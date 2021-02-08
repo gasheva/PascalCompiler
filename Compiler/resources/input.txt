@@ -1,0 +1,6 @@
+Var x: Integger;
+begin
+	x_2 := 2..3.;
+end.
+
+

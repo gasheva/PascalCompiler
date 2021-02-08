@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков\errors_headers">
+      <UniqueIdentifier>{0d3e0dae-87ef-4744-9158-e255e56289a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\errors">
+      <UniqueIdentifier>{5a0a94cf-9848-427f-8959-490d5bbe5335}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\tokens">
+      <UniqueIdentifier>{1cc95b7f-9afb-478d-9c13-a04402a05138}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\tokens_headers">
+      <UniqueIdentifier>{fa9d679b-ff8a-4701-becf-ad4a61f3a554}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\modules">
+      <UniqueIdentifier>{0deddb48-f472-440b-982d-53f7be3990e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\modules">
+      <UniqueIdentifier>{0e1318ae-fb33-4f40-875c-031ad13f959c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Compiler.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="CError.cpp">
+      <Filter>Исходные файлы\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="CErrorManager.cpp">
+      <Filter>Исходные файлы\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="CFileOnlyErrorPrinter.cpp">
+      <Filter>Исходные файлы\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="CToken.cpp">
+      <Filter>Исходные файлы\tokens</Filter>
+    </ClCompile>
+    <ClCompile Include="CVariant.cpp">
+      <Filter>Исходные файлы\tokens</Filter>
+    </ClCompile>
+    <ClCompile Include="CTokenFactory.cpp">
+      <Filter>Исходные файлы\tokens</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexic.cpp">
+      <Filter>Исходные файлы\modules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CError.h">
+      <Filter>Файлы заголовков\errors_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CErrorManager.h">
+      <Filter>Файлы заголовков\errors_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CFileOnlyErrorPrinter.h">
+      <Filter>Файлы заголовков\errors_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="IErrorPrinter.h">
+      <Filter>Файлы заголовков\errors_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CToken.h">
+      <Filter>Файлы заголовков\tokens_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CVariant.h">
+      <Filter>Файлы заголовков\tokens_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CTokenFactory.h">
+      <Filter>Файлы заголовков\tokens_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexic.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
