@@ -1,7 +1,8 @@
 #include "CToken.h"
 
 
-CToken::~CToken(){}
+CToken::~CToken() {}
+
 
 CToken::CToken(ETokenType type)
 {
@@ -9,10 +10,10 @@ CToken::CToken(ETokenType type)
 }
 
 
-CValueToken::CValueToken(CVariant val): CToken(VALUE) {
+CValueToken::CValueToken(CVariant* val): CToken(VALUE) {
 	this->m_val = val;
 }
-CValueToken::~CValueToken(){}
+CValueToken::~CValueToken() { delete m_val; }
 
 
 CIdentToken::CIdentToken(string lexem) : CToken(IDENT) {

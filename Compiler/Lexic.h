@@ -4,7 +4,8 @@
 #include <regex>
 #include <string>
 #include <iostream>
-
+#include "CToken.h"
+#include "CTokenFactory.h"
 
 using namespace std;
 
@@ -15,12 +16,15 @@ class Lexic {
 private:
 	const string *text;
 	const char NEW_LINE_SYMBOL = '\n';
+	int pos, lineNum;
+	
+	CTokenFactory factory;
 	CErrorManager* errorManager;
-	string getLexem(int pos, int lineNum, bool& hasMistake);			// получить лексему, начиная с позиции pos
+	string getLexem(bool& hasMistake);			// получить лексему, начиная с позиции pos
 	bool isLetter(char ch);			// проверка является ли передаваемый символ буквой
 	bool isDigit(char ch);			// проверка является ли передаваемый символ цифрой
-	int passWhitespaces(int pos, int& lineNum);		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
+	int passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
-	void startVer();		// начать лексический анализ
+	CToken* getNext();		// начать лексический анализ
 };

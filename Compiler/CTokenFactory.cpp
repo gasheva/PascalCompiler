@@ -15,11 +15,11 @@ CToken* CTokenFactory::createToken(string lexem)
 {
 	// является ли char (тип value)
 	if (lexem.length() == 3 && lexem[0] == '\'' && lexem[lexem.length() - 1] == '\'')
-		return new CValueToken(CCharVariant(lexem[1]));
+		return new CValueToken(new CCharVariant(lexem[1]));
 
 	// является ли string (тип value)
 	if (lexem[0] == '\'' && lexem[lexem.length() - 1] == '\'')
-		return new CValueToken(CStringVariant(lexem));
+		return new CValueToken(new CStringVariant(lexem));
 
 	// является ли лексема оператором
 	if (sOperators.find(toLower(lexem)) != sOperators.end())
@@ -28,11 +28,11 @@ CToken* CTokenFactory::createToken(string lexem)
 	// можно ли сконвертировать в число (тип value)		
 	if (regex_match(lexem, regex(R"(\d+)"))) {
 		int temp = std::stoi(lexem);
-		return new CValueToken(CIntVariant(temp));
+		return new CValueToken(new CIntVariant(temp));
 	}
 	if (regex_match(lexem, regex(R"(\d+.\d+)"))) {
 		float temp = std::stof(lexem);
-		return new CValueToken(CRealVariant(temp));
+		return new CValueToken(new CRealVariant(temp));
 	}
 	
 

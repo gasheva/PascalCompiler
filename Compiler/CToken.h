@@ -31,9 +31,11 @@ protected:
 class CValueToken: public CToken{
 	using CToken::CToken;
 public:
-	CVariant m_val;
-	CValueToken(CVariant val);
+	CVariant* m_val;
+	CValueToken(CVariant* val);
 	~CValueToken();
+protected:
+	
 };
 
 /*

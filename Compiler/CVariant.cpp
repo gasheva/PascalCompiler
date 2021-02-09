@@ -1,4 +1,5 @@
 #include "CVariant.h"
+#include <iostream>
 
 CVariant::CVariant(EVarType type)
 {
@@ -10,9 +11,10 @@ CVariant::~CVariant(){}
 
 CIntVariant::CIntVariant(int val) : CVariant(INT)
 {
+	std::cout << "[C] CIntVariant constructor" << std::endl;
 	this->m_val = val;
 }
-CIntVariant::~CIntVariant() {};
+CIntVariant::~CIntVariant() { std::cout << "[C] CIntVariant destructor" << std::endl; };
 
 
 CRealVariant::CRealVariant(float val) : CVariant(REAL)

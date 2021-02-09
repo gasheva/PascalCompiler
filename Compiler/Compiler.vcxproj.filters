@@ -57,6 +57,9 @@
     <ClCompile Include="Lexic.cpp">
       <Filter>Исходные файлы\modules</Filter>
     </ClCompile>
+    <ClCompile Include="Syntax.cpp">
+      <Filter>Исходные файлы\modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CError.h">
@@ -81,6 +84,12 @@
       <Filter>Файлы заголовков\tokens_headers</Filter>
     </ClInclude>
     <ClInclude Include="Lexic.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Syntax.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Semantic.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
   </ItemGroup>

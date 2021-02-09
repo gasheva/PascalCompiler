@@ -1,5 +1,4 @@
 #include "Lexic.h"
-#include "CTokenFactory.h"
 
 using namespace std;
 
@@ -15,7 +14,7 @@ bool Lexic::isDigit(char ch)
 	else return false;
 }
 
-int Lexic::passWhitespaces(int pos, int &lineNum) {
+int Lexic::passWhitespaces() {
 	while ((*text)[pos] == ' ' || (*text)[pos] == '\r' || (*text)[pos] == '\t' || (*text)[pos] == '\n') {
 		if ((*text)[pos] == '\r' || (*text)[pos] == '\n')
 			lineNum++;
@@ -26,30 +25,11 @@ int Lexic::passWhitespaces(int pos, int &lineNum) {
 	return pos;
 }
 
-void Lexic::startVer()
-{
-	int lineNum = 0;
-	int pos = passWhitespaces(0, lineNum); 
-	bool hasMistake = false;
-	
-	CTokenFactory factory = CTokenFactory();
-	cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE<<endl;
-	while (pos < (*text).length()) {
-		pos = passWhitespaces(pos, lineNum);
-		if (pos >= (*text).length()) break;
-		string lexem = getLexem(pos, lineNum, hasMistake);
-		cout <<"[x] Lexem = " << lexem;
-		pos += lexem.length();
-		CToken* token = factory.createToken(lexem);
-		cout << " token = " << token->m_T << endl;
-		delete token;
-	}
 
-}
 
-string Lexic::getLexem(int pos, int lineNum, bool &hasMistake)
+string Lexic::getLexem(bool &hasMistake)
 {
-	int oldPos = pos;
+	//int oldPos = pos;
 	hasMistake = false;
     string res("");
 	switch ((*text)[pos])
@@ -115,4 +95,24 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 {
 	this->errorManager = errorManager;
 	this->text = text;
+	this->pos = 0;
+	lineNum = 0;
+	factory = CTokenFactory();
+}
+
+CToken* Lexic::getNext()
+{
+	pos = passWhitespaces();
+	bool hasMistake = false;
+
+	cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
+	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
+
+	pos = passWhitespaces();
+	if (pos >= (*text).length()) return nullptr;
+
+	string lexem = getLexem(hasMistake);
+	cout << "[x] Lexem = " << lexem;
+	pos += lexem.length();
+	return factory.createToken(lexem);
 }

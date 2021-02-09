@@ -147,6 +147,7 @@
     <ClCompile Include="CTokenFactory.cpp" />
     <ClCompile Include="CVariant.cpp" />
     <ClCompile Include="Lexic.cpp" />
+    <ClCompile Include="Syntax.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CError.h" />
@@ -157,6 +158,8 @@
     <ClInclude Include="CVariant.h" />
     <ClInclude Include="IErrorPrinter.h" />
     <ClInclude Include="Lexic.h" />
+    <ClInclude Include="Semantic.h" />
+    <ClInclude Include="Syntax.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
