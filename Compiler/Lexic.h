@@ -23,7 +23,7 @@ private:
 	string getLexem(bool& hasMistake);			// получить лексему, начиная с позиции pos
 	bool isLetter(char ch);			// проверка является ли передаваемый символ буквой
 	bool isDigit(char ch);			// проверка является ли передаваемый символ цифрой
-	int passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
+	void passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
 	CToken* getNext();		// начать лексический анализ

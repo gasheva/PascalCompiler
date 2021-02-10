@@ -18,6 +18,7 @@ enum EVarType {
 class CVariant {
 public:
 	EVarType T;
+	
 	CVariant();
 	virtual ~CVariant();
 protected:

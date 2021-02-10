@@ -12,13 +12,13 @@ private:
 	void getNext();
 	void removeToken();
 
-	void accept();
+	void accept(string oper);
 	float simpleExpr();
-	bool isSign(COperToken* token);
-	float term();		// слагаемое
-	bool isAdditiveOper(COperToken* token);
-	float factor();		// множитель
-	bool isMultOper(COperToken* token);
+	bool isSign();
+	EVarType term(float &res);		// слагаемое
+	bool isAdditiveOper();
+	EVarType factor(float &rest);		// множитель
+	bool isMultOper();
 	float variable();
 	float constWithoutSign();
 

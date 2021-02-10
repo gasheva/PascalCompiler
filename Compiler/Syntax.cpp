@@ -14,11 +14,15 @@ float Syntax::simpleExpr() { return NULL; }
 
 void Syntax::startVer()
 {
-	// пока не достигнем конца файла
-	while (lexic->getNext() != nullptr) {
-		curToken = lexic->getNext();
+	float res;
+	auto left = factor(res);
+	getNext();
 
+	// пока не достигнем конца файла
+	while (curToken!= nullptr) {
 		simpleExpr();
+
+		getNext();
 	}
 }
 
@@ -33,18 +37,68 @@ void Syntax::removeToken()
 		delete curToken;
 }
 
-bool Syntax::isAdditiveOper(COperToken* token) {
-	return token->lexem == string("+") ||
-		token->lexem == string("-") ||
-		token->lexem == string("or");
+EVarType Syntax::term(float &res)
+{
+	return;
 }
 
-bool Syntax::isMultOper(COperToken* token) {
-	return token->lexem == string("*") ||
-		token->lexem == string("/") ||
-		token->lexem == string("div") ||
-		token->lexem == string("mod") ||
-		token->lexem == string("and");
+// мб добавить переменную hasMistake?
+EVarType Syntax::factor(float& res)
+{
+	/*if (curToken == nullptr) {
+		throw exception("Token expected");
+		return;
+	}
+
+
+	if (curToken->m_T == OPER) {
+		accept("(");
+		auto left = simpleExpr();
+		accept(")");
+		res = left;
+		return;
+	}
+	return ((CValueToken*)curToken)->m_val
+	getNext();*/
+	return;
+}
+
+void Syntax::accept(string oper) {
+	if (curToken == nullptr)
+		throw new exception("Expected another op");
+	if (curToken->m_T!=OPER)
+		throw new exception("Expected another op");
+	if (((COperToken*)curToken)->lexem!=oper)
+		throw new exception("Expected another op");
+	getNext();
+}
+
+
+bool Syntax::isAdditiveOper() {
+	if (curToken->m_T != OPER) return false;
+	return ((COperToken*)curToken)->lexem == string("+") ||
+		((COperToken*)curToken)->lexem == string("-") ||
+		((COperToken*)curToken)->lexem == string("or");
+}
+
+bool Syntax::isMultOper() {
+	if (curToken->m_T != OPER) return false;
+	return ((COperToken*)curToken)->lexem == string("*") ||
+		((COperToken*)curToken)->lexem == string("/") ||
+		((COperToken*)curToken)->lexem == string("div") ||
+		((COperToken*)curToken)->lexem == string("mod") ||
+		((COperToken*)curToken)->lexem == string("and");
+}
+
+
+// accept sign
+bool Syntax::isSign() {
+
+	if (curToken->m_T != OPER) return false;
+	if (((COperToken*)curToken)->lexem == "+" ||
+		((COperToken*)curToken)->lexem == "-")
+		getNext();
+	return true;
 }
 
 float Syntax::constWithoutSign() {

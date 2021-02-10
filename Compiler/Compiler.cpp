@@ -65,13 +65,19 @@ int main()
     syntax.startVer();*/
 
 
-    CErrorManager eManager = CErrorManager();
+    unique_ptr<CToken> unq(new COperToken("42"));
+    auto unq2 = make_unique<CToken>(new COperToken("32"));
+    auto mov = move(unq);
+    ((COperToken*)mov.get());
+
+
+    /*CErrorManager eManager = CErrorManager();
     string text("1+3*32-(9+1)/43");
     Lexic lexic = Lexic(&eManager, &text);
     CValueToken* token = ((CValueToken*)lexic.getNext());
     CVariant* variant = token->m_val;
     ((CIntVariant*)variant)->m_val;
   
-    delete token;
+    delete token;*/
 }
 
