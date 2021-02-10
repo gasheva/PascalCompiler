@@ -45,6 +45,10 @@ EVarType Syntax::term(float &res)
 // мб добавить переменную hasMistake?
 EVarType Syntax::factor(float& res)
 {
+	auto tokenTMP = CValueToken(new CIntVariant(2));
+	CVariant* v = ((CIntVariant*)(tokenTMP.m_val));
+	
+
 	/*if (curToken == nullptr) {
 		throw exception("Token expected");
 		return;

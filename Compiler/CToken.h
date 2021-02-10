@@ -20,6 +20,7 @@ enum ETokenType
 class CToken {
 public:
 	ETokenType m_T;
+
 	virtual ~CToken();
 protected:
 	CToken(ETokenType type);

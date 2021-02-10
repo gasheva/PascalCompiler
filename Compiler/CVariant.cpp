@@ -5,6 +5,10 @@ CVariant::CVariant(EVarType type)
 {
 	this->T = type;
 }
+EVarType CVariant::getType()
+{
+	return T;
+}
 CVariant::CVariant(){ }
 CVariant::~CVariant(){}
 

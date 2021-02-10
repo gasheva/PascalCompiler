@@ -15,14 +15,16 @@ enum EVarType {
 /*
 * Абстрактный родительский класс, кот наследуюется классами типов переменных
 */
+//template <typename R>
 class CVariant {
 public:
-	EVarType T;
-	
+	//R m_val;
 	CVariant();
 	virtual ~CVariant();
+	EVarType getType();
 protected:
-	CVariant(EVarType type);	
+	EVarType T;
+	CVariant(EVarType type);
 };
 
 /*
@@ -31,9 +33,11 @@ protected:
 class CIntVariant : public CVariant {
 	using CVariant::CVariant;
 public:
-	int m_val;
 	CIntVariant(int val);
 	~CIntVariant();
+	int getVal() { return m_val; }
+private:
+	int m_val;
 };
 
 /*
@@ -42,9 +46,11 @@ public:
 class CRealVariant : public CVariant {
 	using CVariant::CVariant;
 public:
-	float m_val;
 	CRealVariant(float val);
 	~CRealVariant();
+	float getVal() { return m_val; }
+private:
+	float m_val;
 };
 
 /*
@@ -53,9 +59,11 @@ public:
 class CStringVariant : public CVariant {
 	using CVariant::CVariant;
 public:
-	string m_val;
 	CStringVariant(string val);
 	~CStringVariant();
+	string getVal() { return m_val; }
+private:
+	string m_val;
 };
 
 /*
@@ -64,7 +72,9 @@ public:
 class CCharVariant : public CVariant {
 	using CVariant::CVariant;
 public:
-	char m_val;
 	CCharVariant(char val);
 	~CCharVariant();
+	char getVal() { return m_val; }
+private:
+	char m_val;
 };
