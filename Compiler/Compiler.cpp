@@ -65,10 +65,14 @@ int main()
     syntax.startVer();*/
 
 
-    unique_ptr<CToken> unq(new COperToken("42"));
-    auto unq2 = make_unique<CToken>(new COperToken("32"));
-    auto mov = move(unq);
-    ((COperToken*)mov.get());
+   CTokenFactory factory = CTokenFactory();
+    unique_ptr<CToken> unq(factory.createToken("+"));
+    unique_ptr<CToken> mov(factory.createToken("-"));
+    mov = move(unq);
+    auto type = mov->getType();
+    type = IDENT;
+    cout << mov->getType() << IDENT << endl;
+    
 
 
     /*CErrorManager eManager = CErrorManager();

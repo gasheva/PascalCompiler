@@ -15,7 +15,6 @@ enum EVarType {
 /*
 * Абстрактный родительский класс, кот наследуюется классами типов переменных
 */
-//template <typename R>
 class CVariant {
 public:
 	//R m_val;

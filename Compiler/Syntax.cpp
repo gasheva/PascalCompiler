@@ -10,20 +10,16 @@ Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic) {
 Syntax::~Syntax(){}
 
 
-float Syntax::simpleExpr() { return NULL; }
-
 void Syntax::startVer()
 {
-	float res;
-	auto left = factor(res);
-	getNext();
+	simpleExpr();
 
-	// пока не достигнем конца файла
-	while (curToken!= nullptr) {
-		simpleExpr();
+	// пока не достигли конца файла
+	/*while (curToken!= nullptr) {
+		
 
 		getNext();
-	}
+	}*/
 }
 
 void Syntax::getNext() {
@@ -37,16 +33,41 @@ void Syntax::removeToken()
 		delete curToken;
 }
 
+
+// TODO(замени флоат возврат на воид, дл€ синтаксиса этого достаточно)
+float Syntax::simpleExpr() { 
+	float left;
+	term(left);
+	while (isMultOper()) {
+		auto oper = ((COperToken*)curToken)->lexem;
+		getNext();
+		float right;
+		term(right);
+		switch (oper)
+		{
+		case "+":
+			left = left + right;
+			break;
+		case Oper.oMinus:
+			left = left - right;
+			break;
+		default:
+			throw new Exception("bad addit oper");
+		}
+	}
+	
+}
+
 EVarType Syntax::term(float &res)
 {
-	return;
+	return EVarType();
 }
 
 // мб добавить переменную hasMistake?
 EVarType Syntax::factor(float& res)
 {
-	auto tokenTMP = CValueToken(new CIntVariant(2));
-	CVariant* v = ((CIntVariant*)(tokenTMP.m_val));
+	auto tokenTMP = CValueToken(CIntVariant(2));
+	CVariant* v = ((CIntVariant*)(tokenTMP.getType()));
 	
 
 	/*if (curToken == nullptr) {
@@ -55,7 +76,7 @@ EVarType Syntax::factor(float& res)
 	}
 
 
-	if (curToken->m_T == OPER) {
+	if (curToken->getType() == OPER) {
 		accept("(");
 		auto left = simpleExpr();
 		accept(")");
@@ -64,13 +85,14 @@ EVarType Syntax::factor(float& res)
 	}
 	return ((CValueToken*)curToken)->m_val
 	getNext();*/
-	return;
+	return EVarType();
 }
 
+// "съедаем" токен, провер€€, что лексема нужна€
 void Syntax::accept(string oper) {
 	if (curToken == nullptr)
 		throw new exception("Expected another op");
-	if (curToken->m_T!=OPER)
+	if (curToken->getType()!=OPER)
 		throw new exception("Expected another op");
 	if (((COperToken*)curToken)->lexem!=oper)
 		throw new exception("Expected another op");
@@ -79,14 +101,14 @@ void Syntax::accept(string oper) {
 
 
 bool Syntax::isAdditiveOper() {
-	if (curToken->m_T != OPER) return false;
+	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->lexem == string("+") ||
 		((COperToken*)curToken)->lexem == string("-") ||
 		((COperToken*)curToken)->lexem == string("or");
 }
 
 bool Syntax::isMultOper() {
-	if (curToken->m_T != OPER) return false;
+	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->lexem == string("*") ||
 		((COperToken*)curToken)->lexem == string("/") ||
 		((COperToken*)curToken)->lexem == string("div") ||
@@ -95,10 +117,10 @@ bool Syntax::isMultOper() {
 }
 
 
-// accept sign
+// "съедаем" знак, если он есть
 bool Syntax::isSign() {
 
-	if (curToken->m_T != OPER) return false;
+	if (curToken->getType() != OPER) return false;
 	if (((COperToken*)curToken)->lexem == "+" ||
 		((COperToken*)curToken)->lexem == "-")
 		getNext();

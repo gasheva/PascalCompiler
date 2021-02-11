@@ -10,10 +10,10 @@ CToken::CToken(ETokenType type)
 }
 
 
-CValueToken::CValueToken(CVariant* val): CToken(VALUE) {
+CValueToken::CValueToken(CVariant val): CToken(VALUE) {
 	this->m_val = val;
 }
-CValueToken::~CValueToken() { delete m_val; }
+CValueToken::~CValueToken() {}
 
 
 CIdentToken::CIdentToken(string lexem) : CToken(IDENT) {

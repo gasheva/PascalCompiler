@@ -19,11 +19,11 @@ enum ETokenType
 */
 class CToken {
 public:
-	ETokenType m_T;
-
+	ETokenType getType() { return m_T; }
 	virtual ~CToken();
 protected:
 	CToken(ETokenType type);
+	ETokenType m_T;
 };
 
 /*
@@ -32,12 +32,11 @@ protected:
 class CValueToken: public CToken{
 	using CToken::CToken;
 public:
-	CVariant* m_val;
-	
-	CValueToken(CVariant* val);
+	CVariant getVariant() const { return m_val; }
+	CValueToken(CVariant val);
 	~CValueToken();
-protected:
-	
+private:
+	CVariant m_val;
 };
 
 /*
