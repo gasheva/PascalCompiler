@@ -26,5 +26,6 @@ private:
 	void passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
-	CToken* getNext();		// начать лексический анализ
+	CToken* getNext(bool get);		// получить или посмотреть следующий токен
+	
 };

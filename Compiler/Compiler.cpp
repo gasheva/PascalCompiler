@@ -57,21 +57,21 @@ int main()
 
      delete printer;*/
 
-    /*CErrorManager eManager = CErrorManager();
-    string text("1+3*32-(9+1)/43");
+    CErrorManager eManager = CErrorManager();
+    string text("variable");
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);
-    syntax.startVer();*/
+    syntax.startVer();
 
 
-   CTokenFactory factory = CTokenFactory();
+    /*CTokenFactory factory = CTokenFactory();
     unique_ptr<CToken> unq(factory.createToken("+"));
     unique_ptr<CToken> mov(factory.createToken("-"));
     mov = move(unq);
     auto type = mov->getType();
     type = IDENT;
-    cout << mov->getType() << IDENT << endl;
+    cout << mov->getType() << IDENT << endl;*/
     
 
 

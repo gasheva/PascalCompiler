@@ -99,18 +99,18 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 	factory = CTokenFactory();
 }
 
-CToken* Lexic::getNext()
+CToken* Lexic::getNext(bool get)
 {
 	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
 	bool hasMistake = false;
 
-	cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
+	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
 
 	passWhitespaces();
 	if (pos >= (*text).length()) return nullptr;
 
 	string lexem = getLexem(hasMistake);
 	cout << "[x] Lexem = " << lexem;
-	pos += lexem.length();
+	if (get) pos += lexem.length();
 	return factory.createToken(lexem);
 }
