@@ -17,6 +17,7 @@ private:
 	const string *text;
 	const char NEW_LINE_SYMBOL = '\n';
 	int pos, lineNum;
+	int lastLexemStartPos = 0;
 	
 	CTokenFactory factory;
 	CErrorManager* errorManager;
@@ -24,8 +25,10 @@ private:
 	bool isLetter(char ch);			// проверка является ли передаваемый символ буквой
 	bool isDigit(char ch);			// проверка является ли передаваемый символ цифрой
 	void passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
+
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
 	CToken* getNext(bool get);		// получить или посмотреть следующий токен
-	
+	int getStartPosition();
+	int getCurLine();
 };

@@ -44,47 +44,83 @@ void Syntax::removeToken()
 
 void Syntax::simpleExpr() { 
 	cout << "Checking simple Expr" << endl;
-	ifNullThrowExcp();
+	try {
+		ifNullThrowExcp();
+	}
+	catch (PascalExcp& e) {
+		cout << "[!]ECXEPTION" << endl;
+	}
+
 
 	acceptSign();
-	term();
+	bool hasMistake = false;
+
+	term(hasMistake);
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
+	// TODO(пропуск строки)
+
 	// то, что в {}
 	while (isAdditiveOper()) {
 		getNext();
-		term();
+		
+		term(hasMistake);
+		if (hasMistake) {
+			cout << "[!] EXCEPTION" << endl;
+			return;
+		}
 	}
 }
 
-void Syntax::term()
+void Syntax::term(bool& hasMistake)
 {
 	cout << "Checking term" << endl;
 	ifNullThrowExcp();
 
-	factor();
+	factor(hasMistake);
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
+
 	while (curToken!=nullptr && isMultOper()) {
 		getNext();
-		factor();
+		factor(hasMistake);
+		if (hasMistake) {
+			cout << "[!] EXCEPTION" << endl;
+			return;
+		}
 	}
 }
 
 
 
 // мб добавить переменную hasMistake?
-void Syntax::factor()
+void Syntax::factor(bool &hasMistake)
 {
 	cout << "Checking factor" << endl;
 	ifNullThrowExcp();
 
 	if (checkOper("not")) {						// not <множитель>
 		getNext();
-		factor();
+		factor(hasMistake);
+		if (hasMistake) {
+			cout << "[!] EXCEPTION" << endl;
+			return;
+		}
 		return;
 	}
 
 	if (curToken->getType() == IDENT) {			// функци€ TODO(проверка параметров)
 		peekNext();			
 		if (curToken != nullptr) {
-			if (tryAccept("(")) {
+			if (tryAccept("(", hasMistake)) {
+				if (hasMistake) {
+					cout << "[!] EXCEPTION" << endl;
+					return;
+				}
 				getNext();				// = accept("("), поскольку до этого было неприн€тое значение
 				while (curToken != nullptr && !checkOper(")"))
 					getNext();
@@ -100,18 +136,39 @@ void Syntax::factor()
 	}
 
 	// константа без знака
-	if (unsignedConst())
+	if (unsignedConst(hasMistake)) {
+		if (hasMistake) {
+			cout << "[!] EXCEPTION" << endl;
+			return;
+		}
 		return;
+	}
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
 		
 	
 	// если ничего не подошло, проверка на (<выражение>)
-	accept("(");
+	accept("(", hasMistake);
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
 	simpleExpr();
-	accept(")");
+	accept(")", hasMistake);
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
 }
 
-bool Syntax::unsignedConst() {
-	ifNullThrowExcp();
+bool Syntax::unsignedConst(bool& hasMistake) {
+	hasMistake = ifNullThrowExcp();
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return false;
+	}
 
 	// число без знака
 	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getType() != CHAR){		// TODO(а char?)
@@ -123,24 +180,63 @@ bool Syntax::unsignedConst() {
 	
 }
 
-// "съедаем" токен, провер€€, что лексема нужна€
-void Syntax::accept(string oper) {
-	ifNullThrowExcp();
+bool Syntax::checkForbiddenSymbol()
+{
+	if (curToken->getType() == UNDEF) {
+		writeMistake(6);
+		return true;
+	}
+	return false;
+}
 
-	if (curToken->getType()!=OPER)
-		throw exception("Expected another op");
-	if (((COperToken*)curToken)->lexem!=oper)
-		throw exception("Expected another op");
+void Syntax::writeMistake(int code)
+{
+	erManager->addError(lexic->getStartPosition(), lexic->getStartPosition(), code);
+}
+
+
+
+// "съедаем" токен, провер€€, что лексема нужна€
+void Syntax::accept(string oper, bool& hasMistake) {
+	hasMistake = ifNullThrowExcp();
+	if (hasMistake) {
+		cout << "[!] EXCEPTION" << endl;
+		return;
+	}
+
+	if (curToken->getType() != OPER)
+	{
+		if (oper == ")") writeMistake(4);
+		if (oper == ":") writeMistake(5);
+		if (oper == "OF") writeMistake(8);
+		if (oper == "(") writeMistake(9);
+		if (oper == "[") writeMistake(11);
+		if (oper == "]") writeMistake(12);
+		if (oper == "END") writeMistake(13);
+		if (oper == ";") writeMistake(14);
+		hasMistake = true;
+		return;
+		// throw exception("Expected another op");
+	}
+	if (((COperToken*)curToken)->lexem != oper) {
+		hasMistake = true;
+		return;
+		// throw exception("Expected another op");
+	}
 	getNext();
 }
 
-bool Syntax::tryAccept(string oper) {
+bool Syntax::tryAccept(string oper, bool &hasMistake) {
 	if (curToken == nullptr) return false;
 
-	if (curToken->getType() != OPER)
+	if (curToken->getType() != OPER) {
+		hasMistake = true;
+		return;
 		throw exception("Expected another op");
-	if (((COperToken*)curToken)->lexem != oper)
+	}
+	if (((COperToken*)curToken)->lexem != oper) {
 		return false;
+	}
 	getNext();
 	return true;
 }
@@ -153,11 +249,14 @@ bool Syntax::checkOper(string oper)
 	return false;
 }
 
-bool Syntax::ifNullThrowExcp()
+bool Syntax::ifNullThrowExcp() throw(PascalExcp)
 {
 	if (curToken == nullptr)
-		throw exception("Reached eof");
-	return (curToken == nullptr);
+	{
+		return true;
+		// throw exception("Reached eof");
+	}
+	return false;
 }
 
 bool Syntax::isAdditiveOper() {

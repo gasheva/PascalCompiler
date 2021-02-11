@@ -16,20 +16,32 @@ private:
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память
 
-	void accept(string oper);	// принять операцию
-	void simpleExpr();
+	void accept(string oper, bool& hasMistake);	// принять операцию
 	bool acceptSign();			// принять знак, если он есть
-	void term();		// слагаемое
+	bool tryAccept(string oper, bool& hasMistake);	// попытка принять операцию
+
+	void simpleExpr();
+	void term(bool& hasMistake);		// слагаемое
+	void factor(bool& hasMistake);		// множитель
+	bool unsignedConst(bool& hasMistake);
+
 	bool isAdditiveOper();		// является ли аддит. операцией
-	void factor();		// множитель
 	bool isMultOper();			// является ли мультипл. операцией
-	bool tryAccept(string oper);	// попытка принять операцию
 	bool checkOper(string oper);	// совпадает ли оператор
+
 	bool ifNullThrowExcp();
-	bool unsignedConst();
+	bool checkForbiddenSymbol();
+	void writeMistake(int code);
 
 public:
 	Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic);
 	~Syntax();
 	void startVer();
+};
+
+
+struct PascalExcp : public std::exception {
+	const char* what() const throw() {
+		return "Some exception in Pascal code";
+	}
 };

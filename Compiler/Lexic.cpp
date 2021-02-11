@@ -111,6 +111,17 @@ CToken* Lexic::getNext(bool get)
 
 	string lexem = getLexem(hasMistake);
 	cout << "[x] Lexem = " << lexem << endl;
+	lastLexemStartPos = pos;
 	if (get) pos += lexem.length();
 	return factory.createToken(lexem);
+}
+
+int Lexic::getStartPosition()
+{
+	return pos - lastLexemStartPos;
+}
+
+int Lexic::getCurLine()
+{
+	return lineNum;
 }
