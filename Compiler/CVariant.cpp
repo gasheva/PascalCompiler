@@ -15,10 +15,12 @@ CVariant::~CVariant(){}
 
 CIntVariant::CIntVariant(int val) : CVariant(INT)
 {
-	std::cout << "[C] CIntVariant constructor" << std::endl;
+	// std::cout << "[C] CIntVariant constructor" << std::endl;
 	this->m_val = val;
 }
-CIntVariant::~CIntVariant() { std::cout << "[C] CIntVariant destructor" << std::endl; };
+CIntVariant::~CIntVariant() { 
+	// std::cout << "[C] CIntVariant destructor" << std::endl; 
+};
 
 
 CRealVariant::CRealVariant(float val) : CVariant(REAL)

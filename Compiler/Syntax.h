@@ -10,6 +10,8 @@ private:
 	Semantic* semantic;
 	CToken* curToken;
 
+	int offset = 0;
+
 	void getNext();		// получить следующий токен
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память

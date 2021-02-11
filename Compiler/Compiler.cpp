@@ -58,12 +58,15 @@ int main()
      delete printer;*/
 
     CErrorManager eManager = CErrorManager();
-    string text("variable");
+    string text("2 + (- 7 *(5-two))");         
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);
     syntax.startVer();
 
+    // 43*6 + ( 7)
+    // 2 + (- 7 *(5-two))
+    // func() + (-2)
 
     /*CTokenFactory factory = CTokenFactory();
     unique_ptr<CToken> unq(factory.createToken("+"));

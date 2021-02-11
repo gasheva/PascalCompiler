@@ -110,7 +110,7 @@ CToken* Lexic::getNext(bool get)
 	if (pos >= (*text).length()) return nullptr;
 
 	string lexem = getLexem(hasMistake);
-	cout << "[x] Lexem = " << lexem;
+	cout << "[x] Lexem = " << lexem << endl;
 	if (get) pos += lexem.length();
 	return factory.createToken(lexem);
 }

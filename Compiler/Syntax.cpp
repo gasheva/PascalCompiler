@@ -13,7 +13,7 @@ Syntax::~Syntax(){}
 void Syntax::startVer()
 {
 	getNext();
-	factor();
+	simpleExpr();
 
 	// simpleExpr();
 
@@ -43,11 +43,12 @@ void Syntax::removeToken()
 }
 
 void Syntax::simpleExpr() { 
+	cout << "Checking simple Expr" << endl;
 	ifNullThrowExcp();
 
 	acceptSign();
 	term();
-	// то что в {}
+	// то, что в {}
 	while (isAdditiveOper()) {
 		getNext();
 		term();
@@ -56,6 +57,7 @@ void Syntax::simpleExpr() {
 
 void Syntax::term()
 {
+	cout << "Checking term" << endl;
 	ifNullThrowExcp();
 
 	factor();
@@ -70,23 +72,29 @@ void Syntax::term()
 // мб добавить переменную hasMistake?
 void Syntax::factor()
 {
+	cout << "Checking factor" << endl;
 	ifNullThrowExcp();
 
 	if (checkOper("not")) {						// not <множитель>
 		getNext();
-		term();
+		factor();
 		return;
 	}
 
 	if (curToken->getType() == IDENT) {			// функция TODO(проверка параметров)
-		peekNext();
-		if (tryAccept("(")) {
-			while (checkOper(")"))
-				getNext();
-			if (curToken == nullptr) throw new exception("Reached eof. Expected ')'");
-			else getNext();			// accept(")")
-			return;
+		peekNext();			
+		if (curToken != nullptr) {
+			if (tryAccept("(")) {
+				getNext();				// = accept("("), поскольку до этого было непринятое значение
+				while (curToken != nullptr && !checkOper(")"))
+					getNext();
+				if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
+				else getNext();			// accept(")")
+				cout << "Checking func" << endl;
+				return;
+			}
 		}
+		cout << "Checking ident" << endl;
 		getNext();	// если не функция, то переменная 
 		return;	
 	}
@@ -106,10 +114,8 @@ bool Syntax::unsignedConst() {
 	ifNullThrowExcp();
 
 	// число без знака
-	if (curToken->getType() == VALUE ||
-		((CValueToken*)curToken)->getType() == INT ||
-		((CValueToken*)curToken)->getType() == REAL ||
-		((CValueToken*)curToken)->getType() == STRING){		// TODO(а char?)
+	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getType() != CHAR){		// TODO(а char?)
+		cout << "Checking unsigned Const" << endl;
 		getNext();
 		return true;
 	}
@@ -122,17 +128,17 @@ void Syntax::accept(string oper) {
 	ifNullThrowExcp();
 
 	if (curToken->getType()!=OPER)
-		throw new exception("Expected another op");
+		throw exception("Expected another op");
 	if (((COperToken*)curToken)->lexem!=oper)
-		throw new exception("Expected another op");
+		throw exception("Expected another op");
 	getNext();
 }
 
 bool Syntax::tryAccept(string oper) {
-	ifNullThrowExcp();
+	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER)
-		throw new exception("Expected another op");
+		throw exception("Expected another op");
 	if (((COperToken*)curToken)->lexem != oper)
 		return false;
 	getNext();
@@ -141,8 +147,6 @@ bool Syntax::tryAccept(string oper) {
 
 bool Syntax::checkOper(string oper)
 {
-	ifNullThrowExcp();
-
 	if (curToken->getType() == OPER &&
 		((COperToken*)curToken)->lexem == oper)
 		return true;
@@ -152,12 +156,12 @@ bool Syntax::checkOper(string oper)
 bool Syntax::ifNullThrowExcp()
 {
 	if (curToken == nullptr)
-		throw new exception("Reached eof");
-	return curToken == nullptr;
+		throw exception("Reached eof");
+	return (curToken == nullptr);
 }
 
 bool Syntax::isAdditiveOper() {
-	ifNullThrowExcp();
+	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->lexem == string("+") ||
@@ -166,7 +170,7 @@ bool Syntax::isAdditiveOper() {
 }
 
 bool Syntax::isMultOper() {
-	ifNullThrowExcp();
+	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->lexem == string("*") ||
