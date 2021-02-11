@@ -125,3 +125,13 @@ int Lexic::getCurLine()
 {
 	return lineNum;
 }
+
+void Lexic::passToNewLine()
+{
+	do {
+		pos++;
+		if (pos >= (*text).length())
+			return;
+	} while ((*text)[pos] != NEW_LINE_SYMBOL);
+	lineNum++;
+}

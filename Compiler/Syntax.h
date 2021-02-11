@@ -16,14 +16,14 @@ private:
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память
 
-	void accept(string oper, bool& hasMistake);	// принять операцию
+	void accept(string oper);	// принять операцию
 	bool acceptSign();			// принять знак, если он есть
-	bool tryAccept(string oper, bool& hasMistake);	// попытка принять операцию
+	bool tryAccept(string oper);	// попытка принять операцию
 
 	void simpleExpr();
-	void term(bool& hasMistake);		// слагаемое
-	void factor(bool& hasMistake);		// множитель
-	bool unsignedConst(bool& hasMistake);
+	void term();		// слагаемое
+	void factor();		// множитель
+	bool unsignedConst();
 
 	bool isAdditiveOper();		// является ли аддит. операцией
 	bool isMultOper();			// является ли мультипл. операцией

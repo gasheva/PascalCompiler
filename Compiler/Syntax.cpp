@@ -13,9 +13,18 @@ Syntax::~Syntax(){}
 void Syntax::startVer()
 {
 	getNext();
-	simpleExpr();
-
-	// simpleExpr();
+	try { ifNullThrowExcp(); }
+	catch (PascalExcp& e) {
+		cout << "[!]EXCEPTION" << endl;
+		return;
+	}
+	// TODO(пропуск строки)
+	try {
+		simpleExpr();
+	}
+	catch (PascalExcp& e) {
+		cout << "[!]EXCEPTION" << endl;
+	}
 
 
 	// пока не достигли конца файла
@@ -42,55 +51,53 @@ void Syntax::removeToken()
 		delete curToken;
 }
 
-void Syntax::simpleExpr() { 
+void Syntax::simpleExpr() throw(PascalExcp) {
 	cout << "Checking simple Expr" << endl;
 	try {
 		ifNullThrowExcp();
 	}
 	catch (PascalExcp& e) {
-		cout << "[!]ECXEPTION" << endl;
+		throw PascalExcp();
 	}
 
 
 	acceptSign();
-	bool hasMistake = false;
-
-	term(hasMistake);
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+	
+	try {term();}
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
-	// TODO(пропуск строки)
+	
+	
 
 	// то, что в {}
 	while (isAdditiveOper()) {
 		getNext();
 		
-		term(hasMistake);
-		if (hasMistake) {
-			cout << "[!] EXCEPTION" << endl;
-			return;
+		try { term(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
 		}
 	}
 }
 
-void Syntax::term(bool& hasMistake)
+void Syntax::term() throw(PascalExcp)
 {
 	cout << "Checking term" << endl;
-	ifNullThrowExcp();
-
-	factor(hasMistake);
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+	try { ifNullThrowExcp();}
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
 
+	try { factor(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 	while (curToken!=nullptr && isMultOper()) {
 		getNext();
-		factor(hasMistake);
-		if (hasMistake) {
-			cout << "[!] EXCEPTION" << endl;
-			return;
+		try { factor(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
 		}
 	}
 }
@@ -98,17 +105,20 @@ void Syntax::term(bool& hasMistake)
 
 
 // мб добавить переменную hasMistake?
-void Syntax::factor(bool &hasMistake)
+void Syntax::factor() throw(PascalExcp)
 {
 	cout << "Checking factor" << endl;
-	ifNullThrowExcp();
+	try { ifNullThrowExcp(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
+	
 
 	if (checkOper("not")) {						// not <множитель>
 		getNext();
-		factor(hasMistake);
-		if (hasMistake) {
-			cout << "[!] EXCEPTION" << endl;
-			return;
+		try { factor(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
 		}
 		return;
 	}
@@ -116,18 +126,19 @@ void Syntax::factor(bool &hasMistake)
 	if (curToken->getType() == IDENT) {			// функция TODO(проверка параметров)
 		peekNext();			
 		if (curToken != nullptr) {
-			if (tryAccept("(", hasMistake)) {
-				if (hasMistake) {
-					cout << "[!] EXCEPTION" << endl;
+			try {
+				if (tryAccept("(")) {
+					getNext();				// = accept("("), поскольку до этого было непринятое значение
+					while (curToken != nullptr && !checkOper(")"))
+						getNext();
+					if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
+					else getNext();			// accept(")")
+					cout << "Checking func" << endl;
 					return;
 				}
-				getNext();				// = accept("("), поскольку до этого было непринятое значение
-				while (curToken != nullptr && !checkOper(")"))
-					getNext();
-				if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
-				else getNext();			// accept(")")
-				cout << "Checking func" << endl;
-				return;
+			}
+			catch (PascalExcp& e) {
+				throw PascalExcp();
 			}
 		}
 		cout << "Checking ident" << endl;
@@ -136,38 +147,36 @@ void Syntax::factor(bool &hasMistake)
 	}
 
 	// константа без знака
-	if (unsignedConst(hasMistake)) {
-		if (hasMistake) {
-			cout << "[!] EXCEPTION" << endl;
+	try {
+		if (unsignedConst()) {
 			return;
 		}
-		return;
 	}
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
 		
 	
 	// если ничего не подошло, проверка на (<выражение>)
-	accept("(", hasMistake);
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+	try { accept("("); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
-	simpleExpr();
-	accept(")", hasMistake);
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+	try { simpleExpr(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
+
+	try { accept(")"); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
 }
 
-bool Syntax::unsignedConst(bool& hasMistake) {
-	hasMistake = ifNullThrowExcp();
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return false;
+bool Syntax::unsignedConst()throw(PascalExcp) {
+	try { ifNullThrowExcp(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
 
 	// число без знака
@@ -197,11 +206,10 @@ void Syntax::writeMistake(int code)
 
 
 // "съедаем" токен, проверяя, что лексема нужная
-void Syntax::accept(string oper, bool& hasMistake) {
-	hasMistake = ifNullThrowExcp();
-	if (hasMistake) {
-		cout << "[!] EXCEPTION" << endl;
-		return;
+void Syntax::accept(string oper) throw(PascalExcp) {
+	try { ifNullThrowExcp(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
 	}
 
 	if (curToken->getType() != OPER)
@@ -214,25 +222,24 @@ void Syntax::accept(string oper, bool& hasMistake) {
 		if (oper == "]") writeMistake(12);
 		if (oper == "END") writeMistake(13);
 		if (oper == ";") writeMistake(14);
-		hasMistake = true;
+		throw PascalExcp();
 		return;
 		// throw exception("Expected another op");
 	}
 	if (((COperToken*)curToken)->lexem != oper) {
-		hasMistake = true;
+		throw PascalExcp();
 		return;
 		// throw exception("Expected another op");
 	}
 	getNext();
 }
 
-bool Syntax::tryAccept(string oper, bool &hasMistake) {
+bool Syntax::tryAccept(string oper) throw(PascalExcp) {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) {
-		hasMistake = true;
-		return;
-		throw exception("Expected another op");
+		throw PascalExcp();
+		// throw exception("Expected another op");
 	}
 	if (((COperToken*)curToken)->lexem != oper) {
 		return false;
@@ -253,7 +260,7 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp)
 {
 	if (curToken == nullptr)
 	{
-		return true;
+		throw PascalExcp();
 		// throw exception("Reached eof");
 	}
 	return false;
