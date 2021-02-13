@@ -29,7 +29,6 @@ void Lexic::passWhitespaces() {
 string Lexic::getLexem(bool &hasMistake)
 {
 	int oldPos = pos;
-	hasMistake = false;
     string res("");
 	switch ((*text)[oldPos])
 	{
@@ -42,7 +41,6 @@ string Lexic::getLexem(bool &hasMistake)
 		}
 		if ((*text)[oldPos] != '\'') {
 			errorManager->addError(oldPos, lineNum, 75);
-			hasMistake = true;
 			return res;
 		}
 		res += "\'";
@@ -84,8 +82,7 @@ string Lexic::getLexem(bool &hasMistake)
 	}
 	// если ничего из вышеперечисленного, то неопределенный символ
 	res += (*text)[oldPos];
-	errorManager->addError(oldPos, lineNum, 6);
-	hasMistake = true;
+	// errorManager->addError(oldPos, lineNum, 6);
 
     return res;
 }
@@ -134,4 +131,9 @@ void Lexic::passToNewLine()
 			return;
 	} while ((*text)[pos] != NEW_LINE_SYMBOL);
 	lineNum++;
+}
+
+int Lexic::getCurPos()
+{
+	return pos;
 }

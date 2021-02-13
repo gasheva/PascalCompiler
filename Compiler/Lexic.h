@@ -32,4 +32,5 @@ public:
 	int getStartPosition();
 	int getCurLine();
 	void passToNewLine();			// пропуск символов до начала новой строки или до конца файла
+	int getCurPos();
 };

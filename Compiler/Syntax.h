@@ -11,6 +11,7 @@ private:
 	CToken* curToken;
 
 	int offset = 0;
+	int offsetD = 5;
 
 	void getNext();		// получить следующий токен
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
@@ -30,7 +31,7 @@ private:
 	bool checkOper(string oper);	// совпадает ли оператор
 
 	bool ifNullThrowExcp();
-	bool checkForbiddenSymbol();
+	void checkForbiddenSymbol();
 	void writeMistake(int code);
 
 public:

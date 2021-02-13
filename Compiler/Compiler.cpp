@@ -12,7 +12,7 @@
 //#include "Lexic.h"
 //#include "CTokenFactory.h"
 
-
+#include "CFileOnlyErrorPrinter.h"
 #include "Syntax.h"
 
 using namespace std;
@@ -58,11 +58,18 @@ int main()
      delete printer;*/
 
     CErrorManager eManager = CErrorManager();
-    string text("5+func$))");         
+    string text("45 - 6 # 4");         
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);
     syntax.startVer();
+
+    IErrorPrinter* printer = new CFileOnlyErrorPrinter();
+    ((CFileOnlyErrorPrinter*)printer)->path = "C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errorsFound.txt";
+
+    eManager.printErrors(*printer);
+
+    delete printer;
 
     // 43*6 + ( 7)
     // 2 + (- 7 *(5-two))

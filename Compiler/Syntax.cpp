@@ -1,4 +1,5 @@
 #include "Syntax.h"
+#include <iomanip>
 
 
 Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic) {
@@ -12,7 +13,12 @@ Syntax::~Syntax(){}
 
 void Syntax::startVer()
 {
-	getNext();
+	try { getNext(); }
+	catch (PascalExcp& e) {
+		cout << "[!]EXCEPTION" << endl;
+		return;
+	}
+
 	try { ifNullThrowExcp(); }
 	catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
@@ -35,14 +41,23 @@ void Syntax::startVer()
 	}*/
 }
 
-void Syntax::getNext() {
+void Syntax::getNext() throw(PascalExcp){
 	removeToken();
 	curToken = this->lexic->getNext(true);
+	try {
+		checkForbiddenSymbol();
+	}catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 }
 
 void Syntax::peekNext() {
 	removeToken();
 	curToken = this->lexic->getNext(false);
+	try {checkForbiddenSymbol();}
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 }
 
 void Syntax::removeToken()
@@ -52,7 +67,8 @@ void Syntax::removeToken()
 }
 
 void Syntax::simpleExpr() throw(PascalExcp) {
-	cout << "Checking simple Expr" << endl;
+	cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
+	offset += offsetD;
 	try {
 		ifNullThrowExcp();
 	}
@@ -60,8 +76,10 @@ void Syntax::simpleExpr() throw(PascalExcp) {
 		throw PascalExcp();
 	}
 
-
-	acceptSign();
+	try { acceptSign(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 	
 	try {term();}
 	catch (PascalExcp& e) {
@@ -72,18 +90,23 @@ void Syntax::simpleExpr() throw(PascalExcp) {
 
 	// то, что в {}
 	while (isAdditiveOper()) {
-		getNext();
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}
 		
 		try { term(); }
 		catch (PascalExcp& e) {
 			throw PascalExcp();
 		}
 	}
+	offset -= offsetD;
 }
 
 void Syntax::term() throw(PascalExcp)
 {
-	cout << "Checking term" << endl;
+	cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
+	offset += offsetD;
 	try { ifNullThrowExcp();}
 	catch (PascalExcp& e) {
 		throw PascalExcp();
@@ -94,12 +117,16 @@ void Syntax::term() throw(PascalExcp)
 		throw PascalExcp();
 	}
 	while (curToken!=nullptr && isMultOper()) {
-		getNext();
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}
 		try { factor(); }
 		catch (PascalExcp& e) {
 			throw PascalExcp();
 		}
 	}
+	offset -= offsetD;
 }
 
 
@@ -107,7 +134,8 @@ void Syntax::term() throw(PascalExcp)
 // мб добавить переменную hasMistake?
 void Syntax::factor() throw(PascalExcp)
 {
-	cout << "Checking factor" << endl;
+	cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
+	offset += offsetD;
 	try { ifNullThrowExcp(); }
 	catch (PascalExcp& e) {
 		throw PascalExcp();
@@ -115,11 +143,16 @@ void Syntax::factor() throw(PascalExcp)
 	
 
 	if (checkOper("not")) {						// not <множитель>
-		getNext();
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}
+		offset -= offsetD;
 		try { factor(); }
 		catch (PascalExcp& e) {
 			throw PascalExcp();
 		}
+		
 		return;
 	}
 
@@ -128,12 +161,24 @@ void Syntax::factor() throw(PascalExcp)
 		if (curToken != nullptr) {
 			try {
 				if (tryAccept("(")) {
-					getNext();				// = accept("("), поскольку до этого было непринятое значение
+									// = accept("("), поскольку до этого было непринятое значение
+					try { getNext(); }
+					catch (PascalExcp& e) {
+						throw PascalExcp();
+					}
 					while (curToken != nullptr && !checkOper(")"))
-						getNext();
+						try { getNext(); }
+						catch (PascalExcp& e) {
+							throw PascalExcp();
+						}
 					if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
-					else getNext();			// accept(")")
-					cout << "Checking func" << endl;
+					else 
+						try { getNext(); }
+						catch (PascalExcp& e) {
+							throw PascalExcp();
+						}// accept(")")
+					cout <<setw(offset)<<" "<<std::left<< "Checking func" << endl;
+					offset -= offsetD;
 					return;
 				}
 			}
@@ -141,14 +186,19 @@ void Syntax::factor() throw(PascalExcp)
 				throw PascalExcp();
 			}
 		}
-		cout << "Checking ident" << endl;
-		getNext();	// если не функция, то переменная 
+		cout <<setw(offset)<<" "<<std::left<< "Checking ident" << endl;
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}	// если не функция, то переменная 
+		offset -= offsetD;
 		return;	
 	}
 
 	// константа без знака
 	try {
 		if (unsignedConst()) {
+			offset -= offsetD;
 			return;
 		}
 	}
@@ -171,6 +221,7 @@ void Syntax::factor() throw(PascalExcp)
 	catch (PascalExcp& e) {
 		throw PascalExcp();
 	}
+	offset -= offsetD;
 }
 
 bool Syntax::unsignedConst()throw(PascalExcp) {
@@ -181,21 +232,23 @@ bool Syntax::unsignedConst()throw(PascalExcp) {
 
 	// число без знака
 	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getType() != CHAR){		// TODO(а char?)
-		cout << "Checking unsigned Const" << endl;
-		getNext();
+		cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}
 		return true;
 	}
 	return false;
 	
 }
 
-bool Syntax::checkForbiddenSymbol()
+void Syntax::checkForbiddenSymbol() throw(PascalExcp)
 {
 	if (curToken->getType() == UNDEF) {
 		writeMistake(6);
-		return true;
+		throw PascalExcp();
 	}
-	return false;
 }
 
 void Syntax::writeMistake(int code)
@@ -231,7 +284,10 @@ void Syntax::accept(string oper) throw(PascalExcp) {
 		return;
 		// throw exception("Expected another op");
 	}
-	getNext();
+	try { getNext(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 }
 
 bool Syntax::tryAccept(string oper) throw(PascalExcp) {
@@ -244,7 +300,10 @@ bool Syntax::tryAccept(string oper) throw(PascalExcp) {
 	if (((COperToken*)curToken)->lexem != oper) {
 		return false;
 	}
-	getNext();
+	try { getNext(); }
+	catch (PascalExcp& e) {
+		throw PascalExcp();
+	}
 	return true;
 }
 
@@ -260,6 +319,7 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp)
 {
 	if (curToken == nullptr)
 	{
+		erManager->addError(lexic->getCurPos(), lexic->getCurLine(), 14);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
 		throw PascalExcp();
 		// throw exception("Reached eof");
 	}
@@ -288,13 +348,16 @@ bool Syntax::isMultOper() {
 
 
 // "съедаем" знак, если он есть
-bool Syntax::acceptSign() {
+bool Syntax::acceptSign() throw (PascalExcp){
 	ifNullThrowExcp();
 
 	if (curToken->getType() != OPER) return false;
 	if (((COperToken*)curToken)->lexem == "+" ||
 		((COperToken*)curToken)->lexem == "-")
-		getNext();
+		try { getNext(); }
+		catch (PascalExcp& e) {
+			throw PascalExcp();
+		}
 	return true;
 }
 
