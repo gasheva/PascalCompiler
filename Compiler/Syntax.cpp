@@ -44,20 +44,15 @@ void Syntax::startVer()
 void Syntax::getNext() throw(PascalExcp){
 	removeToken();
 	curToken = this->lexic->getNext(true);
-	try {
 		checkForbiddenSymbol();
-	}catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	
 }
 
 void Syntax::peekNext() {
 	removeToken();
 	curToken = this->lexic->getNext(false);
-	try {checkForbiddenSymbol();}
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	checkForbiddenSymbol();
+	
 }
 
 void Syntax::removeToken()
@@ -136,107 +131,62 @@ void Syntax::factor() throw(PascalExcp)
 {
 	cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
 	offset += offsetD;
-	try { ifNullThrowExcp(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	ifNullThrowExcp();
 	
 
 	if (checkOper("not")) {						// not <множитель>
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
+		getNext();
 		offset -= offsetD;
-		try { factor(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
-		
+		factor(); 
 		return;
 	}
 
 	if (curToken->getType() == IDENT) {			// функци€ TODO(проверка параметров)
 		peekNext();			
 		if (curToken != nullptr) {
-			try {
 				if (tryAccept("(")) {
 									// = accept("("), поскольку до этого было неприн€тое значение
-					try { getNext(); }
-					catch (PascalExcp& e) {
-						throw PascalExcp();
-					}
+					getNext(); 
 					while (curToken != nullptr && !checkOper(")"))
-						try { getNext(); }
-						catch (PascalExcp& e) {
-							throw PascalExcp();
-						}
+						getNext();
 					if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
 					else 
-						try { getNext(); }
-						catch (PascalExcp& e) {
-							throw PascalExcp();
-						}// accept(")")
+						getNext(); // accept(")")
 					cout <<setw(offset)<<" "<<std::left<< "Checking func" << endl;
 					offset -= offsetD;
 					return;
 				}
-			}
-			catch (PascalExcp& e) {
-				throw PascalExcp();
-			}
+			
 		}
 		cout <<setw(offset)<<" "<<std::left<< "Checking ident" << endl;
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}	// если не функци€, то переменна€ 
+		getNext(); // если не функци€, то переменна€ 
 		offset -= offsetD;
 		return;	
 	}
 
 	// константа без знака
-	try {
+	
 		if (unsignedConst()) {
 			offset -= offsetD;
 			return;
 		}
-	}
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	
 		
 	
 	// если ничего не подошло, проверка на (<выражение>)
-	try { accept("("); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
-	try { simpleExpr(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
-
-	try { accept(")"); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	accept("("); 
+	simpleExpr(); 
+	accept(")");
 	offset -= offsetD;
 }
 
 bool Syntax::unsignedConst()throw(PascalExcp) {
-	try { ifNullThrowExcp(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	ifNullThrowExcp(); 
 
 	// число без знака
 	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getType() != CHAR){		// TODO(а char?)
 		cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
+		getNext(); 
 		return true;
 	}
 	return false;
@@ -260,10 +210,7 @@ void Syntax::writeMistake(int code)
 
 // "съедаем" токен, провер€€, что лексема нужна€
 void Syntax::accept(string oper) throw(PascalExcp) {
-	try { ifNullThrowExcp(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	ifNullThrowExcp(); 
 
 	if (curToken->getType() != OPER)
 	{
@@ -284,10 +231,7 @@ void Syntax::accept(string oper) throw(PascalExcp) {
 		return;
 		// throw exception("Expected another op");
 	}
-	try { getNext(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	getNext(); 
 }
 
 bool Syntax::tryAccept(string oper) throw(PascalExcp) {
@@ -300,10 +244,7 @@ bool Syntax::tryAccept(string oper) throw(PascalExcp) {
 	if (((COperToken*)curToken)->lexem != oper) {
 		return false;
 	}
-	try { getNext(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	getNext(); 
 	return true;
 }
 
@@ -354,10 +295,7 @@ bool Syntax::acceptSign() throw (PascalExcp){
 	if (curToken->getType() != OPER) return false;
 	if (((COperToken*)curToken)->lexem == "+" ||
 		((COperToken*)curToken)->lexem == "-")
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
+		getNext();
 	return true;
 }
 
