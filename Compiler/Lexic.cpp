@@ -1,4 +1,5 @@
 #include "Lexic.h"
+#include <string>
 
 using namespace std;
 
@@ -23,7 +24,10 @@ void Lexic::passWhitespaces() {
 			return;
 	}
 }
-
+string toLower(string lexem) {
+	transform(lexem.begin(), lexem.end(), lexem.begin(), ::tolower);
+	return lexem;
+}
 
 
 string Lexic::getLexem(bool &hasMistake)
@@ -75,7 +79,15 @@ string Lexic::getLexem(bool &hasMistake)
 		(*text)[oldPos]=='_') {
 		while (isDigit((*text)[oldPos]) || isLetter((*text)[oldPos]) ||
 			(*text)[oldPos] == '_' || (*text)[oldPos] == '.') {
+
+			// отдельно проверяется не является ли лексема "end"
 			res += (*text)[oldPos];
+			if (toLower(res) == "end") {
+				if (oldPos != (*text).length() && (*text)[oldPos + 1]=='.') {
+					return res;
+				}
+				
+			}
 			oldPos++;
 		}
 		return res;

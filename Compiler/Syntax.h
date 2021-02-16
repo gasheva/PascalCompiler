@@ -35,14 +35,28 @@ private:
 	
 	void constDef();
 	void constanta();
+	void descrMonotypeVars();	// TODO 
+	void simpleType();		// TODO
+
+	void compoundOper();	// составной оператор
+	void oper();
+	void unmarkedOper();
+	void simpleOper();
+	void complOper();		// сложный оператор
+	void assignOper();		// оператор присваивания		//TODO 
+	void procedureOper();	// оператор процедуры
+	void goOper();			// оператор перехода
+	void emptyOper();		// пустой оператор
 
 
+	void expression();
 	void simpleExpr();
 	void term();		// слагаемое
 	void factor();		// множитель
 	bool unsignedConst();
 	void unsignedNum();
 
+	bool isBoolOper();			// является ли операцией отношения
 	bool isAdditiveOper();		// является ли аддит. операцией
 	bool isMultOper();			// является ли мультипл. операцией
 	bool checkOper(string oper);	// совпадает ли оператор

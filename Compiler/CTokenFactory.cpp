@@ -7,7 +7,7 @@ using namespace std;
 
 CTokenFactory::CTokenFactory() {}
 
-string toLower(string lexem) {
+string CTokenFactory::toLower(string lexem) {
 	transform(lexem.begin(), lexem.end(), lexem.begin(), ::tolower);
 	return lexem;
 }
@@ -23,7 +23,7 @@ CToken* CTokenFactory::createToken(string lexem)
 
 	// является ли лексема оператором
 	if (sOperators.find(toLower(lexem)) != sOperators.end())
-		return new COperToken(lexem);
+		return new COperToken(toLower(lexem));
 
 	// можно ли сконвертировать в число (тип value)		
 	if (regex_match(lexem, regex(R"(\d+)"))) {

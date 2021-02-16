@@ -58,7 +58,13 @@ int main()
      delete printer;*/
 
     CErrorManager eManager = CErrorManager();
-    string text("-675");         
+    //string text("const _y1o='YO!'; f2 = -1; ");         
+    //string text("const _y1o='YO!'; f2 = -1; var v1, v2: Integer; v3, v4: String;");         
+    //string text("var v1, v2: Integer; v3, v4: String;");
+    //string text("BeGin x:=12; v2:='fds' End");
+    //string text("var v1, v2: Integer; v3, v4: String; BeGin x:=12; v2:='fds' End");
+    //string text("var v1, v2: Integer; v3, v4: String; BeGin x:=");
+    string text("program pr1(f1, f2); var v1, v2: Integer; v3, v4: String; BeGin x:=1.2; v2:='fds' End.");
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

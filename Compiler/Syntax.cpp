@@ -24,7 +24,7 @@ void Syntax::startVer()
 		cout << "[!]EXCEPTION" << endl;
 		return;
 	}
-	try { constanta(); }
+	try { program(); }
 	catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
 		return;
@@ -37,7 +37,6 @@ void Syntax::startVer()
 	//catch (PascalExcp& e) {
 	//	cout << "[!]EXCEPTION" << endl;
 	//}
-
 
 	// пока не достигли конца файла
 	/*while (curToken!= nullptr) {
@@ -79,18 +78,18 @@ void Syntax::program() throw(PascalExcp){
 	}
 	accept(")");
 	accept(";");
-	//block();
+	block();
 	
 	accept(".");		// end.
 }
 
-void Syntax::name() {
+void Syntax::name() throw(PascalExcp) {
 	ifNullThrowExcp();
 	if (curToken->getType() != IDENT) throw PascalExcp();
 	getNext();
 }
 
-void Syntax::block() {
+void Syntax::block() throw(PascalExcp) {
 	ifNullThrowExcp();
 
 	blockMarks();
@@ -105,28 +104,22 @@ void Syntax::blockMarks()
 {
 }
 void Syntax::blockConst() throw(PascalExcp){
-	ifNullThrowExcp();
+	ifNullThrowExcp();		//TODO(кидать не кидать)
 
 	if (checkOper("const")) {
-		unsignedConst();
-		accept(";");
+		getNext();
 		constDef();
 		while (checkOper(";")) {
-			try {
-				constDef();
+			getNext();
+			if (curToken != nullptr) {
+				if (curToken->getType() == OPER && (
+					((COperToken*)curToken)->lexem == "var" ||		//TODO(не только эти)
+					((COperToken*)curToken)->lexem == "begin"))		//TODO(не только эти)
+					return;
 			}
-			catch (PascalExcp& e) {
-				// проверка, что закончили с разделом констант
-				if (curToken != nullptr) {
-					if (curToken->getType() == OPER && (
-						((COperToken*)curToken)->lexem == "type" ||
-						((COperToken*)curToken)->lexem == "var"))
-						return;
-					else throw e;	// кидаем ошибку TODO(пропуск константы до ;)
-				}
-				else throw e;
-			}
-		};
+			else return;		// наткнулись на конец файла
+			constDef();
+		}
 	}
 }
 void Syntax::constDef()throw(PascalExcp)
@@ -162,7 +155,7 @@ void Syntax::constanta()throw(PascalExcp)
 		}
 		// <строка>
 		if (curToken->getType() == VALUE &&
-			((CValueToken*)curToken)->getType() == STRING){
+			((CValueToken*)curToken)->getVariant().getType() == STRING){
 			getNext();		// приняли строку
 			return;
 		}
@@ -171,28 +164,103 @@ void Syntax::constanta()throw(PascalExcp)
 		unsignedNum();		// кинет ошибку
 	}
 }
-
-void Syntax::blockTypes()
+void Syntax::blockTypes(){}
+void Syntax::blockVars() throw(PascalExcp)
 {
+	ifNullThrowExcp();
+	// var <описание однотипных переменных>;
+	if (checkOper("var")) {
+		getNext();		// accept("var");
+		descrMonotypeVars();
+		// {<описание однотипных переменных>;}
+		while (checkOper(";")) {
+			getNext();
+			if (curToken != nullptr) {
+				if (curToken->getType() == OPER && (
+					((COperToken*)curToken)->lexem == "begin"))		//TODO(не только эти)
+					return;
+			}
+			else return; //throw PascalExcp();		// неожиданный конец файла
+			descrMonotypeVars();
+		}
+	}
+}
+void Syntax::descrMonotypeVars() throw(PascalExcp)
+{
+	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
+	name();
+	while (checkOper(",")) {
+		getNext();		//accept(",")
+		name();
+	}
+	accept(":");
+	simpleType();
+}
+void Syntax::simpleType() throw(PascalExcp)
+{
+	ifNullThrowExcp();
+	if (curToken->getType() == OPER &&
+		(((COperToken*)curToken)->lexem == "integer" || ((COperToken*)curToken)->lexem == "string") ||
+		((COperToken*)curToken)->lexem == "char" || ((COperToken*)curToken)->lexem == "real") {
+		getNext();
+		return;
+	}
+	throw PascalExcp();
+}
+void Syntax::blockFunc(){}
 
+void Syntax::blockOpers()throw(PascalExcp)
+{
+	// <раздел операторов>::=<составной оператор>
+	compoundOper();
+}
+void Syntax::compoundOper() throw(PascalExcp) {
+	// <составной оператор>::= begin <оператор>{;<оператор>} end
+	ifNullThrowExcp();
+	accept("begin");
+	oper();
+	while (checkOper(";")) {
+		getNext();
+		oper();
+	}
+	accept("end");
 }
 
-void Syntax::blockVars()
-{
+void Syntax::oper() throw(PascalExcp) {
+	// <оператор>::=<непомеченный оператор>|<метка><непомеченный оператор>
+	unmarkedOper();
 }
-
-void Syntax::blockFunc()
-{
+void Syntax::unmarkedOper() throw(PascalExcp) {
+	// <непомеченный оператор>:: = <простой оператор> |<сложный оператор>
+	simpleOper();
 }
-
-void Syntax::blockOpers()
-{
+void Syntax::simpleOper() throw(PascalExcp) {
+	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
+	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
+	assignOper();
 }
-
+void Syntax::assignOper()throw(PascalExcp) {
+	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
+	ifNullThrowExcp();
+	if (curToken->getType() != IDENT)
+		throw PascalExcp();
+	getNext();	//accept(variable)
+	ifNullThrowExcp();
+	accept(":=");
+	expression();
+}
+void Syntax::expression() throw(PascalExcp) {
+	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
+	simpleExpr();
+	if (isBoolOper()) {
+		getNext();		// accept
+		simpleExpr();
+	}
+}
 
 
 void Syntax::simpleExpr() throw(PascalExcp) {
-	cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
+	// cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
 	offset += offsetD;
 	ifNullThrowExcp();
 
@@ -209,7 +277,7 @@ void Syntax::simpleExpr() throw(PascalExcp) {
 
 void Syntax::term() throw(PascalExcp)
 {
-	cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
+	// cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
 	offset += offsetD;
 	ifNullThrowExcp();
 
@@ -221,12 +289,9 @@ void Syntax::term() throw(PascalExcp)
 	offset -= offsetD;
 }
 
-
-
-// мб добавить переменную hasMistake?
 void Syntax::factor() throw(PascalExcp)
 {
-	cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
+	// cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
 	offset += offsetD;
 	ifNullThrowExcp();
 	
@@ -249,26 +314,23 @@ void Syntax::factor() throw(PascalExcp)
 					if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
 					else 
 						getNext(); // accept(")")
-					cout <<setw(offset)<<" "<<std::left<< "Checking func" << endl;
+					// cout <<setw(offset)<<" "<<std::left<< "Checking func" << endl;
 					offset -= offsetD;
 					return;
 				}
 			
 		}
-		cout <<setw(offset)<<" "<<std::left<< "Checking ident" << endl;
+		// cout <<setw(offset)<<" "<<std::left<< "Checking ident" << endl;
 		getNext(); // если не функция, то переменная 
 		offset -= offsetD;
 		return;	
 	}
 
 	// константа без знака
-	
-		if (unsignedConst()) {
-			offset -= offsetD;
-			return;
-		}
-	
-		
+	if (unsignedConst()) {
+		offset -= offsetD;
+		return;
+	}
 	
 	// если ничего не подошло, проверка на (<выражение>)
 	accept("("); 
@@ -281,8 +343,8 @@ bool Syntax::unsignedConst()throw(PascalExcp) {
 	ifNullThrowExcp(); 
 
 	// число без знака
-	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getType() != CHAR){		// TODO(а char?)
-		cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
+	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getVariant().getType() != CHAR){		// TODO(а char?)
+		// cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
 		getNext(); 
 		return true;
 	}
@@ -292,8 +354,8 @@ bool Syntax::unsignedConst()throw(PascalExcp) {
 void Syntax::unsignedNum() throw(PascalExcp) {
 	if (curToken->getType() != VALUE)
 		throw PascalExcp();
-	auto tokType = ((CValueToken*)curToken)->getType();
-	if (tokType != INT || tokType != REAL)
+	auto tokType = ((CValueToken*)curToken)->getVariant().getType();
+	if (tokType != INT && tokType != REAL)
 		throw PascalExcp();
 	getNext();
 }
@@ -370,6 +432,21 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp)
 		// throw exception("Reached eof");
 	}
 	return false;
+}
+
+bool Syntax::isBoolOper()
+{
+	// <операция отношения>::==|<>|<|<=|>=|>|in
+	if (curToken == nullptr) return false;
+
+	if (curToken->getType() != OPER) return false;
+	return ((COperToken*)curToken)->lexem == string("==") ||
+		((COperToken*)curToken)->lexem == string("<>") ||
+		((COperToken*)curToken)->lexem == string("<") ||
+		((COperToken*)curToken)->lexem == string("<=") ||
+		((COperToken*)curToken)->lexem == string(">=") ||
+		((COperToken*)curToken)->lexem == string(">") ||
+		((COperToken*)curToken)->lexem == string("in");
 }
 
 bool Syntax::isAdditiveOper() {

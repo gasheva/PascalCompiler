@@ -22,6 +22,7 @@ private:
 		"<>", "+", "-", ":=",
 		"float", "integer", "string", "char", "return"
 	};
+	string toLower(string str);
 public:
 	CTokenFactory();
 	CToken* createToken(string lexem);		// создание токена определенного класса
