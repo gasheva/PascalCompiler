@@ -24,13 +24,19 @@ void Syntax::startVer()
 		cout << "[!]EXCEPTION" << endl;
 		return;
 	}
-	// TODO(пропуск строки)
-	try {
-		simpleExpr();
-	}
+	try { constanta(); }
 	catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
+		return;
 	}
+
+	//// TODO(пропуск строки)
+	//try {
+	//	simpleExpr();
+	//}
+	//catch (PascalExcp& e) {
+	//	cout << "[!]EXCEPTION" << endl;
+	//}
 
 
 	// пока не достигли конца файла
@@ -61,39 +67,142 @@ void Syntax::removeToken()
 		delete curToken;
 }
 
+void Syntax::program() throw(PascalExcp){
+	ifNullThrowExcp();
+	accept("program");
+	name();
+	accept("(");
+	name();
+	while (checkOper(",")) {
+		getNext();
+		name();
+	}
+	accept(")");
+	accept(";");
+	//block();
+	
+	accept(".");		// end.
+}
+
+void Syntax::name() {
+	ifNullThrowExcp();
+	if (curToken->getType() != IDENT) throw PascalExcp();
+	getNext();
+}
+
+void Syntax::block() {
+	ifNullThrowExcp();
+
+	blockMarks();
+	blockConst();
+	blockTypes();
+	blockVars();
+	blockFunc();
+	blockOpers();
+	blockMarks();
+}
+void Syntax::blockMarks()
+{
+}
+void Syntax::blockConst() throw(PascalExcp){
+	ifNullThrowExcp();
+
+	if (checkOper("const")) {
+		unsignedConst();
+		accept(";");
+		constDef();
+		while (checkOper(";")) {
+			try {
+				constDef();
+			}
+			catch (PascalExcp& e) {
+				// проверка, что закончили с разделом констант
+				if (curToken != nullptr) {
+					if (curToken->getType() == OPER && (
+						((COperToken*)curToken)->lexem == "type" ||
+						((COperToken*)curToken)->lexem == "var"))
+						return;
+					else throw e;	// кидаем ошибку TODO(пропуск константы до ;)
+				}
+				else throw e;
+			}
+		};
+	}
+}
+void Syntax::constDef()throw(PascalExcp)
+{
+	ifNullThrowExcp();
+	name();
+	accept("=");
+	constanta();
+}
+void Syntax::constanta()throw(PascalExcp)
+{
+	//<знак>
+	if (acceptSign()) {
+		// <число без знака>
+		try {
+			unsignedNum();
+		}
+		catch (PascalExcp& e) {
+			try {
+				// <имя константы>
+				name();
+			}
+			catch (PascalExcp& e) {
+				throw e;		// варианты начинания со знака закончились
+			}
+		}
+	}
+	else {
+		// <имя константы>
+		if (curToken->getType() == IDENT) {
+			getNext();
+			return;
+		}
+		// <строка>
+		if (curToken->getType() == VALUE &&
+			((CValueToken*)curToken)->getType() == STRING){
+			getNext();		// приняли строку
+			return;
+		}
+
+		// <число без знака>
+		unsignedNum();		// кинет ошибку
+	}
+}
+
+void Syntax::blockTypes()
+{
+
+}
+
+void Syntax::blockVars()
+{
+}
+
+void Syntax::blockFunc()
+{
+}
+
+void Syntax::blockOpers()
+{
+}
+
+
+
 void Syntax::simpleExpr() throw(PascalExcp) {
 	cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
 	offset += offsetD;
-	try {
-		ifNullThrowExcp();
-	}
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	ifNullThrowExcp();
 
-	try { acceptSign(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	acceptSign();
+	term();
 	
-	try {term();}
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
-	
-	
-
 	// то, что в {}
 	while (isAdditiveOper()) {
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
-		
-		try { term(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
+		getNext();	
+		term();
 	}
 	offset -= offsetD;
 }
@@ -102,24 +211,12 @@ void Syntax::term() throw(PascalExcp)
 {
 	cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
 	offset += offsetD;
-	try { ifNullThrowExcp();}
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	ifNullThrowExcp();
 
-	try { factor(); }
-	catch (PascalExcp& e) {
-		throw PascalExcp();
-	}
+	factor();
 	while (curToken!=nullptr && isMultOper()) {
-		try { getNext(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
-		try { factor(); }
-		catch (PascalExcp& e) {
-			throw PascalExcp();
-		}
+		getNext(); 
+		factor();
 	}
 	offset -= offsetD;
 }
@@ -192,10 +289,18 @@ bool Syntax::unsignedConst()throw(PascalExcp) {
 	return false;
 	
 }
+void Syntax::unsignedNum() throw(PascalExcp) {
+	if (curToken->getType() != VALUE)
+		throw PascalExcp();
+	auto tokType = ((CValueToken*)curToken)->getType();
+	if (tokType != INT || tokType != REAL)
+		throw PascalExcp();
+	getNext();
+}
 
 void Syntax::checkForbiddenSymbol() throw(PascalExcp)
 {
-	if (curToken->getType() == UNDEF) {
+	if (curToken!=nullptr && curToken->getType() == UNDEF) {
 		writeMistake(6);
 		throw PascalExcp();
 	}

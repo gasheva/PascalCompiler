@@ -58,7 +58,7 @@ int main()
      delete printer;*/
 
     CErrorManager eManager = CErrorManager();
-    string text("45 - 6 # 4");         
+    string text("-675");         
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

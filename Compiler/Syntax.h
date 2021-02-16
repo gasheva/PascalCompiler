@@ -21,10 +21,27 @@ private:
 	bool acceptSign();			// принять знак, если он есть
 	bool tryAccept(string oper);	// попытка принять операцию
 
+
+	void program();
+	void name();
+	void block();
+
+	void blockMarks();
+	void blockConst();
+	void blockTypes();
+	void blockVars();
+	void blockFunc();
+	void blockOpers();
+	
+	void constDef();
+	void constanta();
+
+
 	void simpleExpr();
 	void term();		// слагаемое
 	void factor();		// множитель
 	bool unsignedConst();
+	void unsignedNum();
 
 	bool isAdditiveOper();		// является ли аддит. операцией
 	bool isMultOper();			// является ли мультипл. операцией
