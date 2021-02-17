@@ -32,13 +32,19 @@ string Lexic::getLexem(bool &hasMistake)
     string res("");
 	switch ((*text)[oldPos])
 	{
+		// проверка на string
 	case '\'':
 		oldPos++;
 		res += "\'";
-		while ((*text)[oldPos] != '\'' && (*text)[oldPos] != NEW_LINE_SYMBOL) {
+		while (oldPos<(*text).length() && (*text)[oldPos] != '\'' && (*text)[oldPos] != NEW_LINE_SYMBOL) {
 			res += (*text)[oldPos];
 			oldPos++;
 		}
+		if (oldPos == (*text).length()) {
+			errorManager->addError(oldPos, lineNum, 75);
+			return res;
+		}
+
 		if ((*text)[oldPos] != '\'') {
 			errorManager->addError(oldPos, lineNum, 75);
 			return res;
@@ -79,7 +85,7 @@ string Lexic::getLexem(bool &hasMistake)
 			// отдельно проверяется не является ли лексема "end"
 			res += (*text)[oldPos];
 			if (toLower(res) == "end") {
-				if (oldPos != (*text).length() && (*text)[oldPos + 1]=='.') {
+				if (oldPos < (*text).length() && (*text)[oldPos + 1]=='.') {
 					return res;
 				}
 				

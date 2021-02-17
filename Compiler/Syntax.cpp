@@ -1,5 +1,6 @@
 #include "Syntax.h"
 #include <iomanip>
+#include "FStringFunc.h"
 
 
 Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic) {
@@ -50,7 +51,6 @@ void Syntax::getNext() throw(PascalExcp){
 	removeToken();
 	curToken = this->lexic->getNext(true);
 		checkForbiddenSymbol();
-	
 }
 
 void Syntax::peekNext() {
@@ -379,18 +379,29 @@ void Syntax::writeMistake(int code)
 void Syntax::accept(string oper) throw(PascalExcp) {
 	ifNullThrowExcp(); 
 
-	
-	if (curToken->getType() != OPER)
+	oper = toLower(oper);
+	if (curToken->getType() != OPER || ((COperToken*)curToken)->lexem != oper)
 	{
 		if (oper == "program") writeMistake(3);
-		if (oper == ")") writeMistake(4);
-		if (oper == ":") writeMistake(5);
-		if (oper == "OF") writeMistake(8);
-		if (oper == "(") writeMistake(9);
-		if (oper == "[") writeMistake(11);
-		if (oper == "]") writeMistake(12);
-		if (oper == "end") writeMistake(13);
-		if (oper == ";") writeMistake(14);
+		else if (oper == ")") writeMistake(4);
+		else if (oper == ":") writeMistake(5);
+		else if (oper == "OF") writeMistake(8);
+		else if (oper == "(") writeMistake(9);
+		else if (oper == "[") writeMistake(11);
+		else if (oper == "]") writeMistake(12);
+		else if (oper == "end") writeMistake(13);
+		else if (oper == ";") writeMistake(14);
+		else if (oper == "=") writeMistake(16);
+		else if (oper == "begin") writeMistake(17);
+		else if (oper == ",") writeMistake(20);
+		else if (oper == ":=") writeMistake(51);
+		else if (oper == "then") writeMistake(52);
+		else if (oper == "until") writeMistake(53);
+		else if (oper == "do") writeMistake(54);
+		else if (oper == "to"|| oper == "downto") writeMistake(55);
+		else if (oper == "if") writeMistake(56);
+		else if (oper == ".") writeMistake(61);
+		else if (oper == "..") writeMistake(74);
 		throw PascalExcp();
 		return;
 		// throw exception("Expected another op");
