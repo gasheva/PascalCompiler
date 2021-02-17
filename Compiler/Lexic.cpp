@@ -1,6 +1,6 @@
 #include "Lexic.h"
 #include <string>
-
+#include "FStringFunc.h"
 using namespace std;
 
 bool Lexic::isLetter(char ch) {
@@ -23,10 +23,6 @@ void Lexic::passWhitespaces() {
 		if (pos == (*text).length())
 			return;
 	}
-}
-string toLower(string lexem) {
-	transform(lexem.begin(), lexem.end(), lexem.begin(), ::tolower);
-	return lexem;
 }
 
 

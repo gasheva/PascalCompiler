@@ -146,6 +146,8 @@
     <ClCompile Include="CToken.cpp" />
     <ClCompile Include="CTokenFactory.cpp" />
     <ClCompile Include="CVariant.cpp" />
+    <ClCompile Include="FStringFunc.cpp" />
+    <ClCompile Include="FStringFunc.h" />
     <ClCompile Include="Lexic.cpp" />
     <ClCompile Include="Syntax.cpp" />
   </ItemGroup>

@@ -60,6 +60,12 @@
     <ClCompile Include="Syntax.cpp">
       <Filter>Исходные файлы\modules</Filter>
     </ClCompile>
+    <ClCompile Include="FStringFunc.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClCompile>
+    <ClCompile Include="FStringFunc.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CError.h">

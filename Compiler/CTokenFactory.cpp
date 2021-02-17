@@ -1,16 +1,11 @@
 #include "CTokenFactory.h"
-#include <iostream>
-#include <stdlib.h>
+#include "FStringFunc.h"
 
 using namespace std;
 
 
 CTokenFactory::CTokenFactory() {}
 
-string CTokenFactory::toLower(string lexem) {
-	transform(lexem.begin(), lexem.end(), lexem.begin(), ::tolower);
-	return lexem;
-}
 CToken* CTokenFactory::createToken(string lexem)
 {
 	// является ли char (тип value)

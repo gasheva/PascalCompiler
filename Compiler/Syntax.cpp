@@ -379,15 +379,17 @@ void Syntax::writeMistake(int code)
 void Syntax::accept(string oper) throw(PascalExcp) {
 	ifNullThrowExcp(); 
 
+	
 	if (curToken->getType() != OPER)
 	{
+		if (oper == "program") writeMistake(3);
 		if (oper == ")") writeMistake(4);
 		if (oper == ":") writeMistake(5);
 		if (oper == "OF") writeMistake(8);
 		if (oper == "(") writeMistake(9);
 		if (oper == "[") writeMistake(11);
 		if (oper == "]") writeMistake(12);
-		if (oper == "END") writeMistake(13);
+		if (oper == "end") writeMistake(13);
 		if (oper == ";") writeMistake(14);
 		throw PascalExcp();
 		return;

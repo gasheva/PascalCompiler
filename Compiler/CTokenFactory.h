@@ -1,8 +1,9 @@
 #pragma once
-#include <string>
 #include "CToken.h"
+#include <string>
 #include <set>
 #include <regex>
+#include <iostream>
 
 using namespace std;
 
@@ -22,7 +23,6 @@ private:
 		"<>", "+", "-", ":=",
 		"float", "integer", "string", "char", "return"
 	};
-	string toLower(string str);
 public:
 	CTokenFactory();
 	CToken* createToken(string lexem);		// создание токена определенного класса
