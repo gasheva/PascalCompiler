@@ -17,8 +17,10 @@ bool Lexic::isDigit(char ch)
 
 void Lexic::passWhitespaces() {
 	while ((*text)[pos] == ' ' || (*text)[pos] == '\r' || (*text)[pos] == '\t' || (*text)[pos] == '\n') {
-		if ((*text)[pos] == '\r' || (*text)[pos] == '\n')
+		if ((*text)[pos] == '\n') {
 			lineNum++;
+			lastNewLinePos = pos;
+		}
 		pos++;
 		if (pos == (*text).length())
 			return;
@@ -106,7 +108,6 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 	this->errorManager = errorManager;
 	this->text = text;
 	this->pos = 0;
-	lineNum = 0;
 	factory = CTokenFactory();
 }
 
@@ -129,7 +130,7 @@ CToken* Lexic::getNext(bool get)
 
 int Lexic::getStartPosition()
 {
-	return pos - lastLexemStartPos;
+	return lastLexemStartPos - lastNewLinePos+1;
 }
 
 int Lexic::getCurLine()

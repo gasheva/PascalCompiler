@@ -15,7 +15,7 @@ bool CFileOnlyErrorPrinter::print(list<CError> errors)
         return false;
 
     for (CError er : errors) {
-        myfile << "[" << er.code << "] line = "<<(er.line+1)<< " pos = "<<er.pos<< " - "<< er.description <<endl;
+        myfile << "[" << er.code << "] line = "<<(er.line)<< " pos = "<<er.pos<< " - "<< er.description <<endl;
     }
     myfile.close();
     return true;

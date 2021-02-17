@@ -16,8 +16,9 @@ class Lexic {
 private:
 	const string *text;
 	const char NEW_LINE_SYMBOL = '\n';
-	int pos, lineNum;
+	int pos, lineNum = 1;
 	int lastLexemStartPos = 0;
+	int lastNewLinePos = 0;
 	
 	CTokenFactory factory;
 	CErrorManager* errorManager;

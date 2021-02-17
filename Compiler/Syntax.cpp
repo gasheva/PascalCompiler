@@ -85,7 +85,10 @@ void Syntax::program() throw(PascalExcp){
 
 void Syntax::name() throw(PascalExcp) {
 	ifNullThrowExcp();
-	if (curToken->getType() != IDENT) throw PascalExcp();
+	if (curToken->getType() != IDENT) {
+		writeMistake(2);
+		throw PascalExcp();
+	}
 	getNext();
 }
 
@@ -242,9 +245,7 @@ void Syntax::simpleOper() throw(PascalExcp) {
 void Syntax::assignOper()throw(PascalExcp) {
 	// <оператор присваивани€>:: = <переменна€>: = <выражение> |<им€ функции> : = <выражение>
 	ifNullThrowExcp();
-	if (curToken->getType() != IDENT)
-		throw PascalExcp();
-	getNext();	//accept(variable)
+	name();				//TODO(здесь как бы переменна€)
 	ifNullThrowExcp();
 	accept(":=");
 	expression();
@@ -370,7 +371,7 @@ void Syntax::checkForbiddenSymbol() throw(PascalExcp)
 
 void Syntax::writeMistake(int code)
 {
-	erManager->addError(lexic->getStartPosition(), lexic->getStartPosition(), code);
+	erManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
 }
 
 
