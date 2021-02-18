@@ -50,7 +50,7 @@ void Syntax::startVer()
 void Syntax::getNext() throw(PascalExcp){
 	removeToken();
 	curToken = this->lexic->getNext(true);
-		checkForbiddenSymbol();
+	// checkForbiddenSymbol();
 }
 
 void Syntax::peekNext() {
@@ -208,6 +208,7 @@ void Syntax::simpleType() throw(PascalExcp)
 		getNext();
 		return;
 	}
+	writeMistake(324);
 	throw PascalExcp();
 }
 void Syntax::blockFunc(){}
@@ -261,6 +262,7 @@ void Syntax::expression() throw(PascalExcp) {
 
 
 void Syntax::simpleExpr() throw(PascalExcp) {
+	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
 	// cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
 	offset += offsetD;
 	ifNullThrowExcp();
@@ -333,10 +335,16 @@ void Syntax::factor() throw(PascalExcp)
 		return;
 	}
 	
-	// если ничего не подошло, проверка на (<выражение>)
-	accept("("); 
-	simpleExpr(); 
-	accept(")");
+	// (<выражение>)
+	if (checkOper("(")) {
+		accept("(");
+		simpleExpr();
+		accept(")");
+	}
+	else {
+		writeMistake(6);
+		throw PascalExcp();
+	}
 	offset -= offsetD;
 }
 
