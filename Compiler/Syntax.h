@@ -79,3 +79,8 @@ struct PascalExcp : public std::exception {
 		return "Some exception in Pascal code";
 	}
 };
+struct EOFExcp : public std::exception {
+	const char* what() const throw() {
+		return "Reached eof";
+	}
+};

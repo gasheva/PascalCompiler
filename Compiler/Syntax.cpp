@@ -19,15 +19,29 @@ void Syntax::startVer()
 		cout << "[!]EXCEPTION" << endl;
 		return;
 	}
+	catch (EOFExcp& e) {
+		cout << "[!]EOF EXCEPTION" << endl;
+		return;
+	}
+	
 
 	try { ifNullThrowExcp(); }
 	catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
 		return;
 	}
+	catch (EOFExcp& e) {
+		cout << "[!]EOF EXCEPTION" << endl;
+		return;
+	}
+
 	try { program(); }
 	catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
+		return;
+	}
+	catch (EOFExcp& e) {
+		cout << "[!]EOF EXCEPTION" << endl;
 		return;
 	}
 
@@ -47,7 +61,7 @@ void Syntax::startVer()
 	}*/
 }
 
-void Syntax::getNext() throw(PascalExcp) {
+void Syntax::getNext() throw(PascalExcp, EOFExcp) {
 	removeToken();
 	curToken = this->lexic->getNext(true);
 	// checkForbiddenSymbol();
@@ -77,7 +91,7 @@ void Syntax::removeToken()
 }
 
 
-void Syntax::program() throw(PascalExcp) {
+void Syntax::program() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	accept("program");
 	set<string> nameSet = { "(", ",", ";", "const", "var", "begin" };
@@ -123,7 +137,7 @@ void Syntax::program() throw(PascalExcp) {
 	}
 }
 
-void Syntax::name() throw(PascalExcp) {
+void Syntax::name() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	if (curToken->getType() != IDENT) {
 		writeMistake(2);
@@ -132,7 +146,7 @@ void Syntax::name() throw(PascalExcp) {
 	getNext();
 }
 
-void Syntax::block() throw(PascalExcp) {
+void Syntax::block() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	blockMarks();
@@ -151,7 +165,7 @@ void Syntax::block() throw(PascalExcp) {
 void Syntax::blockMarks()
 {
 }
-void Syntax::blockConst() throw(PascalExcp) {
+void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();		//TODO(кидать не кидать)
 
 	if (checkOper("const")) {
@@ -170,14 +184,14 @@ void Syntax::blockConst() throw(PascalExcp) {
 		}
 	}
 }
-void Syntax::constDef()throw(PascalExcp)
+void Syntax::constDef()throw(PascalExcp, EOFExcp)
 {
 	ifNullThrowExcp();
 	name();
 	accept("=");
 	constanta();
 }
-void Syntax::constanta()throw(PascalExcp)
+void Syntax::constanta()throw(PascalExcp, EOFExcp)
 {
 	//<знак>
 	if (acceptSign()) {
@@ -213,8 +227,9 @@ void Syntax::constanta()throw(PascalExcp)
 	}
 }
 void Syntax::blockTypes() {}
-void Syntax::blockVars() throw(PascalExcp)
+void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 {
+	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
 	// var <описание однотипных переменных>;
 	if (checkOper("var")) {
@@ -233,7 +248,7 @@ void Syntax::blockVars() throw(PascalExcp)
 		}
 	}
 }
-void Syntax::descrMonotypeVars() throw(PascalExcp)
+void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
 {
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 	name();
@@ -244,7 +259,7 @@ void Syntax::descrMonotypeVars() throw(PascalExcp)
 	accept(":");
 	simpleType();
 }
-void Syntax::simpleType() throw(PascalExcp)
+void Syntax::simpleType() throw(PascalExcp, EOFExcp)
 {
 	ifNullThrowExcp();
 	if (curToken->getType() == OPER &&
@@ -258,13 +273,13 @@ void Syntax::simpleType() throw(PascalExcp)
 }
 void Syntax::blockFunc() {}
 
-void Syntax::blockOpers()throw(PascalExcp)
+void Syntax::blockOpers()throw(PascalExcp, EOFExcp)
 {
 	// <раздел операторов>::=<составной оператор>
 	compoundOper();
 
 }
-void Syntax::compoundOper() throw(PascalExcp) {
+void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
 	accept("begin");
@@ -285,20 +300,20 @@ void Syntax::compoundOper() throw(PascalExcp) {
 	accept("end");
 }
 
-void Syntax::oper() throw(PascalExcp) {
+void Syntax::oper() throw(PascalExcp, EOFExcp) {
 	// <оператор>::=<непомеченный оператор>|<метка><непомеченный оператор>
 	unmarkedOper();
 }
-void Syntax::unmarkedOper() throw(PascalExcp) {
+void Syntax::unmarkedOper() throw(PascalExcp, EOFExcp) {
 	// <непомеченный оператор>:: = <простой оператор> |<сложный оператор>
 	simpleOper();
 }
-void Syntax::simpleOper() throw(PascalExcp) {
+void Syntax::simpleOper() throw(PascalExcp, EOFExcp) {
 	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
 	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
 	assignOper();
 }
-void Syntax::assignOper()throw(PascalExcp) {
+void Syntax::assignOper()throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
 	name();				//TODO(здесь как бы переменная)
@@ -306,7 +321,7 @@ void Syntax::assignOper()throw(PascalExcp) {
 	accept(":=");
 	expression();
 }
-void Syntax::expression() throw(PascalExcp) {
+void Syntax::expression() throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
 	simpleExpr();
 	if (isBoolOper()) {
@@ -316,7 +331,7 @@ void Syntax::expression() throw(PascalExcp) {
 }
 
 
-void Syntax::simpleExpr() throw(PascalExcp) {
+void Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
 	// cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
 	offset += offsetD;
@@ -333,7 +348,7 @@ void Syntax::simpleExpr() throw(PascalExcp) {
 	offset -= offsetD;
 }
 
-void Syntax::term() throw(PascalExcp)
+void Syntax::term() throw(PascalExcp, EOFExcp)
 {
 	// cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
 	offset += offsetD;
@@ -347,7 +362,7 @@ void Syntax::term() throw(PascalExcp)
 	offset -= offsetD;
 }
 
-void Syntax::factor() throw(PascalExcp)
+void Syntax::factor() throw(PascalExcp, EOFExcp)
 {
 	// cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
 	offset += offsetD;
@@ -403,7 +418,7 @@ void Syntax::factor() throw(PascalExcp)
 	offset -= offsetD;
 }
 
-bool Syntax::unsignedConst()throw(PascalExcp) {
+bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	// число без знака
@@ -415,7 +430,7 @@ bool Syntax::unsignedConst()throw(PascalExcp) {
 	return false;
 
 }
-void Syntax::unsignedNum() throw(PascalExcp) {
+void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	if (curToken->getType() != VALUE)
 		throw PascalExcp();
 	auto tokType = ((CValueToken*)curToken)->getVariant().getType();
@@ -424,7 +439,7 @@ void Syntax::unsignedNum() throw(PascalExcp) {
 	getNext();
 }
 
-void Syntax::checkForbiddenSymbol() throw(PascalExcp)
+void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp)
 {
 	if (curToken != nullptr && curToken->getType() == UNDEF) {
 		writeMistake(6);
@@ -440,7 +455,7 @@ void Syntax::writeMistake(int code)
 
 
 // "съедаем" токен, проверяя, что лексема нужная
-void Syntax::accept(string oper) throw(PascalExcp) {
+void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	oper = toLower(oper);
@@ -476,7 +491,7 @@ void Syntax::accept(string oper) throw(PascalExcp) {
 	getNext();
 }
 
-bool Syntax::tryAccept(string oper) throw(PascalExcp) {
+bool Syntax::tryAccept(string oper) throw(PascalExcp, EOFExcp) {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) {
@@ -499,12 +514,12 @@ bool Syntax::checkOper(string oper)
 	return false;
 }
 
-bool Syntax::ifNullThrowExcp() throw(PascalExcp)
+bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp)
 {
 	if (curToken == nullptr)
 	{
 		erManager->addError(lexic->getCurPos(), lexic->getCurLine(), 1000);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
-		throw PascalExcp();
+		throw EOFExcp();
 		// throw exception("Reached eof");
 	}
 	return false;
@@ -547,7 +562,7 @@ bool Syntax::isMultOper() {
 
 
 // "съедаем" знак, если он есть
-bool Syntax::acceptSign() throw (PascalExcp) {
+bool Syntax::acceptSign() throw (PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	if (curToken->getType() != OPER) return false;
