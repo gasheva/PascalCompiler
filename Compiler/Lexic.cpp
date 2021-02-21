@@ -39,7 +39,7 @@ void Lexic::skipComments()
 }
 
 
-string Lexic::getLexem(bool &hasMistake)
+string Lexic::getLexem()
 {
 	int oldPos = pos;
     string res("");
@@ -85,7 +85,7 @@ string Lexic::getLexem(bool &hasMistake)
 			passToNewLine();
 			passWhitespaces();
 		}
-		return getLexem(hasMistake);
+		return getLexem();
 	}
 
 
@@ -99,7 +99,7 @@ string Lexic::getLexem(bool &hasMistake)
 		skipComments();
 		if (pos < (*text).length()) {
 			passWhitespaces();
-			string tmp = getLexem(hasMistake);
+			string tmp = getLexem();
 			return tmp;
 		}
 	}
@@ -145,16 +145,16 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 CToken* Lexic::getNext(bool get)
 {
 	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
-	bool hasMistake = false;
-
+	
 	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
 
 	passWhitespaces();
 	if (pos >= (*text).length()) return nullptr;
 
-	string lexem = getLexem(hasMistake);
+	string lexem = getLexem();
 	cout << "[x] Lexem = " << lexem << endl;
 	lastLexemStartPos = pos;
+	
 	if (get) pos += lexem.length();
 	return factory.createToken(lexem);
 }
@@ -178,6 +178,23 @@ void Lexic::passToNewLine()
 			return;
 	} while ((*text)[pos] != NEW_LINE_SYMBOL);
 	lineNum++;
+}
+
+CToken* Lexic::skip(set<string> lexemes) {
+	string lexem = "";
+	if (pos >= (*text).length()) return nullptr;
+
+	while (pos < (*text).length() && lexemes.find(lexem)==lexemes.end()) {
+		passWhitespaces();
+		if (pos >= (*text).length()) return nullptr;
+
+		lexem = toLower(getLexem());
+		lastLexemStartPos = pos;
+		passWhitespaces();
+		pos += lexem.length();
+	}
+	if (pos >= (*text).length()) return nullptr;
+	return factory.createToken(lexem);
 }
 
 int Lexic::getCurPos()

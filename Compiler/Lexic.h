@@ -22,7 +22,7 @@ private:
 	
 	CTokenFactory factory;
 	CErrorManager* errorManager;
-	string getLexem(bool& hasMistake);			// получить лексему, начиная с позиции pos
+	string getLexem();			// получить лексему, начиная с позиции pos
 	bool isLetter(char ch);			// проверка является ли передаваемый символ буквой
 	bool isDigit(char ch);			// проверка является ли передаваемый символ цифрой
 	void passWhitespaces();		// возвращает позицию очередного символа или позицию конца файла, если очередной символ не был найден
@@ -35,4 +35,5 @@ public:
 	int getCurLine();
 	void passToNewLine();			// пропуск символов до начала новой строки или до конца файла
 	int getCurPos();
+	CToken* skip(set<string> lexemes);
 };

@@ -16,6 +16,7 @@ private:
 	void getNext();		// получить следующий токен
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память
+	void skip(set<string> lexem);	// пропуск до определенной лексемы. Лексема curToken равна одной из переданных или nullptr
 
 	void accept(string oper);	// принять операцию
 	bool acceptSign();			// принять знак, если он есть
@@ -64,6 +65,7 @@ private:
 	bool ifNullThrowExcp();
 	void checkForbiddenSymbol();
 	void writeMistake(int code);
+
 
 public:
 	Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic);
