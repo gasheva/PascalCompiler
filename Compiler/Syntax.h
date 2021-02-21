@@ -28,7 +28,7 @@ private:
 	void block();
 
 	void blockMarks();
-	void blockConst();
+	void blockConst();		// пропуск определения константы, если в нем ошибка
 	void blockTypes();
 	void blockVars();
 	void blockFunc();

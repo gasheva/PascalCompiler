@@ -150,10 +150,6 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	blockMarks();
-	auto blConFolSyms = vector<string>();
-	/*blConFolSyms[0] = ";";
-	blConFolSyms[0] = "var";
-	blConFolSyms[0] = "begin";*/
 
 	blockConst();
 	blockTypes();
@@ -167,20 +163,27 @@ void Syntax::blockMarks()
 }
 void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();		//TODO(кидать не кидать)
+	set <string> constDefSet = { ";", "var", "begin" };
 
 	if (checkOper("const")) {
 		getNext();
-		constDef();
+		try {constDef();}
+		catch (PascalExcp& e) {
+			skip(constDefSet);
+		}
 		while (checkOper(";")) {
 			getNext();
 			if (curToken != nullptr) {
 				if (curToken->getType() == OPER && (
 					((COperToken*)curToken)->lexem == "var" ||		//TODO(не только эти)
-					((COperToken*)curToken)->lexem == "begin"))		//TODO(не только эти)
+					((COperToken*)curToken)->lexem == "begin"))		
 					return;
 			}
 			else return;		// наткнулись на конец файла
-			constDef();
+			try { constDef(); }
+			catch (PascalExcp& e) {
+				skip(constDefSet);
+			}
 		}
 	}
 }
