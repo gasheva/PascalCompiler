@@ -28,6 +28,17 @@ void Lexic::passWhitespaces() {
 }
 
 
+void Lexic::skipComments()
+{
+	while (pos < (*text).length() && (*text)[pos] != '}') {
+		pos++;
+	}
+	// пропускаем '}'
+	if (pos < (*text).length())
+		pos++;
+}
+
+
 string Lexic::getLexem(bool &hasMistake)
 {
 	int oldPos = pos;
@@ -67,17 +78,37 @@ string Lexic::getLexem(bool &hasMistake)
 		if ((*text)[oldPos + 1] == '=')
 			return ">=";
 		else return ">";
-	case '+': case '-': case '*': case '^': case '/':
+
+	// однострочный комментарий 
+	case '/': {
+		if ((*text)[oldPos + 1] == '/') {
+			passToNewLine();
+			passWhitespaces();
+		}
+		return getLexem(hasMistake);
+	}
+
+
+	case '+': case '-': case '*': case '^':
 	case '(': case ')': case '[': case ']':
-	case '{': case '}': case ';':
-	case ',': case '=': case '.':
+	case ';': case ',': case '=': case '.':
 		return res += (*text)[oldPos];
+
+	// многострочный комментарий
+	case '{': {
+		skipComments();
+		if (pos < (*text).length()) {
+			passWhitespaces();
+			string tmp = getLexem(hasMistake);
+			return tmp;
+		}
+	}
 		// <>
 	default:
 		break;
 	}
 
-	// проверяем, что это не является не опознанным символом
+	// проверяем, что это не является неопознанным символом
 	// возможно число или ид
 	if (isDigit((*text)[oldPos]) || isLetter((*text)[oldPos])||
 		(*text)[oldPos]=='_') {
@@ -127,6 +158,7 @@ CToken* Lexic::getNext(bool get)
 	if (get) pos += lexem.length();
 	return factory.createToken(lexem);
 }
+
 
 int Lexic::getStartPosition()
 {

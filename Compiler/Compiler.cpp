@@ -5,13 +5,6 @@
 #include <fstream>
 #include <vector>
 
-//#include "CError.h"
-//#include "CErrorManager.h"
-//#include "CFileOnlyErrorPrinter.h"
-//#include "CVariant.h"
-//#include "Lexic.h"
-//#include "CTokenFactory.h"
-
 #include "CFileOnlyErrorPrinter.h"
 #include "Syntax.h"
 
@@ -64,7 +57,8 @@ int main()
     //string text("BeGin x:=12; v2:='fds' End");
     //string text("var v1, v2: Integer; v3, v4: String; BeGin x:=12; v2:='fds' End");
     //string text("var v1, v2: Integer; v3, v4: String; BeGin x:=");
-    string text("progRam pr1(f1, f2); var v1, v2: Integer; v3, v4: String; BeGin x:=1.2^; v2:='fds End.' enD.");
+    //string text("progRam pr1(f1, f2); var //v1, v2: Integer; \n {vhjhugv3,{}}//\n v4: String; BeGin x:=3; y:=2 enD.");
+    string text("progRam pr1(f1, f2); var v1, v2: Integer; \n vhjhugv3, v4: String; BeGin x:=3; y:=2 enD.");
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

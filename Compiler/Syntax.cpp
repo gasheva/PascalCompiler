@@ -81,6 +81,11 @@ void Syntax::program() throw(PascalExcp){
 	block();
 	
 	accept(".");		// end.
+	// проверка, что после end. больше ничего нет
+	if (curToken != nullptr) {
+		writeMistake(1000);
+		throw PascalExcp();
+	}
 }
 
 void Syntax::name() throw(PascalExcp) {
@@ -96,12 +101,17 @@ void Syntax::block() throw(PascalExcp) {
 	ifNullThrowExcp();
 
 	blockMarks();
+	auto blConFolSyms = vector<string>();
+	/*blConFolSyms[0] = ";";
+	blConFolSyms[0] = "var";
+	blConFolSyms[0] = "begin";*/
+
 	blockConst();
 	blockTypes();
 	blockVars();
 	blockFunc();
 	blockOpers();
-	blockMarks();
+
 }
 void Syntax::blockMarks()
 {
@@ -217,16 +227,26 @@ void Syntax::blockOpers()throw(PascalExcp)
 {
 	// <раздел операторов>::=<составной оператор>
 	compoundOper();
+		
 }
 void Syntax::compoundOper() throw(PascalExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
 	accept("begin");
+	// проверяем, есть ли операторы или сразу end
+	if (curToken != nullptr) {
+		if (curToken->getType() == OPER && ((COperToken*)curToken)->lexem == "end") {
+			getNext();
+			return;
+		}
+	}
+
 	oper();
 	while (checkOper(";")) {
 		getNext();
 		oper();
 	}
+
 	accept("end");
 }
 
