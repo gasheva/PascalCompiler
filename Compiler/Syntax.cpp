@@ -234,10 +234,14 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 {
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
+	set <string> constDefSet = { ";", "begin"};
 	// var <описание однотипных переменных>;
 	if (checkOper("var")) {
 		getNext();		// accept("var");
-		descrMonotypeVars();
+		try { descrMonotypeVars(); }
+		catch (PascalExcp& e) {
+			skip(constDefSet);
+		}
 		// {<описание однотипных переменных>;}
 		while (checkOper(";")) {
 			getNext();
@@ -247,17 +251,27 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 					return;
 			}
 			else return; //throw PascalExcp();		// неожиданный конец файла
-			descrMonotypeVars();
+			try { descrMonotypeVars(); }
+			catch (PascalExcp& e) {
+				skip(constDefSet);
+			}
 		}
 	}
 }
 void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
-{
+{	
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
-	name();
+	set <string> constDefSet = { ",", ":", ";", "begin", "integer", "real", "string", "char" };
+	try { name(); }
+	catch (PascalExcp& e) {
+		skip(constDefSet);
+	}
 	while (checkOper(",")) {
 		getNext();		//accept(",")
-		name();
+		try { name(); }
+		catch (PascalExcp& e) {
+			skip(constDefSet);
+		}
 	}
 	accept(":");
 	simpleType();

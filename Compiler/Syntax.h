@@ -28,15 +28,15 @@ private:
 	void block();
 
 	void blockMarks();
-	void blockConst();		// пропуск определения константы, если в нем ошибка
+	void blockConst();		// пропуск до след определения константы или до след блока
 	void blockTypes();
-	void blockVars();
+	void blockVars();		// пропуск до след определения переменной или до след блока
 	void blockFunc();
 	void blockOpers();
 	
 	void constDef();
 	void constanta();
-	void descrMonotypeVars();	// TODO 
+	void descrMonotypeVars();	// TODO() пропуск до след имени
 	void simpleType();		// TODO
 
 	void compoundOper();	// составной оператор
