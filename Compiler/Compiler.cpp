@@ -59,7 +59,14 @@ int main()
     //string text("var v1, v2: Integer; v3, v4: String; BeGin x:=");
     //string text("progRam pr1(f1, f2); var //v1, v2: Integer; \n {vhjhugv3,{}}//\n v4: String; BeGin x:=3; y:=2 enD.");
     // string text("progRam pr1(f1, f2); var v1, v2: Integer; \n vhjhugv3, v4: String; BeGin x:=3; y:=2 enD.");
-    string text("PROGRAM pre(f1); CONST x=8; z=9; \n VAR 7z, t: INTEGER;   BEGIN y:=3 END.");
+    string text ="PROGRAM pre(f1); \n" 
+        " CONST x=8; z=9; \n" 
+        " VAR z, t: INTEGER; \n" 
+        " BEGIN \n"
+        " {y:=3+; \n" 
+        " x:='red'} \n"
+        " zhjk:='gred' \n"
+        " END. ";
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

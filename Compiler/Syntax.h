@@ -65,6 +65,7 @@ private:
 	bool ifNullThrowExcp();
 	void checkForbiddenSymbol();
 	void writeMistake(int code);
+	void writeMistakeCurPos(int code);
 
 
 public:

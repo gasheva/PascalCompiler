@@ -35,5 +35,6 @@ public:
 	int getCurLine();
 	void passToNewLine();			// пропуск символов до начала новой строки или до конца файла
 	int getCurPos();
+	int getCurPosInLine();
 	CToken* skip(set<string> lexemes);
 };

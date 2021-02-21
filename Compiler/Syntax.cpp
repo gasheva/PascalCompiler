@@ -234,13 +234,13 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 {
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
-	set <string> constDefSet = { ";", "begin"};
+	set <string> skipSet = { ";", "begin"};
 	// var <описание однотипных переменных>;
 	if (checkOper("var")) {
 		getNext();		// accept("var");
 		try { descrMonotypeVars(); }
 		catch (PascalExcp& e) {
-			skip(constDefSet);
+			skip(skipSet);
 		}
 		// {<описание однотипных переменных>;}
 		while (checkOper(";")) {
@@ -253,7 +253,7 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 			else return; //throw PascalExcp();		// неожиданный конец файла
 			try { descrMonotypeVars(); }
 			catch (PascalExcp& e) {
-				skip(constDefSet);
+				skip(skipSet);
 			}
 		}
 	}
@@ -299,6 +299,7 @@ void Syntax::blockOpers()throw(PascalExcp, EOFExcp)
 void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
+	set <string> skipSet = { ";", "end" };
 	accept("begin");
 	// проверяем, есть ли операторы или сразу end
 	if (curToken != nullptr) {
@@ -307,11 +308,18 @@ void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 			return;
 		}
 	}
-
-	oper();
-	while (checkOper(";")) {
-		getNext();
-		oper();
+	try { oper(); }
+	catch (PascalExcp& e) {
+		skip(skipSet);
+	}
+	while (!checkOper("end")) {
+		try{ accept(";"); }
+		catch(PascalExcp &e){}
+		//getNext();
+		try { oper(); }
+		catch (PascalExcp& e) {
+			skip(skipSet);
+		}
 	}
 
 	accept("end");
@@ -328,6 +336,11 @@ void Syntax::unmarkedOper() throw(PascalExcp, EOFExcp) {
 void Syntax::simpleOper() throw(PascalExcp, EOFExcp) {
 	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
 	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
+	
+	ifNullThrowExcp();
+	// <пусто>
+	if (curToken->getType() == OPER && (checkOper(";")||checkOper("end")))
+		return;
 	assignOper();
 }
 void Syntax::assignOper()throw(PascalExcp, EOFExcp) {
@@ -469,6 +482,11 @@ void Syntax::writeMistake(int code)
 	erManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
 }
 
+void Syntax::writeMistakeCurPos(int code)
+{
+	erManager->addError(lexic->getCurPosInLine(), lexic->getCurLine(), code);
+}
+
 
 
 // "съедаем" токен, проверяя, что лексема нужная
@@ -535,7 +553,7 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp)
 {
 	if (curToken == nullptr)
 	{
-		erManager->addError(lexic->getCurPos(), lexic->getCurLine(), 1000);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
+		erManager->addError(lexic->getCurPosInLine(), lexic->getCurLine(), 1000);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
 		throw EOFExcp();
 		// throw exception("Reached eof");
 	}

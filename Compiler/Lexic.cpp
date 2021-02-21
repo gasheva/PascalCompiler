@@ -31,11 +31,17 @@ void Lexic::passWhitespaces() {
 void Lexic::skipComments()
 {
 	while (pos < (*text).length() && (*text)[pos] != '}') {
+		if ((*text)[pos] == '\n') {
+			lineNum++;
+			lastNewLinePos = pos;
+		}
 		pos++;
 	}
 	// пропускаем '}'
 	if (pos < (*text).length())
 		pos++;
+	else 
+		errorManager->addError(pos - lastNewLinePos, lineNum, 86);
 }
 
 
@@ -54,12 +60,12 @@ string Lexic::getLexem()
 			oldPos++;
 		}
 		if (oldPos == (*text).length()) {
-			errorManager->addError(oldPos, lineNum, 75);
+			errorManager->addError(oldPos - lastNewLinePos, lineNum, 75);
 			return res;
 		}
 
 		if ((*text)[oldPos] != '\'') {
-			errorManager->addError(oldPos, lineNum, 75);
+			errorManager->addError(oldPos - lastNewLinePos, lineNum, 75);
 			return res;
 		}
 		res += "\'";
@@ -102,8 +108,10 @@ string Lexic::getLexem()
 			string tmp = getLexem();
 			return tmp;
 		}
+		else {
+			return "";
+		}
 	}
-		// <>
 	default:
 		break;
 	}
@@ -152,6 +160,7 @@ CToken* Lexic::getNext(bool get)
 	if (pos >= (*text).length()) return nullptr;
 
 	string lexem = getLexem();
+	if (pos >= (*text).length()) return nullptr;
 	cout << "[x] Lexem = " << lexem << endl;
 	lastLexemStartPos = pos;
 	
@@ -162,7 +171,7 @@ CToken* Lexic::getNext(bool get)
 
 int Lexic::getStartPosition()
 {
-	return lastLexemStartPos - lastNewLinePos+1;
+	return lastLexemStartPos - lastNewLinePos;
 }
 
 int Lexic::getCurLine()
@@ -178,6 +187,7 @@ void Lexic::passToNewLine()
 			return;
 	} while ((*text)[pos] != NEW_LINE_SYMBOL);
 	lineNum++;
+	lastNewLinePos = pos;
 }
 
 CToken* Lexic::skip(set<string> lexemes) {
@@ -201,3 +211,8 @@ int Lexic::getCurPos()
 {
 	return pos;
 }
+
+int Lexic::getCurPosInLine() {
+	return pos - lastNewLinePos;
+}
+
