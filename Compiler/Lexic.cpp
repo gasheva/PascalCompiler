@@ -168,7 +168,7 @@ CToken* Lexic::getNext(bool get)
 	return factory.createToken(lexem);
 }
 
-
+// Возвращает индекс начала последней лексемы в строке
 int Lexic::getStartPosition()
 {
 	return lastLexemStartPos - lastNewLinePos;
@@ -206,12 +206,13 @@ CToken* Lexic::skip(set<string> lexemes) {
 	if (pos >= (*text).length()) return nullptr;
 	return factory.createToken(lexem);
 }
-
+/* возвращает текущую позицию в файле*/
 int Lexic::getCurPos()
 {
 	return pos;
 }
 
+// возвращает текущую позицию в строке
 int Lexic::getCurPosInLine() {
 	return pos - lastNewLinePos;
 }

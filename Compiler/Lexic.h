@@ -31,10 +31,10 @@ private:
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
 	CToken* getNext(bool get);		// получить или посмотреть следующий токен
-	int getStartPosition();
+	int getStartPosition();			// Возвращает индекс начала последней лексемы в строке
 	int getCurLine();
 	void passToNewLine();			// пропуск символов до начала новой строки или до конца файла
-	int getCurPos();
-	int getCurPosInLine();
+	int getCurPos();				// возвращает текущую позицию в файле
+	int getCurPosInLine();			// возвращает текущую позицию в строке
 	CToken* skip(set<string> lexemes);
 };

@@ -3,6 +3,8 @@
 #include "Semantic.h"
 
 class Syntax {
+	//TODO( if, while, раздел описания типов (перечислимый, интервальный(ограниченный)))
+	// сложный оператор
 	// функции, начинающиеся с is и check не "съедают" токен
 private:
 	CErrorManager* erManager;
@@ -17,6 +19,7 @@ private:
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память
 	void skip(set<string> lexem);	// пропуск до определенной лексемы. Лексема curToken равна одной из переданных или nullptr
+	bool skipUntilBlock(set<string> lexemes, string word);			// пропуск до начала какого-либо блока. Возвращает истину, если был осуществлен пропуск
 
 	void accept(string oper);	// принять операцию
 	bool acceptSign();			// принять знак, если он есть
@@ -37,20 +40,23 @@ private:
 	void constDef();
 	void constanta();
 	void descrMonotypeVars();	// TODO() пропуск до след имени
-	void simpleType();		// TODO
+	void simpleType();		// TODO()
 
+	void typeDef();
+
+	void diffOper();		// сложный оператор
 	void compoundOper();	// составной оператор
-	void oper();
+	void oper();			// оператор
 	void unmarkedOper();
+	void ifOper();
+	void whileOper();
 	void simpleOper();
-	void complOper();		// сложный оператор
 	void assignOper();		// оператор присваивания		//TODO 
-	void procedureOper();	// оператор процедуры
 	void goOper();			// оператор перехода
 	void emptyOper();		// пустой оператор
 
 
-	void expression();
+	void expression();		// выражение
 	void simpleExpr();
 	void term();		// слагаемое
 	void factor();		// множитель
@@ -65,6 +71,7 @@ private:
 	bool ifNullThrowExcp();
 	void checkForbiddenSymbol();
 	void writeMistake(int code);
+	void writeMistake(int code, int pos, int line);
 	void writeMistakeCurPos(int code);
 
 
