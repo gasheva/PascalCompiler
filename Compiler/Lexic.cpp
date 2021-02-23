@@ -204,6 +204,7 @@ CToken* Lexic::skip(set<string> lexemes) {
 		pos += lexem.length();
 	}
 	if (pos >= (*text).length()) return nullptr;
+	cout << "[x] Lexem = " << lexem << endl;
 	return factory.createToken(lexem);
 }
 /* возвращает текущую позицию в файле*/

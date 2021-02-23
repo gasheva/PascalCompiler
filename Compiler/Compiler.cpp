@@ -60,12 +60,19 @@ int main()
     //string text("progRam pr1(f1, f2); var //v1, v2: Integer; \n {vhjhugv3,{}}//\n v4: String; BeGin x:=3; y:=2 enD.");
     // string text("progRam pr1(f1, f2); var v1, v2: Integer; \n vhjhugv3, v4: String; BeGin x:=3; y:=2 enD.");
     string text ="PROGRAM pre(f1); \n" 
-        " CONSTT x=8; z=9; \n" 
+        " CONST x=8; z=9; \n" 
         " VAR z, t: INTEGER; \n" 
         " BEGIN \n"
         " {y:=3+; \n" 
         " x:='red'} \n"
-        " zhjk:='gred' \n"
+        " if x<>4 then \n"
+        " BEGIN \n"
+        " x:=2; \n"
+        " xy:=2 \n"
+        " END;"
+        " else el:=6;"
+        //" 8zhjk:='gred' else \n"
+        " h:='gred'; \n"
         " END. ";
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);

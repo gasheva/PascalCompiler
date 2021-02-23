@@ -388,11 +388,20 @@ void Syntax::diffOper()throw(PascalExcp, EOFExcp) {
 	}
 }
 void Syntax::ifOper() throw(PascalExcp, EOFExcp) {
+	// <условный оператор>::= if <выражение> then <оператор>|
+	// if <выражение> then <оператор> else <оператор>
 	ifNullThrowExcp();
+	set<string> skipSet = { "then" };
 	accept("if");
-	expression();
+	try {expression();}
+	catch (PascalExcp& e) {
+		skip(skipSet);
+	}
 	accept("then");
-	oper();
+	try {oper();}
+	catch (PascalExcp& e) {
+		cout << "oper excp" << endl;
+	}
 	if (checkOper("else")) {
 		accept("else");
 		oper();
@@ -405,7 +414,6 @@ void Syntax::whileOper() throw(PascalExcp, EOFExcp) {
 void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
-	set <string> skipSet = { ";", "end" };
 	accept("begin");
 	// проверяем, есть ли операторы или сразу end
 	if (curToken != nullptr) {
@@ -414,18 +422,13 @@ void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 			return;
 		}
 	}
-	try { oper(); }
-	catch (PascalExcp& e) {
-		skip(skipSet);
-	}
+	
+	oper();
 	while (!checkOper("end")) {
 		try{ accept(";"); }
 		catch(PascalExcp &e){}
 		//getNext();
-		try { oper(); }
-		catch (PascalExcp& e) {
-			skip(skipSet);
-		}
+		oper(); 
 	}
 
 	accept("end");
@@ -434,24 +437,33 @@ void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 void Syntax::oper() throw(PascalExcp, EOFExcp) {
 	// <оператор>::=<непомеченный оператор>|<метка><непомеченный оператор>
 	unmarkedOper();
+	
 }
 void Syntax::unmarkedOper() throw(PascalExcp, EOFExcp) {
 	// <непомеченный оператор>:: = <простой оператор> |<сложный оператор>
 	ifNullThrowExcp();
+	set <string> skipCompoundSet = {"end", "else" };
+	set <string> skipSet = {"end", ";", "else" };
 	if (curToken->getType() == OPER) {
-		if (((COperToken*)curToken)->lexem == "begin") {
-			compoundOper();
+		if (checkOper("begin")) {
+			try{ compoundOper(); }
+			catch (PascalExcp& e) {
+				skip(skipCompoundSet);
+			}
 		}
 		else
-			if (((COperToken*)curToken)->lexem == "if") {
+			if (checkOper("if")) {
 				ifOper();
 			}
-			else if (((COperToken*)curToken)->lexem == "while") {
+			else if (checkOper("while")) {
 				whileOper();
 			}
 	}
 	else
-		simpleOper();
+		try {simpleOper();}
+		catch(PascalExcp& e){
+			skip(skipSet);
+		}
 }
 
 void Syntax::simpleOper() throw(PascalExcp, EOFExcp) {
@@ -515,6 +527,8 @@ void Syntax::term() throw(PascalExcp, EOFExcp)
 
 void Syntax::factor() throw(PascalExcp, EOFExcp)
 {
+	//<множитель>::=<переменная>|<константа без знака>|
+	//(<выражение>) | <обозначение функции> | <множество> | not <множитель>
 	// cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
 	offset += offsetD;
 	ifNullThrowExcp();
