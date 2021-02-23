@@ -84,6 +84,10 @@ string Lexic::getLexem()
 		if ((*text)[oldPos + 1] == '=')
 			return ">=";
 		else return ">";
+	case '.':
+		if ((*text)[oldPos + 1] == '.')
+			return "..";
+		else return ".";
 
 	// однострочный комментарий 
 	case '/': {
@@ -97,7 +101,7 @@ string Lexic::getLexem()
 
 	case '+': case '-': case '*': case '^':
 	case '(': case ')': case '[': case ']':
-	case ';': case ',': case '=': case '.':
+	case ';': case ',': case '=':
 		return res += (*text)[oldPos];
 
 	// многострочный комментарий

@@ -145,6 +145,8 @@ void Syntax::name() throw(PascalExcp, EOFExcp) {
 	getNext();
 }
 
+
+
 bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) throw(PascalExcp, EOFExcp) {
 	// проверяем находимся ли на лексема const, 
 	// если нет, пытаемся скипнуть до const или до начала следующих блоков
@@ -168,6 +170,39 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 		}
 
 	return false;
+}
+
+void Syntax::var()throw(PascalExcp, EOFExcp) {
+	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
+	ifNullThrowExcp();
+
+	peekNext();
+	//если после имени переменной стоит "["
+	if(curToken!=nullptr && curToken->getType()==OPER && checkOper("]"))
+		compVar();
+	else
+		fullVar();
+}
+
+void Syntax::fullVar() throw(PascalExcp, EOFExcp) {
+	//<полная переменная>::=<имя переменной>
+	name();
+}
+void Syntax::compVar()throw(PascalExcp, EOFExcp) {
+	//<компонента переменной>:: = <индексированная переменная>| <обозначение поля> | <буфер файла>
+	indexVar();
+}
+void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
+	// <индексированная переменная>::=<переменная-массив>[<выражение>{, <выражение>}]
+	ifNullThrowExcp();
+	arrayVar();
+	accept("[");
+	set<string> skipSet = { ";","end" };
+	expression(skipSet);	//TODO
+	accept("]");
+}
+void Syntax::arrayVar()throw(PascalExcp, EOFExcp) {
+	var();
 }
 
 void Syntax::block() throw(PascalExcp, EOFExcp) {
@@ -299,8 +334,48 @@ void Syntax::blockTypes() {
 }
 
 void Syntax::typeDef()throw(PascalExcp, EOFExcp) {
-
+	//<определение типа>::=<имя>=<тип>
+	name();
+	accept("=");
+	type();
 }
+void Syntax::type()throw(PascalExcp, EOFExcp) {
+	// <тип>:: = <простой тип> | <составной тип> | <ссылочный тип>
+	simpleType();
+}
+void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
+	//<простой тип>::=<перечислимый тип>|<ограниченный тип>|<имя типа>
+	ifNullThrowExcp();
+	//<перечислимый тип>
+	if (checkOper("(")) {
+
+	}
+	else {
+		peekNext();
+		if (checkOper(".."))		//<ограниченный тип>
+			limitedType();
+		else
+			name();	//<имя типа>
+	}
+	
+	//writeMistake(324);
+}
+void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {
+	// <перечислимый тип>::=(<имя>{,<имя>})
+	accept("(");
+	while (checkOper(",")) {
+		getNext();
+		name();
+	}
+	accept(")");
+}
+void Syntax::limitedType()throw(PascalExcp, EOFExcp) {
+	//<ограниченный тип>::=<константа>..<константа>
+	constanta();
+	accept("..");
+	constanta();
+}
+
 void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 {
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
@@ -347,18 +422,7 @@ void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
 	accept(":");
 	simpleType();
 }
-void Syntax::simpleType() throw(PascalExcp, EOFExcp)
-{
-	ifNullThrowExcp();
-	if (curToken->getType() == OPER &&
-		(((COperToken*)curToken)->lexem == "integer" || ((COperToken*)curToken)->lexem == "string") ||
-		((COperToken*)curToken)->lexem == "char" || ((COperToken*)curToken)->lexem == "real") {
-		getNext();
-		return;
-	}
-	writeMistake(324);
-	throw PascalExcp();
-}
+
 void Syntax::blockFunc() {}
 
 void Syntax::blockOpers()throw(PascalExcp, EOFExcp)
@@ -383,7 +447,7 @@ void Syntax::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 		}
 		else
 			if (checkOper("while")) {
-				try { whileOper(); }
+				try { whileOper(skippingSet); }
 				catch (PascalExcp& e) {
 					skip(skippingSet);
 				}
@@ -428,8 +492,21 @@ void Syntax::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	}
 	
 }
-void Syntax::whileOper() throw(PascalExcp, EOFExcp) {
-
+void Syntax::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+	//<цикл с предусловием>::= while <выражение> do <оператор>
+	ifNullThrowExcp();
+	set<string> skipIfSet(skippingSet);	// copy set
+	skipIfSet.insert("do");
+	accept("while");
+	try { expression(skipIfSet); }
+	catch (PascalExcp& e) {
+		skip(skipIfSet);
+	}
+	accept("do");
+	try { oper(skippingSet); }
+	catch (PascalExcp& e) {
+		skip(skippingSet);
+	}
 }
 void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end

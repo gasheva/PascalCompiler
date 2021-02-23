@@ -28,6 +28,12 @@ private:
 
 	void program();
 	void name();
+	void indexVar();
+	void arrayVar();
+	void var();
+	void fullVar();
+	void compVar();
+
 	void block();
 
 	void blockMarks();
@@ -40,8 +46,11 @@ private:
 	void constDef();
 	void constanta();
 	void descrMonotypeVars();	// TODO() пропуск до след имени
+	
+	void type();
 	void simpleType();		// TODO()
-
+	void enumaratedType();	// перечислимый тип
+	void limitedType();		// ограниченный тип
 	void typeDef();
 
 	void diffOper(set<string> skippingSet);		// сложный оператор
@@ -49,7 +58,7 @@ private:
 	void oper(set<string> skippingSet);			// оператор
 	void unmarkedOper(set<string> skippingSet);
 	void ifOper(set<string> skippingSet);
-	void whileOper();
+	void whileOper(set<string> skippingSet);
 	void simpleOper(set<string> skippingSet);
 	void assignOper(set<string> skippingSet);		// оператор присваивания		//TODO 
 	void goOper();			// оператор перехода
