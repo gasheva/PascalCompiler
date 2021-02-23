@@ -67,12 +67,17 @@ int main()
         " x:='red'} \n"
         " if x<>4 then \n"
         " BEGIN \n"
-        " x:=2; \n"
-        " xy:=2 \n"
-        " END;"
-        " else el:=6;"
-        //" 8zhjk:='gred' else \n"
+        " if x<>4 then \n"
+            " zhjk:='gred' else t:=6;\n"
+        " ux:=2; \n"
+        " xy:=kl; \n"
+        //" else el2:=6; \n"
         " h:='gred'; \n"
+        " END; \n"
+        //" else \n"
+        " BEGIN \n"
+        " el:=6; \n"
+        " END; \n"
         " END. ";
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);

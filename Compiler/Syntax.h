@@ -44,19 +44,19 @@ private:
 
 	void typeDef();
 
-	void diffOper();		// сложный оператор
-	void compoundOper();	// составной оператор
-	void oper();			// оператор
-	void unmarkedOper();
-	void ifOper();
+	void diffOper(set<string> skippingSet);		// сложный оператор
+	void compoundOper(set<string> skippingSet);	// составной оператор
+	void oper(set<string> skippingSet);			// оператор
+	void unmarkedOper(set<string> skippingSet);
+	void ifOper(set<string> skippingSet);
 	void whileOper();
-	void simpleOper();
-	void assignOper();		// оператор присваивания		//TODO 
+	void simpleOper(set<string> skippingSet);
+	void assignOper(set<string> skippingSet);		// оператор присваивания		//TODO 
 	void goOper();			// оператор перехода
 	void emptyOper();		// пустой оператор
 
 
-	void expression();		// выражение
+	void expression(set<string> skippingSet);		// выражение
 	void simpleExpr();
 	void term();		// слагаемое
 	void factor();		// множитель
@@ -72,7 +72,6 @@ private:
 	void checkForbiddenSymbol();
 	void writeMistake(int code);
 	void writeMistake(int code, int pos, int line);
-	void writeMistakeCurPos(int code);
 
 
 public:

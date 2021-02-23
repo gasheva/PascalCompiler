@@ -364,54 +364,74 @@ void Syntax::blockFunc() {}
 void Syntax::blockOpers()throw(PascalExcp, EOFExcp)
 {
 	// <раздел операторов>::=<составной оператор>
-	compoundOper();
-
-}
-void Syntax::diffOper()throw(PascalExcp, EOFExcp) {
-	// <сложный оператор>::=<составной оператор>|<выбирающий оператор>|
-	// <оператор цикла> |<оператор присоединения>
-	ifNullThrowExcp();
-	if (curToken->getType() == OPER) {
-		if (((COperToken*)curToken)->lexem == "if") {
-			ifOper();
-		}
-		else
-			if (((COperToken*)curToken)->lexem == "while") {
-				whileOper();
-			}
-	}
-	try {
-		compoundOper();
-	}
-	catch (PascalExcp& e) {
-
-	}
-}
-void Syntax::ifOper() throw(PascalExcp, EOFExcp) {
-	// <условный оператор>::= if <выражение> then <оператор>|
-	// if <выражение> then <оператор> else <оператор>
-	ifNullThrowExcp();
-	set<string> skipSet = { "then" };
-	accept("if");
-	try {expression();}
+	set<string> skipSet = { "end" };
+	try{ compoundOper(skipSet); }
 	catch (PascalExcp& e) {
 		skip(skipSet);
 	}
-	accept("then");
-	try {oper();}
+}
+void Syntax::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
+	// <сложный оператор>::=<составной оператор>|<выбирающий оператор>|
+	// <оператор цикла> |<оператор присоединения>
+	ifNullThrowExcp();
+	if (curToken->getType() == OPER && (checkOper("if") || checkOper("while"))) {
+		if (checkOper("if")) {
+			try{ ifOper(skippingSet); }
+			catch (PascalExcp& e) {
+				skip(skippingSet);
+			}
+		}
+		else
+			if (checkOper("while")) {
+				try { whileOper(); }
+				catch (PascalExcp& e) {
+					skip(skippingSet);
+				}
+			}
+	}
+	else{
+		try {
+			if (skippingSet.find("end") == skippingSet.end()) skippingSet.insert("end");
+			compoundOper(skippingSet);
+		}
+		catch (PascalExcp& e) {
+			skip(skippingSet);
+			cout<<"compound excp"<<endl;
+		}
+
+	}
+}
+void Syntax::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+	// <условный оператор>::= if <выражение> then <оператор>|
+	// if <выражение> then <оператор> else <оператор>
+	ifNullThrowExcp();
+	set<string> skipIfSet (skippingSet);	// copy set
+	skipIfSet.insert("then");
+	accept("if");
+	try {expression(skipIfSet);}
 	catch (PascalExcp& e) {
-		cout << "oper excp" << endl;
+		skip(skipIfSet);
+	}
+	accept("then");
+	set<string> skipThenSet(skippingSet);	
+	skipThenSet.insert("else");
+	try {oper(skipThenSet);}
+	catch (PascalExcp& e) {
+		skip(skipThenSet);
 	}
 	if (checkOper("else")) {
 		accept("else");
-		oper();
+		try { oper(skippingSet); }
+		catch (PascalExcp& e) {
+			skip(skippingSet);
+		}
 	}
 	
 }
 void Syntax::whileOper() throw(PascalExcp, EOFExcp) {
 
 }
-void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
+void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
 	accept("begin");
@@ -422,74 +442,92 @@ void Syntax::compoundOper() throw(PascalExcp, EOFExcp) {
 			return;
 		}
 	}
+	skippingSet.insert(";");
+	try{ oper(skippingSet); }
+	catch (PascalExcp& e) {
+		writeMistake(6);
+		skip(skippingSet);
+	}
 	
-	oper();
-	while (!checkOper("end")) {
+	while (!checkOper("end")) {		
 		try{ accept(";"); }
-		catch(PascalExcp &e){}
-		//getNext();
-		oper(); 
+		catch (PascalExcp& e) {}
+		//TODO(костыль, поскольку else никто, кроме if, не съедает и на нем зацикливание)
+		if (checkOper("else")) { 
+			writeMistake(6);
+			getNext(); 
+		}
+		try { oper(skippingSet); }
+		catch (PascalExcp& e) {
+			writeMistake(6);
+			skip(skippingSet);
+		}
 	}
 
 	accept("end");
 }
 
-void Syntax::oper() throw(PascalExcp, EOFExcp) {
+void Syntax::oper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <оператор>::=<непомеченный оператор>|<метка><непомеченный оператор>
-	unmarkedOper();
-	
+	unmarkedOper(skippingSet);
 }
-void Syntax::unmarkedOper() throw(PascalExcp, EOFExcp) {
+void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <непомеченный оператор>:: = <простой оператор> |<сложный оператор>
 	ifNullThrowExcp();
-	set <string> skipCompoundSet = {"end", "else" };
-	set <string> skipSet = {"end", ";", "else" };
-	if (curToken->getType() == OPER) {
-		if (checkOper("begin")) {
-			try{ compoundOper(); }
+	// если ;, то в простом операторе есть <пусто>
+	if (curToken->getType() == OPER && (checkOper("begin") || checkOper("if") || checkOper("while"))) {
+		{
+			try{ diffOper(skippingSet); }	//HERE
 			catch (PascalExcp& e) {
-				skip(skipCompoundSet);
+				skippingSet.insert("end");
+				skip(skippingSet);
 			}
 		}
-		else
-			if (checkOper("if")) {
-				ifOper();
-			}
-			else if (checkOper("while")) {
-				whileOper();
-			}
 	}
 	else
-		try {simpleOper();}
-		catch(PascalExcp& e){
-			skip(skipSet);
+		//TODO(не уверена насчет обработки неож оператора)
+		if(curToken->getType()!=OPER || ((COperToken*)curToken)->lexem==";" ||
+			((COperToken*)curToken)->lexem == "end")
+			try {simpleOper(skippingSet);}
+			catch(PascalExcp& e){
+				skip(skippingSet);
+			}
+		// встречен неожиданный оператор
+		else {
+			//writeMistake(6);
+			throw PascalExcp();
 		}
 }
 
-void Syntax::simpleOper() throw(PascalExcp, EOFExcp) {
+void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
 	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
-	
 	ifNullThrowExcp();
 	// <пусто>
 	if (curToken->getType() == OPER && (checkOper(";")||checkOper("end")))
 		return;
-	assignOper();
+	assignOper(skippingSet);
 }
-void Syntax::assignOper()throw(PascalExcp, EOFExcp) {
+void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
 	name();				//TODO(здесь как бы переменная)
 	ifNullThrowExcp();
 	accept(":=");
-	expression();
+	expression(skippingSet);
 }
-void Syntax::expression() throw(PascalExcp, EOFExcp) {
+void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
-	simpleExpr();
+	try { simpleExpr(); }
+	catch (PascalExcp& e) {
+		skip(skippingSet);
+	}
 	if (isBoolOper()) {
 		getNext();		// accept
-		simpleExpr();
+		try { simpleExpr(); }
+		catch (PascalExcp& e) {
+			skip(skippingSet);
+		}
 	}
 }
 
@@ -614,19 +652,15 @@ void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp)
 
 void Syntax::writeMistake(int code)
 {
+	cout << "Mistake "<<code<<": "<< lexic->getStartPosition() << endl;
 	erManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
 }
 
 void Syntax::writeMistake(int code, int pos, int oldLineNum)
 {
+	cout << "Mistake2 " << code << ": " << pos << endl;
 	erManager->addError(pos, oldLineNum, code);
 }
-
-void Syntax::writeMistakeCurPos(int code)
-{
-	erManager->addError(lexic->getCurPosInLine(), lexic->getCurLine(), code);
-}
-
 
 
 // "съедаем" токен, проверяя, что лексема нужная
@@ -644,7 +678,7 @@ void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
 		else if (oper == "[") writeMistake(11);
 		else if (oper == "]") writeMistake(12);
 		else if (oper == "end") writeMistake(13);
-		else if (oper == ";") writeMistake(14);
+		else if (oper == ";") writeMistake(14);			// ; записывается перед след. лексемой
 		else if (oper == "=") writeMistake(16);
 		else if (oper == "begin") writeMistake(17);
 		else if (oper == ",") writeMistake(20);
