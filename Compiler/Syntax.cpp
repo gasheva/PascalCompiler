@@ -599,7 +599,7 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
-	name();				//TODO(здесь как бы переменная)
+	var();
 	ifNullThrowExcp();
 	accept(":=");
 	expression(skippingSet);
@@ -659,53 +659,26 @@ void Syntax::factor() throw(PascalExcp, EOFExcp)
 	offset += offsetD;
 	ifNullThrowExcp();
 
-
-	if (checkOper("not")) {						// not <множитель>
+	if (checkOper("not")) {		// not <множитель>
 		getNext();
 		offset -= offsetD;
 		factor();
 		return;
 	}
-
-	if (curToken->getType() == IDENT) {			// функция TODO(проверка параметров)
-		peekNext();
-		if (curToken != nullptr) {
-			if (tryAccept("(")) {
-				// = accept("("), поскольку до этого было непринятое значение
-				getNext();
-				while (curToken != nullptr && !checkOper(")"))
-					getNext();
-				if (curToken == nullptr) throw exception("Reached eof. Expected ')'");
-				else
-					getNext(); // accept(")")
-				// cout <<setw(offset)<<" "<<std::left<< "Checking func" << endl;
-				offset -= offsetD;
-				return;
-			}
-
-		}
-		// cout <<setw(offset)<<" "<<std::left<< "Checking ident" << endl;
-		getNext(); // если не функция, то переменная 
+	if (unsignedConst()) {		// константа без знака
 		offset -= offsetD;
 		return;
 	}
 
-	// константа без знака
-	if (unsignedConst()) {
-		offset -= offsetD;
-		return;
-	}
-
-	// (<выражение>)
-	if (checkOper("(")) {
+	if (checkOper("(")) {		// (<выражение>)
 		accept("(");
 		simpleExpr();
 		accept(")");
+		return;
 	}
-	else {
-		writeMistake(6);
-		throw PascalExcp();
-	}
+
+	var();						// <переменная>
+	
 	offset -= offsetD;
 }
 
