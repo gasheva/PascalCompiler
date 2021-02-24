@@ -16,6 +16,7 @@ bool Lexic::isDigit(char ch)
 }
 
 void Lexic::passWhitespaces() {
+	
 	while ((*text)[pos] == ' ' || (*text)[pos] == '\r' || (*text)[pos] == '\t' || (*text)[pos] == '\n') {
 		if ((*text)[pos] == '\n') {
 			lineNum++;
@@ -156,6 +157,9 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 
 CToken* Lexic::getNext(bool get)
 {
+	int _lineNum = lineNum;
+	int _lastNewLinePos = lastNewLinePos;
+	int _lastLexemStartPos = lastLexemStartPos;
 	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
 	
 	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
@@ -164,14 +168,45 @@ CToken* Lexic::getNext(bool get)
 	if (pos >= (*text).length()) return nullptr;
 
 	string lexem = getLexem();
+	if (!get) setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
 	if (pos >= (*text).length()) return nullptr;
 	cout << "[x] Lexem = " << lexem << endl;
 	lastLexemStartPos = pos;
 	
-	if (get) pos += lexem.length();
+	if (get) {
+		pos += lexem.length();
+	}
+	if (!get) setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
 	return factory.createToken(lexem);
 }
 
+void Lexic::setOldPos(int _lineNum, int _lastNewLinePos, int _lastLexemStartPos) {
+	lineNum = _lineNum;
+	lastNewLinePos = _lastNewLinePos;
+	lastLexemStartPos = _lastLexemStartPos;
+}
+string Lexic::peekNext() {
+	int _lineNum = lineNum;
+	int _lastNewLinePos = lastNewLinePos;
+	int _lastLexemStartPos = lastLexemStartPos;
+
+	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
+
+	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
+
+	passWhitespaces();
+	
+	setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
+	if (pos >= (*text).length()) return "";
+
+	string lexem = getLexem();
+	setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
+	if (pos >= (*text).length()) return "";
+	cout << "[x] Lexem = " << lexem << endl;
+	//lastLexemStartPos = pos;
+
+	return lexem;
+}
 // ¬озвращает индекс начала последней лексемы в строке
 int Lexic::getStartPosition()
 {

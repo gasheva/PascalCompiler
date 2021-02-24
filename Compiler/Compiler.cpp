@@ -79,6 +79,15 @@ int main()
         " el:=6; \n"
         " END; \n"
         " END. ";
+   /* text = "PROGRAM pre(f1); \n"
+        "TYPE metall = (fe, al)"
+        "begin end.";*/
+    text = "PROGRAM pre(f1); \n"
+        " CONST x=8; z=9; \n"
+        " VAR n1, n2: INTEGER; \n"
+        " str1, str2: STRING; \n"
+        " r1, r2: REALL; \n"
+        "begin end."; 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

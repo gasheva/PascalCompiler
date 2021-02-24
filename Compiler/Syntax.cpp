@@ -270,22 +270,19 @@ void Syntax::constDef()throw(PascalExcp, EOFExcp)
 	accept("=");
 	constanta();
 }
-void Syntax::constanta()throw(PascalExcp, EOFExcp)
-{
+void Syntax::constanta()throw(PascalExcp, EOFExcp) {
+	//<константа>::=<число без знака>|<знак><число без знака>|
+	//<имя константы> | <знак><имя константы> | <строка>
+
 	//<знак>
 	if (acceptSign()) {
 		// <число без знака>
-		try {
+		if (curToken->getType() == VALUE) {
 			unsignedNum();
 		}
-		catch (PascalExcp& e) {
-			try {
-				// <имя константы>
-				name();
-			}
-			catch (PascalExcp& e) {
-				throw e;		// варианты начинания со знака закончились
-			}
+		else {
+			// <имя константы>
+			name();
 		}
 	}
 	else {
@@ -348,14 +345,17 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	//<перечислимый тип>
 	if (checkOper("(")) {
-
+		enumaratedType();
 	}
 	else {
-		peekNext();
-		if (checkOper(".."))		//<ограниченный тип>
+		int curPos = lexic->getCurPos();
+
+		string nextLexem = lexic->peekNext();
+		if (nextLexem!="" && nextLexem=="..")		//<ограниченный тип>
 			limitedType();
-		else
+		else {
 			name();	//<имя типа>
+		}
 	}
 	
 	//writeMistake(324);
@@ -407,7 +407,7 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
 {	
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
-	set <string> constDefSet = { ",", ":", ";", "begin", "integer", "real", "string", "char" };
+	set <string> constDefSet = { ",", ":", ";", "begin" };
 	try { name(); }
 	catch (PascalExcp& e) {
 		skip(constDefSet);
