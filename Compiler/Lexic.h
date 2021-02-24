@@ -27,17 +27,17 @@ private:
 	bool isDigit(char ch);			// проверка является ли передаваемый символ цифрой
 	void passWhitespaces();		// возвращает текущий номер строки, увеличивает позицию
 	void skipComments();
-	void setOldPos(int _lineNum, int _lastNewLinePos, int _lastLexemStartPos);
+	void setOldPos(int _pos, int _lineNum, int _lastNewLinePos, int _lastLexemStartPos);
 
 public:
 	Lexic(CErrorManager* errorManager, const string *text);
 	CToken* getNext(bool get);		// получить или посмотреть следующий токен
 	string peekNext();				// посмотреть следующую лексему
+	string peek2Next();		// посмотреть через лексему
 	int getStartPosition();			// Возвращает индекс начала последней лексемы в строке
 	int getCurLine();
 	void passToNewLine();			// пропуск символов до начала новой строки или до конца файла
 	int getCurPos();				// возвращает текущую позицию в файле
-	void setCurPos();
 	int getCurPosInLine();			// возвращает текущую позицию в строке
 	CToken* skip(set<string> lexemes);
 };

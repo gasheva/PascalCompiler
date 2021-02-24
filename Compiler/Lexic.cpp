@@ -128,7 +128,7 @@ string Lexic::getLexem()
 		while (isDigit((*text)[oldPos]) || isLetter((*text)[oldPos]) ||
 			(*text)[oldPos] == '_' || (*text)[oldPos] == '.') {
 
-			// отдельно провер€етс€ не €вл€етс€ ли лексема "end"
+			// отдельно провер€етс€ не €вл€етс€ ли лексема "end" (отделить end и .)
 			res += (*text)[oldPos];
 			if (toLower(res) == "end") {
 				if (oldPos < (*text).length() && (*text)[oldPos + 1]=='.') {
@@ -137,6 +137,11 @@ string Lexic::getLexem()
 				
 			}
 			oldPos++;
+		}
+		// если есть 
+		auto found = res.find("..");
+		if (found != std::string::npos) {
+			res = res.substr(0, found);
 		}
 		return res;
 	}
@@ -160,51 +165,92 @@ CToken* Lexic::getNext(bool get)
 	int _lineNum = lineNum;
 	int _lastNewLinePos = lastNewLinePos;
 	int _lastLexemStartPos = lastLexemStartPos;
+	int _pos = pos;
 	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
 	
 	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
 
 	passWhitespaces();
-	if (pos >= (*text).length()) return nullptr;
+	if (pos >= (*text).length()) {
+		if (!get)setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+		return nullptr;
+	}
 
 	string lexem = getLexem();
-	if (!get) setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
-	if (pos >= (*text).length()) return nullptr;
+	if (pos >= (*text).length()) {
+		if (!get)setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+		return nullptr;
+	}
 	cout << "[x] Lexem = " << lexem << endl;
 	lastLexemStartPos = pos;
 	
 	if (get) {
 		pos += lexem.length();
 	}
-	if (!get) setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
+	else setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
 	return factory.createToken(lexem);
 }
 
-void Lexic::setOldPos(int _lineNum, int _lastNewLinePos, int _lastLexemStartPos) {
+void Lexic::setOldPos(int _pos, int _lineNum, int _lastNewLinePos, int _lastLexemStartPos) {
 	lineNum = _lineNum;
 	lastNewLinePos = _lastNewLinePos;
 	lastLexemStartPos = _lastLexemStartPos;
+	if (_pos>0) pos = _pos;
 }
 string Lexic::peekNext() {
 	int _lineNum = lineNum;
 	int _lastNewLinePos = lastNewLinePos;
 	int _lastLexemStartPos = lastLexemStartPos;
+	int _pos = pos;
 
-	if (pos >= (*text).length()) return nullptr;		// возвращаем null, если достигли конца файла
+	if (pos >= (*text).length()) return "";		// возвращаем null, если достигли конца файла
 
 	//cout << "OPER = " << OPER << " IDENT = " << IDENT << " VALUE = " << VALUE << endl;
 
 	passWhitespaces();
 	
-	setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
-	if (pos >= (*text).length()) return "";
+	if (pos >= (*text).length()) {
+		setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+		return "";
+	}
 
 	string lexem = getLexem();
-	setOldPos(_lineNum, _lastNewLinePos, _lastLexemStartPos);
-	if (pos >= (*text).length()) return "";
+	if (pos >= (*text).length()) {
+		setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+		return "";
+	}
 	cout << "[x] Lexem = " << lexem << endl;
 	//lastLexemStartPos = pos;
 
+	return lexem;
+}
+string Lexic::peek2Next() {
+	// сохран€ем старые позиции, чтобы восстановить их при выходе
+	int _lineNum = lineNum;
+	int _lastNewLinePos = lastNewLinePos;
+	int _lastLexemStartPos = lastLexemStartPos;
+	int _pos = pos;
+	string lexem = "";
+
+	for (int i = 0; i < 2; i++) {
+		if (pos >= (*text).length()) {
+			setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+			return "";		// возвращаем null, если достигли конца файла
+		}
+		passWhitespaces();
+		if (pos >= (*text).length()) {
+			setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+			return "";
+		}
+
+		lexem = getLexem();
+		pos += lexem.length();
+		if (pos >= (*text).length()) {
+			setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
+			return "";
+		}
+	}
+	setOldPos(_pos, _lineNum, _lastNewLinePos, _lastLexemStartPos);
 	return lexem;
 }
 // ¬озвращает индекс начала последней лексемы в строке

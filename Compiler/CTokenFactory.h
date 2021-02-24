@@ -20,7 +20,7 @@ private:
 		"var","while","with","xor","as","class","constref","dispose","except","exit","exports","finalization",
 		"finally","inherited","initialization","is","library","new","on","out","property","raise","self","threadvar",
 		"try", "*", "/", "=", ",", ";", ":", ".", "^", "(",")", "[", "]", "{", "}", "<", ">", "<=",">=",
-		"<>", "+", "-", ":=", "return"
+		"<>", "+", "-", ":=", "return", ".."
 		//"float", "integer", "string", "char"
 	};
 public:

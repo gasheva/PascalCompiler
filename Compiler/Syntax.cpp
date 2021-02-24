@@ -348,14 +348,24 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 		enumaratedType();
 	}
 	else {
-		int curPos = lexic->getCurPos();
-
-		string nextLexem = lexic->peekNext();
-		if (nextLexem!="" && nextLexem=="..")		//<ограниченный тип>
-			limitedType();
-		else {
-			name();	//<имя типа>
-		}
+			// заглядываем на один токен вперед и проверяем 
+			// является ли он ".."
+			string nextLexem = lexic->peekNext();
+			if (nextLexem != "" && nextLexem == "..")		//<ограниченный тип>
+			{
+				limitedType();
+			}
+			else {
+				// заглядываем еще на один токен вперед и проверяем 
+				// является ли он ".."
+				nextLexem = lexic->peek2Next();
+				if (nextLexem != "" && nextLexem == "..")		//<ограниченный тип>
+				{
+					limitedType();
+				}
+				else
+					name();	//<имя типа>
+			}
 	}
 	
 	//writeMistake(324);
@@ -363,6 +373,7 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {
 	// <перечислимый тип>::=(<имя>{,<имя>})
 	accept("(");
+	name();
 	while (checkOper(",")) {
 		getNext();
 		name();
@@ -420,7 +431,7 @@ void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
 		}
 	}
 	accept(":");
-	simpleType();
+	type();
 }
 
 void Syntax::blockFunc() {}
@@ -710,6 +721,7 @@ bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 	return false;
 
 }
+
 void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	if (curToken->getType() != VALUE)
 		throw PascalExcp();
