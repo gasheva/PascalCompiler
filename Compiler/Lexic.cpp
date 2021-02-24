@@ -49,7 +49,7 @@ void Lexic::skipComments()
 string Lexic::getLexem()
 {
 	int oldPos = pos;
-    string res("");
+    string res = "";
 	switch ((*text)[oldPos])
 	{
 		// проверка на string

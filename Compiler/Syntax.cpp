@@ -64,7 +64,6 @@ void Syntax::startVer()
 void Syntax::getNext() throw(PascalExcp, EOFExcp) {
 	removeToken();
 	curToken = this->lexic->getNext(true);
-	// checkForbiddenSymbol();
 }
 
 void Syntax::peekNext() {
@@ -145,8 +144,6 @@ void Syntax::name() throw(PascalExcp, EOFExcp) {
 	getNext();
 }
 
-
-
 bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) throw(PascalExcp, EOFExcp) {
 	// проверяем находимся ли на лексема const, 
 	// если нет, пытаемся скипнуть до const или до начала следующих блоков
@@ -176,9 +173,9 @@ void Syntax::var()throw(PascalExcp, EOFExcp) {
 	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
 	ifNullThrowExcp();
 
-	peekNext();
+	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
-	if(curToken!=nullptr && curToken->getType()==OPER && checkOper("]"))
+	if(lexem!="" && lexem=="[")
 		compVar();
 	else
 		fullVar();

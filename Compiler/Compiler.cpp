@@ -69,7 +69,7 @@ int main()
         " BEGIN \n"
         " if x<>4 then \n"
             " zhjk:='gred' else t:=6;\n"
-        " ux:=2; \n"
+        " ux:=2+(x*7*(2-y))+45; \n"
         " xy:=kl; \n"
         //" else el2:=6; \n"
         " h:='gred'; \n"
@@ -82,12 +82,12 @@ int main()
    /* text = "PROGRAM pre(f1); \n"
         "TYPE metall = (fe, al)"
         "begin end.";*/
-    text = "PROGRAM pre(f1); \n"
+    /*text = "PROGRAM pre(f1); \n"
         " CONST x=8; z=9; \n"
         " VAR n1, n2: -3..6; \n"
         " str1, str2: (Ge, O2); \n"
         " r1, r2: REALL; \n"
-        "begin end."; 
+        "begin end."; */
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);
