@@ -89,6 +89,7 @@ int main()
         "      years = 2001..2010; \n"
         " VAR n1, n2: -3..6; \n"
         " str1, str2: (Ge, O2); \n"
+        " ar1: array [1..Sz] of integer; \n"
         " r1, r2: REALL; \n"
         "begin end."; 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
