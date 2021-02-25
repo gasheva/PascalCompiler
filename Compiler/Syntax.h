@@ -5,6 +5,7 @@
 class Syntax {
 	//TODO( if, while, раздел описания типов (перечислимый, интервальный(ограниченный)))
 	// сложный оператор
+
 	// функции, начинающиеся с is и check не "съедают" токен
 private:
 	CErrorManager* erManager;
@@ -30,9 +31,9 @@ private:
 	void name();
 	void indexVar();
 	void arrayVar();
-	void var();
+	void var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
 	void fullVar();
-	void compVar();
+	void compVar();			// <компонента переменной>
 
 	void block();
 

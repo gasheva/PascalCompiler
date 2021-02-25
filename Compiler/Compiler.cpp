@@ -60,34 +60,34 @@ int main()
     //string text("progRam pr1(f1, f2); var //v1, v2: Integer; \n {vhjhugv3,{}}//\n v4: String; BeGin x:=3; y:=2 enD.");
     // string text("progRam pr1(f1, f2); var v1, v2: Integer; \n vhjhugv3, v4: String; BeGin x:=3; y:=2 enD.");
     string text ="PROGRAM pre(f1); \n" 
-        " CONST x=8; z=9; \n" 
-        " VAR z, t: INTEGER; \n" 
+        //" CONST x=8; z=9; \n" 
+        //" VAR z, t: INTEGER; \n" 
         " BEGIN \n"
         " {y:=3+; \n" 
         " x:='red'} \n"
-        " if x<>4 then \n"
-        " BEGIN \n"
-        " if x<>4 then \n"
+        //" if x<>4 then \n"
+        //" BEGIN \n"
+        " if x[x1,x2]<>4 then \n"
             " zhjk:='gred' else t:=6;\n"
-        " ux:=2+(x*7/(2-y))+45; \n"
-        " xy:=kl; \n"
+        //" ux:=2+(x*7/(2-y))+45; \n"
+        //" xy:=kl; \n"
         //" else el2:=6; \n"
-        " h:='gred'; \n"
-        " END; \n"
+        " a[b[0,2]]:='gred'; \n"
+        //" END; \n"
         //" else \n"
-        " BEGIN \n"
-        " el:=6; \n"
-        " END; \n"
+        //" BEGIN \n"
+        //" el:=6; \n"
+        //" END; \n"
         " END. ";
    /* text = "PROGRAM pre(f1); \n"
         "TYPE metall = (fe, al)"
         "begin end.";*/
-    /*text = "PROGRAM pre(f1); \n"
+    text = "PROGRAM pre(f1); \n"
         " CONST x=8; z=9; \n"
         " VAR n1, n2: -3..6; \n"
         " str1, str2: (Ge, O2); \n"
         " r1, r2: REALL; \n"
-        "begin end."; */
+        "begin end."; 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);

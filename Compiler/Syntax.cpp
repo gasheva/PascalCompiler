@@ -169,16 +169,24 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 	return false;
 }
 
-void Syntax::var()throw(PascalExcp, EOFExcp) {
+void Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
 	ifNullThrowExcp();
 
 	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
 	if(lexem!="" && lexem=="[")
-		compVar();
+		try {
+			compVar();		// indexVar()
+	}
+	catch (PascalExcp& e) {
+		if (skippingSet.empty())
+			throw e;
+		else
+			skip(skippingSet);
+		}
 	else
-		fullVar();
+		fullVar();			// name()
 }
 
 void Syntax::fullVar() throw(PascalExcp, EOFExcp) {
@@ -192,14 +200,32 @@ void Syntax::compVar()throw(PascalExcp, EOFExcp) {
 void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 	// <индексированная переменная>::=<переменная-массив>[<выражение>{, <выражение>}]
 	ifNullThrowExcp();
-	arrayVar();
+	fullVar();
 	accept("[");
 	set<string> skipSet = { ";","end" };
-	expression(skipSet);	//TODO
+	set<string> skipExprSet = { ";", "]",",", "end" };
+	string lexem = lexic->peekNext();
+	//если после имени переменной стоит "["
+	if (lexem != "" && lexem == "[")
+		arrayVar();
+	else {
+		try {
+			expression(skipSet);	//TODO
+		}
+		catch (PascalExcp& e) {
+			skip(skipExprSet);
+		}
+	}
+	while (checkOper(",")) {
+		getNext();
+		expression(skipExprSet);
+	}
 	accept("]");
 }
 void Syntax::arrayVar()throw(PascalExcp, EOFExcp) {
-	var();
+	// <переменная - массив>:: = <переменная>
+	set<string> skipSet = { ";", "]",",", "end" };
+	var(skipSet);
 }
 
 void Syntax::block() throw(PascalExcp, EOFExcp) {
@@ -596,7 +622,8 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
-	var();
+	set<string> s;
+	var(s);
 	ifNullThrowExcp();
 	accept(":=");
 	expression(skippingSet);
@@ -674,7 +701,8 @@ void Syntax::factor() throw(PascalExcp, EOFExcp)
 		return;
 	}
 
-	var();						// <переменная>
+	set<string> s;
+	var(s);						// <переменная>
 	
 	offset -= offsetD;
 }
