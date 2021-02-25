@@ -84,6 +84,9 @@ int main()
         "begin end.";*/
     text = "PROGRAM pre(f1); \n"
         " CONST x=8; z=9; \n"
+        " TYPE ar = array [1..Sz] of integer; \n"
+        "      metall = (Al, Fe); \n"
+        "      years = 2001..2010; \n"
         " VAR n1, n2: -3..6; \n"
         " str1, str2: (Ge, O2); \n"
         " r1, r2: REALL; \n"

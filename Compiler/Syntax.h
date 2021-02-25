@@ -49,6 +49,7 @@ private:
 	void descrMonotypeVars();	// TODO() пропуск до след имени
 	
 	void type();
+	void regularType();		// массив
 	void simpleType();		// TODO()
 	void enumaratedType();	// перечислимый тип
 	void limitedType();		// ограниченный тип

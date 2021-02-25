@@ -92,10 +92,10 @@ void Syntax::removeToken()
 
 void Syntax::program() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
-	accept("program");
 	set<string> nameSet = { "(", ",", ";", "const", "var", "begin" };
 	set <string> branchSet = { ";", "const", "var", "begin" };
 	set <string> semicolSet = { "const", "var", "begin" };
+	accept("program");
 
 	try { name(); }
 	catch (PascalExcp& e) {
@@ -361,16 +361,38 @@ void Syntax::typeDef()throw(PascalExcp, EOFExcp) {
 }
 void Syntax::type()throw(PascalExcp, EOFExcp) {
 	// <тип>:: = <простой тип> | <составной тип> | <ссылочный тип>
+	// <тип>:: = простой тип или массив
+	ifNullThrowExcp();
+	if (checkOper("array")) {
+		regularType();
+	}
+	else {
+		simpleType();
+	}
+	
+}
+void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
+	//<регулярный тип>:: = array[<простой тип>{, <простой тип>}] of <тип компоненты >
+	accept("array");
+	accept("[");
 	simpleType();
+	while (checkOper(",")) {
+		getNext();
+		simpleType();
+	}
+	accept("]");
+	accept("of");
+	type();
 }
 void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 	//<простой тип>::=<перечислимый тип>|<ограниченный тип>|<имя типа>
 	ifNullThrowExcp();
 	//<перечислимый тип>
-	if (checkOper("(")) {
-		enumaratedType();
-	}
-	else {
+	try {
+		if (checkOper("(")) {
+			enumaratedType();
+		}
+		else {
 			// заглядываем на один токен вперед и проверяем 
 			// является ли он ".."
 			string nextLexem = lexic->peekNext();
@@ -389,6 +411,11 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 				else
 					name();	//<имя типа>
 			}
+		}
+	}
+	catch (PascalExcp& e) {
+		writeMistake(324);
+		throw e;
 	}
 	
 	//writeMistake(324);
