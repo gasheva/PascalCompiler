@@ -95,8 +95,10 @@ string Lexic::getLexem()
 		if ((*text)[oldPos + 1] == '/') {
 			passToNewLine();
 			passWhitespaces();
+			return getLexem();
 		}
-		return getLexem();
+		else return "/";
+		
 	}
 
 

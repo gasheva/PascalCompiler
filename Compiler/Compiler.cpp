@@ -69,7 +69,7 @@ int main()
         " BEGIN \n"
         " if x<>4 then \n"
             " zhjk:='gred' else t:=6;\n"
-        " ux:=2+(x*7*(2-y))+45; \n"
+        " ux:=2+(x*7/(2-y))+45; \n"
         " xy:=kl; \n"
         //" else el2:=6; \n"
         " h:='gred'; \n"
