@@ -583,7 +583,7 @@ void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	skippingSet.insert(";");
 	try{ oper(skippingSet); }
 	catch (PascalExcp& e) {
-		writeMistake(6);
+		// writeMistake(6);
 		skip(skippingSet);
 	}
 	
@@ -597,7 +597,7 @@ void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 		}
 		try { oper(skippingSet); }
 		catch (PascalExcp& e) {
-			writeMistake(6);
+			// writeMistake(6);
 			skip(skippingSet);
 		}
 	}
@@ -632,7 +632,8 @@ void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 			}
 		// встречен неожиданный оператор
 		else {
-			//writeMistake(6);
+			writeMistake(6);
+			// cout << "Not sure" << endl;
 			throw PascalExcp();
 		}
 }
