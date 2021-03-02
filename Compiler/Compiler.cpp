@@ -81,6 +81,8 @@ int main()
         " END. ";
     text = "PROGRAM pre(f1); \n"
         " BEGIN \n"
+        " bool_var_true:= true; \n"
+        " bool_var_false:= false; \n"
         " while x<>4 do \n"
         //" else el2:=6; \n"
             " BEGIN \n"

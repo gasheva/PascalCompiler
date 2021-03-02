@@ -615,7 +615,7 @@ void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// если ;, то в простом операторе есть <пусто>
 	if (curToken->getType() == OPER && (checkOper("begin") || checkOper("if") || checkOper("while"))) {
 		{
-			try{ diffOper(skippingSet); }	//HERE
+			try{ diffOper(skippingSet); }
 			catch (PascalExcp& e) {
 				skippingSet.insert("end");
 				skip(skippingSet);

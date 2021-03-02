@@ -40,3 +40,8 @@ CCharVariant::CCharVariant(char ch) : CVariant(CHAR) {
 	this->m_val = ch;
 }
 CCharVariant::~CCharVariant(){}
+
+CBooleanVariant::CBooleanVariant(bool b) : CVariant(BOOLEAN) {
+	this->m_val = b;
+}
+CBooleanVariant::~CBooleanVariant() {}

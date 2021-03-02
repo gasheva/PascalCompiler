@@ -9,6 +9,7 @@ enum EVarType {
 	INT,
 	REAL,
 	STRING,
+	BOOLEAN,
 	CHAR
 };
 
@@ -76,4 +77,17 @@ public:
 	char getVal() { return m_val; }
 private:
 	char m_val;
+};
+
+/*
+* Класс для типа Boolean
+*/
+class CBooleanVariant : public CVariant {
+	using CVariant::CVariant;
+public:
+	CBooleanVariant(bool val);
+	~CBooleanVariant();
+	char getVal() { return m_val; }
+private:
+	bool m_val;
 };
