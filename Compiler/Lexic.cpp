@@ -273,6 +273,7 @@ void Lexic::passToNewLine()
 		if (pos >= (*text).length())
 			return;
 	} while ((*text)[pos] != NEW_LINE_SYMBOL);
+	pos++;	// пропуск \n
 	lineNum++;
 	lastNewLinePos = pos;
 }

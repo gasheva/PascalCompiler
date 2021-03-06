@@ -322,7 +322,13 @@ void Syntax::constanta()throw(PascalExcp, EOFExcp) {
 		}
 
 		// <число без знака>
-		unsignedNum();		// кинет ошибку
+		try {
+			unsignedNum();		// кинет ошибку
+		}
+		catch(PascalExcp& e){
+			writeMistake(50);
+			throw e;
+		}
 	}
 }
 void Syntax::blockTypes() {
@@ -749,11 +755,13 @@ bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 }
 
 void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
-	if (curToken->getType() != VALUE)
+	if (curToken->getType() != VALUE) {
 		throw PascalExcp();
+	}
 	auto tokType = ((CValueToken*)curToken)->getVariant().getType();
-	if (tokType != INT && tokType != REAL)
+	if (tokType != INT && tokType != REAL) {
 		throw PascalExcp();
+	}
 	getNext();
 }
 
@@ -855,7 +863,7 @@ bool Syntax::isBoolOper()
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
-	return ((COperToken*)curToken)->lexem == string("==") ||
+	return ((COperToken*)curToken)->lexem == string("=") ||
 		((COperToken*)curToken)->lexem == string("<>") ||
 		((COperToken*)curToken)->lexem == string("<") ||
 		((COperToken*)curToken)->lexem == string("<=") ||

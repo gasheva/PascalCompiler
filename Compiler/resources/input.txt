@@ -1,6 +1,12 @@
-Var x: Integger;
-begin
-	x_2 := 2..3.;
-end.
-
-
+PROGRAM pre(f1); 
+BEGIN  
+	t:=True;
+	if x[x1,x2]<>4 then
+	BEGIN
+		zhjk:='gred'; 
+		if t=%True thenn
+			9t:=False;
+	END
+	else t:=6;
+	a[b[0,2]]:='gred';
+END.

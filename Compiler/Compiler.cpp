@@ -79,18 +79,18 @@ int main()
         //" el:=6; \n"
         //" END; \n"
         " END. ";
-    text = "PROGRAM pre(f1); \n"
-        " BEGIN \n"
-        " bool_var_true:= true; \n"
-        " bool_var_false:= false; \n"
-        " while x<>4 do \n"
-        //" else el2:=6; \n"
-            " BEGIN \n"
-                " if x[x1,x2]<>4 then \n"
-                    " 8zhjk:='gred' else t:=6;\n"
-                " a[b[0,2]]:='gred'; \n"
-            //" END; \n"
-        " END. ";
+    //text = "PROGRAM pre(f1); \n"
+    //    " BEGIN \n"
+    //    " bool_var_true:= true; \n"
+    //    " bool_var_false:= false; \n"
+    //    " while x<>4 do \n"
+    //    //" else el2:=6; \n"
+    //        " BEGIN \n"
+    //            " if x[x1,x2]<>4 then \n"
+    //                " 8zhjk:='gred' else t:=6;\n"
+    //            " a[b[0,2]]:='gred'; \n"
+    //        //" END; \n"
+    //    " END. ";
    /* text = "PROGRAM pre(f1); \n"
         "TYPE metall = (fe, al)"
         "begin end.";*/
@@ -104,6 +104,24 @@ int main()
         " ar1: array [1..Sz] of integer; \n"
         " r1, r2: REALL; \n"
         "begin end."; */
+
+   /* string text = 
+        "PROGRAM pre(f1); \n"
+        " BEGIN \n"
+        " {y:=3+; \n"
+        " x:='red'} \n"
+        " if x[x1,x2]<>4 then \n"
+        " zhjk:='gred' else t:=6;\n"
+        " a[b[0,2]]:='gred'; \n"
+        " END. ";*/
+
+    text = "";
+    text = readFile("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/input.txt");
+    if (text != "")
+        cout << text;
+    else
+        cout << "empty";
+
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
     Syntax syntax = Syntax(&eManager, &lexic , nullptr);
