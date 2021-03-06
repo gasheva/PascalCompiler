@@ -9,4 +9,3 @@ BEGIN
 	END
 	else t:=6;
 	a[b[0,2]]:='gred';
-END.
