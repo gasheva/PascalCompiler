@@ -1,12 +1,11 @@
 PROGRAM pre(f1); 
-BEGIN  
-	t:=True;
-	if x[x1,x2]<>4 then
+BEGIN 
+	if x[6x1,#]<>4 then
 	BEGIN
 		zhjk:='gred'; 
-		if t=%True thenn
-			9t:=False;
+		if t=True then
+			t:=False;
 	END
 	else t:=6;
-	a[b[0,2]]:='gred';
+	a[b[k], c[9]]:='gred';
 END.

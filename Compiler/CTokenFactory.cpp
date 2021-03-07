@@ -27,7 +27,7 @@ CToken* CTokenFactory::createToken(string lexem)
 		return new CValueToken(CIntVariant(temp));
 	}
 	
-	if (regex_match(lexem, regex(R"(\d+.\d+)"))) {
+	if (regex_match(lexem, regex(R"(\d+\.\d+)"))) {
 		float temp = std::stof(lexem);
 		return new CValueToken(CRealVariant(temp));
 	}
