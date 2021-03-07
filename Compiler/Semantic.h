@@ -2,16 +2,13 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "CTypes.h"
 
 using namespace std;
 
 class CSemantic {
 private:
 	vector<CScope> scopesLst;		// нулевую позицию занимает фиктивный скоуп
-	//map<string, int> identTbl;			// таблица идентификаторов <им€_идент, индекс в ““>
-	vector<string> typesTbl = {				// таблица типов
-		"integer", "real", "boolean", "char", "string", "null"
-	};				
 
 public:
 	CSemantic();
@@ -22,8 +19,9 @@ public:
 
 class CScope{
 private:
-	CScope* outerScope;
-	CSymbolTable symbolTbl;
+	CScope* outerScope;			// внешн€€ область действи€
+	CSymbolTable identTbl;		// таблица идентификаторов
+	vector<CType> typeTbl;		// таблица типов
 public:
 	CScope();
 	~CScope();
@@ -46,13 +44,12 @@ private:
 	int typeInd;
 	EBlock block;
 public:
-	string getName();
-	void setName(string name);
-	int getTypeInd();
+	CIdetificator(string name, EBlock block);
+	string getName() const { return name; }
+	int getTypeInd() const { return typeInd; }
 	void setTypeInd(int typeInd);
-	EBlock getBlock();
-	void setBlock();
+	EBlock getBlock() const { return block; }
 };
 
-enum EBlock { VAR, TYPE, CONST, BODY };	
+enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
 // переменна€ может быть не объ€влена, однако использоватьс€, тогда она заноситс€ с меткой BODY и типом NULL (универсальный тип)

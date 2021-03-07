@@ -8,5 +8,5 @@ void CSemantic::createFictiveScope()
 }
 
 void CScope::createSymbolTbl() {
-	this->symbolTbl = CSymbolTable();
+	this->identTbl = CSymbolTable();
 }

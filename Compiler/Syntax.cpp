@@ -3,7 +3,7 @@
 #include "FStringFunc.h"
 
 
-Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic) {
+Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic) {
 	this->erManager = erManager;
 	this->lexic = lexic;
 	this->semantic = semantic;

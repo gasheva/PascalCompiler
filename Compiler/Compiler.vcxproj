@@ -158,6 +158,7 @@
     <ClInclude Include="CFileOnlyErrorPrinter.h" />
     <ClInclude Include="CToken.h" />
     <ClInclude Include="CTokenFactory.h" />
+    <ClInclude Include="CTypes.h" />
     <ClInclude Include="CVariant.h" />
     <ClInclude Include="IErrorPrinter.h" />
     <ClInclude Include="Lexic.h" />

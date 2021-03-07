@@ -10,7 +10,7 @@ class Syntax {
 private:
 	CErrorManager* erManager;
 	Lexic* lexic;
-	Semantic* semantic;
+	CSemantic* semantic;
 	CToken* curToken;
 
 	int offset = 0;
@@ -86,7 +86,7 @@ private:
 
 
 public:
-	Syntax(CErrorManager* erManager, Lexic* lexic, Semantic* semantic);
+	Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic);
 	~Syntax();
 	void startVer();
 };

@@ -101,5 +101,8 @@
     <ClInclude Include="Semantic.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
+    <ClInclude Include="CTypes.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
