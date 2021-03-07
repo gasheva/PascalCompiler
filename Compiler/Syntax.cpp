@@ -202,7 +202,7 @@ void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	fullVar();
 	accept("[");
-	set<string> skipSet = { ";","end" };
+	set<string> skipSet = { ";","end", "]" };
 	set<string> skipExprSet = { ";", "]",",", "end" };
 	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
@@ -213,6 +213,7 @@ void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 			expression(skipSet);	//TODO
 		}
 		catch (PascalExcp& e) {
+			writeMistake(2);
 			skip(skipExprSet);
 		}
 	}
