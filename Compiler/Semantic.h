@@ -1,8 +1,5 @@
 #pragma once
-#include <map>
-#include <string>
-#include <vector>
-#include "CTypes.h"
+
 
 using namespace std;
 
@@ -20,34 +17,39 @@ public:
 class CScope{
 private:
 	CScope* outerScope;			// внешн€€ область действи€
-	CSymbolTable identTbl;		// таблица идентификаторов
+	CIdentTable identTbl;		// таблица идентификаторов
 	vector<CType> typeTbl;		// таблица типов
+	CType* findTypeByIdent(string name);		// возвращает тип по идентификатору
 public:
-	CScope();
+	CScope(CScope* outerScope);
 	~CScope();
-	void createSymbolTbl();
-	void addSymbols();
+	void addSymbol(string name, EBlock block);
+	void createType(string typeName);
 };
-class CSymbolTable{
+class CIdentTable{
 private:
-	map<CIdetificator, bool(*)(int)> identTbl;			// таблица идентификаторов <им€_идент, ограничени€>	
+	struct identcomp {
+		bool operator()(const CIdetificator ident, const string str) const {
+			return ident.getName().compare(str);
+		}
+	};
+	map<CIdetificator, CType*, identcomp> identTbl;			// таблица идентификаторов <им€_идент, индекс_типа>	
 
 public:
-	CSymbolTable();
-	~CSymbolTable();
-	void addSymbol();
+	CIdentTable();
+	~CIdentTable();
+	void addSymbol(string name, EBlock block);
+	CType* findTypeByIdent(string name);
 };
 
 class CIdetificator {
+	
 private:
 	string name;
-	int typeInd;
 	EBlock block;
 public:
 	CIdetificator(string name, EBlock block);
 	string getName() const { return name; }
-	int getTypeInd() const { return typeInd; }
-	void setTypeInd(int typeInd);
 	EBlock getBlock() const { return block; }
 };
 
