@@ -202,7 +202,6 @@ void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	fullVar();
 	accept("[");
-	set<string> skipSet = { ";","end", "]" };
 	set<string> skipExprSet = { ";", "]",",", "end" };
 	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
@@ -210,7 +209,7 @@ void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 		arrayVar();
 	else {
 		try {
-			expression(skipSet);	//TODO
+			expression(skipExprSet);	//TODO
 		}
 		catch (PascalExcp& e) {
 			writeMistake(2);
@@ -746,7 +745,7 @@ bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	// число без знака
-	if (curToken->getType() == VALUE && ((CValueToken*)curToken)->getVariant().getType() != CHAR) {		// TODO(а char?)
+	if (curToken->getType() == VALUE) {	
 		// cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
 		getNext();
 		return true;
