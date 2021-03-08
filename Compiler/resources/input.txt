@@ -1,11 +1,7 @@
 PROGRAM pre(f1); 
+type number = ( one, two, three );
+var b, a : number; c: two.. three;
 BEGIN 
-	if x[6x1,#]<>4 then
-	BEGIN
-		zhjk:='gred'; 
-		if t=True then
-			t:=False;
-	END
-	else t:=6;
-	a[b[k], c[9]]:='gred';
+	
+	a[d[(6+(inner[4r]-4)+4)/2*3]]:='gred';
 END.
