@@ -14,6 +14,7 @@ protected:
 	CType(EType type);
 
 public:
+	const EType getType() { return type; }
 	~CType();
 };
 class CNoneType : public CType {

@@ -9,6 +9,7 @@
 
 using namespace std;
 
+// переменна€ может быть не объ€влена, однако использоватьс€, тогда она заноситс€ с меткой BODY и типом NULL (универсальный тип)
 enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
 
 class CIdetificator {
@@ -26,7 +27,7 @@ public:
 
 class CScope {
 private:
-	list<CType> typesBuff;		// буфер создаваемых типов
+	list<CType*> typesBuff;		// буфер создаваемых типов
 	list<string> namesBuff;		// буфер имен однотипных переменных
 
 	CScope* outerScope;			// внешн€€ область действи€
@@ -39,22 +40,14 @@ private:
 	list<CType> typeTbl;		// таблица типов
 
 
-	CType* findIdent(string name);				// возвращает тип
+	CType* findIdent(string name, set<EBlock> block);				// возвращает тип
 	// CType* getBase(string typeName);			// проверить базовый тип
 public:
 	CScope(CScope* outerScope);
 	~CScope();						
 	CType* findType(string name, set<EBlock> block);			// находит тип по строке, проходитс€ по всем скоупам
-
-	void addIdent(string name, EBlock block, string typeName);	// находит тип, добавл€ет в identTbl 
-	CType* createType(string typeName, list<string> constants);		// CEnumType
-	CType* createType(string typeName, string elTypeName);	// CSubrangeType - содержит константы, константа - string, int, char, real
-	CType* createType(string typeName, string elTypeName, string indexTypeName,
-		int dimension);	// CArrayType
-	CIdetificator createIdent(string name, EBlock block, CType* type);
-	CType* findTypeByIdent(string name);
-
-
+	void createFictive();										// создание базовых типов дл€ фиктивного скоупа
+	
 	CType defineCompleteType(EType type);
 	void clearTypesBuff();
 	void clearNamesBuff();
@@ -62,7 +55,6 @@ public:
 	void addToBuffer(EType type);		// создание объекта класса переданного типа (в буфер и в ““) (array, [], ())
 	void addToBuffer(string type);		// создание объекта класса переданного типа (в буфер и в ““) (myType, INTEGER, BOOLEAN)
 };
-// переменна€ может быть не объ€влена, однако использоватьс€, тогда она заноситс€ с меткой BODY и типом NULL (универсальный тип)
 
 class CSemantic {
 private:
@@ -73,5 +65,4 @@ public:
 	~CSemantic();
 	void createFictiveScope();
 	void createScope();
-	
 };

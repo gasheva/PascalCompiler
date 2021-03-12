@@ -11,21 +11,10 @@ CSemantic::~CSemantic() {}
 
 void CSemantic::createFictiveScope() {
 	// integer, real, string, char - BaseType, true, false - EnumType
-	CScope fictiveScp = CScope(nullptr);
+	scopesLst.push_back(CScope(nullptr));
+	auto fictiveScp = &scopesLst.back();
 	scopesLst.push_back(fictiveScp);
-	fictiveScp.createType("integer");
-	fictiveScp.addIdent("integer", TYPEBL, "integer");
-	fictiveScp.createType("none");
-	fictiveScp.addIdent("none", TYPEBL, "none");
-	fictiveScp.createType("string");
-	fictiveScp.addIdent("string", TYPEBL, "string");
-	fictiveScp.createType("char");
-	fictiveScp.addIdent("char", TYPEBL, "char");
-	fictiveScp.createType("real");
-	fictiveScp.addIdent("real", TYPEBL, "real");
-	list<string> trueFalse("true", "false");
-	fictiveScp.createType("bool", trueFalse);
-	fictiveScp.addIdent("bool", TYPEBL, "bool");
+	(*fictiveScp).createFictive();
 }
 
 CScope::CScope(CScope* outerScopes) {
@@ -33,58 +22,6 @@ CScope::CScope(CScope* outerScopes) {
 }
 
 CScope::~CScope() {}
-
-// ищет типы
-void CScope::addIdent(string name, EBlock block, string typeName) {
-	CType* type = findIdent(typeName);				// ищем тип
-	if (type != nullptr) {
-		identTbl[name] = std::make_tuple(CIdetificator(name, block), type);
-	} else throw exception;			// тип не найден
-}
-
-void CScope::addIdent(string name, EBlock block, string typeName, list<string> constants) {
-	CType* type = createType(typeName, constants);				// создаем тип enum
-	identTbl[name] = std::make_tuple(CIdetificator(name, block), type);
-}
-
-// создание типа enum
-CType* CScope::createType(string typeName, list<string> constants) {
-	typeTbl.push_back(CEnumType(constants));
-	return &typeTbl.back();
-}
-
-// создание типа subrange 
-CType* CScope::createType(string typeName, string elTypeName, list<string>childConstNames, EVarType childType) {
-	typeTbl.push_back(CSubrangeType());
-	CSubrangeType* type = (CSubrangeType*)&typeTbl.back();
-	CType* childeType;
-	for (auto childName : childConstNames) {
-		// проверка 'string', 423, 'c', 8.9
-		if (childType != NULL) {
-			switch (childType) {
-			case STRING: childeType = findType("string", set<EBlock>{TYPEBL}); break;
-			case INT: childeType= findType("int", set<EBlock>{TYPEBL}); break;
-			case REAL: childeType = findType("real", set<EBlock>{TYPEBL}); break;
-			case CHAR: childeType = findType("char", set<EBlock>{TYPEBL}); break;
-			}
-		}
-		// иначе это идентификатор - константа
-		else {
-			childeType = findType(typeName, set<EBlock>{CONSTBL});				// константа 
-		}
-		// если тип не был найден или тип не совпал с предыдущим
-		if (childeType == nullptr || !(*type).setElType(childeType)) {
-			childeType = findType("none", set<EBlock>{TYPEBL}); break;
-			break;
-		} else {
-			(*type).addEl(childName);		// все в порядке
-		}
-	}
-	return nullptr;
-}
-
-// создание типа array
-CType* CScope::createType(string typeName, string elTypeName, string indexTypeName, int dimension) {}
 
 CType CScope::defineCompleteType(EType type) {
 	switch (type) {
@@ -107,12 +44,30 @@ void CScope::clearNamesBuff() {
 void CScope::addToNameBuffer(string name) {
 	namesBuff.push_back(name);
 }
+
 void CScope::addToBuffer(EType type) {
 	typeTbl.push_back(defineCompleteType(type));
 }
 
 void CScope::addToBuffer(string type) {
 	typeTbl.push_back(*(findType(type, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
+	// если в буфере уже имеется тип, значит это дополнение составного типа
+	if (typesBuff.size() > 0) {
+		CType* type = typesBuff.front();
+		auto typeName = (*type).getType();
+		switch (typeName) {
+		case eARRAY:
+			auto arType = (CArrayType*)type;
+			arType->getIndexType();		//TODO()
+			break;
+		case eSUBRANGE:
+			break;
+		case eENUM:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 CType* CScope::findType(string name, set<EBlock> block) {
@@ -131,6 +86,23 @@ CType* CScope::findType(string name, set<EBlock> block) {
 		else return nullptr;		// TODO(типа нет)
 	}
 	return type;
+}
+
+void CScope::createFictive() {
+	typeTbl.push_back(CBaseType(eINT));
+	identTbl["integer"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("integer", TYPEBL), &(typeTbl.back()));
+
+	typeTbl.push_back(CBaseType(eREAL));
+	identTbl["real"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("real", TYPEBL), &(typeTbl.back()));
+
+	typeTbl.push_back(CBaseType(eSTRING));
+	identTbl["string"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("string", TYPEBL), &(typeTbl.back()));
+
+	typeTbl.push_back(CBaseType(eCHAR));
+	identTbl["char"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("char", TYPEBL), &(typeTbl.back()));
+
+	typeTbl.push_back(CEnumType(list<string>{"true", "false"}));
+	identTbl["boolean"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("boolean", TYPEBL), &(typeTbl.back()));
 }
 
 bool CScope::overrideBaseType(string name) {
