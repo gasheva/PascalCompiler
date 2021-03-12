@@ -145,6 +145,7 @@
     <ClCompile Include="Compiler.cpp" />
     <ClCompile Include="CToken.cpp" />
     <ClCompile Include="CTokenFactory.cpp" />
+    <ClCompile Include="CTypes.cpp" />
     <ClCompile Include="CVariant.cpp" />
     <ClCompile Include="FStringFunc.cpp" />
     <ClCompile Include="FStringFunc.h" />

@@ -1,36 +1,32 @@
 #pragma once
-
+#include <list>
+#include <map>
+#include <string>
+#include <vector>
+#include <stack>
+#include "CTypes.h"
 
 using namespace std;
 
-class CSemantic {
-private:
-	vector<CScope> scopesLst;		// нулевую позицию занимает фиктивный скоуп
+enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
 
-public:
-	CSemantic();
-	~CSemantic();
-	void createFictiveScope();
-	void createScope();
-};
+class CIdetificator {
 
-class CScope{
 private:
-	CScope* outerScope;			// внешняя область действия
-	CIdentTable identTbl;		// таблица идентификаторов
-	vector<CType> typeTbl;		// таблица типов
-	CType* findTypeByIdent(string name);		// возвращает тип по идентификатору
+	string name;
+	EBlock block;
 public:
-	CScope(CScope* outerScope);
-	~CScope();
-	void addSymbol(string name, EBlock block);
-	void createType(string typeName);
+	CIdetificator(string name, EBlock block);
+	CIdetificator(string name);
+	~CIdetificator();
+	string getName() const { return name; }
+	EBlock getBlock() const { return block; }
 };
-class CIdentTable{
+class CIdentTable {
 private:
 	struct identcomp {
-		bool operator()(const CIdetificator ident, const string str) const {
-			return ident.getName().compare(str);
+		bool operator()(const CIdetificator ident, const CIdetificator ident2) const {
+			return ident.getName().compare(ident2.getName());
 		}
 	};
 	map<CIdetificator, CType*, identcomp> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
@@ -38,20 +34,35 @@ private:
 public:
 	CIdentTable();
 	~CIdentTable();
-	void addSymbol(string name, EBlock block);
+	void addIdent(string name, EBlock block);
 	CType* findTypeByIdent(string name);
 };
 
-class CIdetificator {
-	
+class CScope {
 private:
-	string name;
-	EBlock block;
+	CScope* outerScope;			// внешняя область действия
+	CIdentTable identTbl;		// таблица идентификаторов
+	list<CType> typeTbl;		// таблица типов
+	CType* findTypeByIdent(string name);		// возвращает тип по идентификатору
 public:
-	CIdetificator(string name, EBlock block);
-	string getName() const { return name; }
-	EBlock getBlock() const { return block; }
+	CScope(CScope* outerScope);
+	~CScope();
+	void addIdent(string name, EBlock block, string typeName);
+	void createType(string typeName);		// CBaseType
+	void createType(string typeName, list<string> constants);		// CEnumType
+	void createType(string typeName, string elTypeName);	// CSubrangeType
+	void createType(string typeName, string elTypeName, string indexTypeName,
+		int dimension);	// CArrayType
 };
-
-enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
 // переменная может быть не объявлена, однако использоваться, тогда она заносится с меткой BODY и типом NULL (универсальный тип)
+
+class CSemantic {
+private:
+	list<CScope> scopesLst;		// нулевую позицию занимает фиктивный скоуп
+
+public:
+	CSemantic();
+	~CSemantic();
+	void createFictiveScope();
+	void createScope();
+};

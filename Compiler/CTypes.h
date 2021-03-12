@@ -5,7 +5,7 @@
 using namespace std;
 
 enum EType {
-	INT, REAL, STRING, CHAR, BOOLEAN, ARRAY, SUBRANGE, ENUM, NONE
+	eINT, eREAL, eSTRING, eCHAR, eBOOLEAN, eARRAY, eSUBRANGE, eENUM, eNONE
 };
 
 class CType {
@@ -17,26 +17,33 @@ public:
 	~CType();
 };
 class CNoneType : public CType {
+	using CType::CType;
 public:
 	CNoneType();
+	~CNoneType();
 };
 
 /// <summary>
 /// Класс соответствующий простым (базовым) типам
 /// </summary>
 class CBaseType : public CType {
+	using CType::CType;
 public:
 	CBaseType();
+	~CBaseType();
 	// const int MAXINT = 2147483647;		// TODO(создание модуля проверки соответствия условиями)
 	// const int MININT = -2147483648;
 };
 class CEnumType : public CType {
+	using CType::CType;
 private:
-	vector<string> enumEls;
+	vector<string> constants;			// список констант
 public:
-	CEnumType(vector<string> enumEls);
+	CEnumType(vector<string> constants);
+	~CEnumType();
 };
 class CArrayType : public CType {
+	using CType::CType;
 private:
 	CType* elType;
 	CType* indexType;
@@ -46,15 +53,18 @@ public:
 	const CType* getIndexType() { return indexType; }
 	int getDimension() const { return dimension; }
 	CArrayType(CType* elType, CType* indexType);
+	~CArrayType();
 };
 /// <summary>
 /// Ограниченный тип
 /// </summary>
 class CSubrangeType : public CType {
+	using CType::CType;
 private:
 	CType* elType;
 public:
 	const CType* getElType() { return elType; }
 	CSubrangeType(CType* elType);
+	~CSubrangeType();
 
 };

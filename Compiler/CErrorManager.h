@@ -3,7 +3,6 @@
 #include "CError.h"
 #include <unordered_map>
 #include "IErrorPrinter.h"
-#include <vector>
 
 using namespace std;
 

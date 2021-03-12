@@ -1,6 +1,5 @@
 #include "CError.h"
 #include <iostream>
-#include <vector>
 
 CError::CError(int pos, int line, int code, string description)
 {
