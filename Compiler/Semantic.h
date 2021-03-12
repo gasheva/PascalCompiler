@@ -5,6 +5,7 @@
 #include <vector>
 #include <stack>
 #include "CTypes.h"
+#include <tuple>
 
 using namespace std;
 
@@ -22,47 +23,55 @@ public:
 	string getName() const { return name; }
 	EBlock getBlock() const { return block; }
 };
-class CIdentTable {
+
+class CScope {
 private:
+	list<CType> typesBuff;		// буфер создаваемых типов
+	list<string> namesBuff;		// буфер имен однотипных переменных
+
+	CScope* outerScope;			// внешн€€ область действи€
 	struct identcomp {
 		bool operator()(const CIdetificator ident, const CIdetificator ident2) const {
 			return ident.getName().compare(ident2.getName());
 		}
 	};
-	map<CIdetificator, CType*, identcomp> identTbl;			// таблица идентификаторов <им€_идент, индекс_типа>	
-
-public:
-	CIdentTable();
-	~CIdentTable();
-	void addIdent(string name, EBlock block);
-	CType* findTypeByIdent(string name);
-};
-
-class CScope {
-private:
-	CScope* outerScope;			// внешн€€ область действи€
-	CIdentTable identTbl;		// таблица идентификаторов
+	map<string , tuple<CIdetificator, CType*>, identcomp> identTbl;			// таблица идентификаторов <им€_идент, индекс_типа>	
 	list<CType> typeTbl;		// таблица типов
-	CType* findTypeByIdent(string name);		// возвращает тип по идентификатору
+
+
+	CType* findIdent(string name);				// возвращает тип
+	// CType* getBase(string typeName);			// проверить базовый тип
 public:
 	CScope(CScope* outerScope);
-	~CScope();
-	void addIdent(string name, EBlock block, string typeName);
-	void createType(string typeName);		// CBaseType
-	void createType(string typeName, list<string> constants);		// CEnumType
-	void createType(string typeName, string elTypeName);	// CSubrangeType
-	void createType(string typeName, string elTypeName, string indexTypeName,
+	~CScope();						
+	CType* findType(string name, set<EBlock> block);			// находит тип по строке, проходитс€ по всем скоупам
+
+	void addIdent(string name, EBlock block, string typeName);	// находит тип, добавл€ет в identTbl 
+	CType* createType(string typeName, list<string> constants);		// CEnumType
+	CType* createType(string typeName, string elTypeName);	// CSubrangeType - содержит константы, константа - string, int, char, real
+	CType* createType(string typeName, string elTypeName, string indexTypeName,
 		int dimension);	// CArrayType
+	CIdetificator createIdent(string name, EBlock block, CType* type);
+	CType* findTypeByIdent(string name);
+
+
+	CType defineCompleteType(EType type);
+	void clearTypesBuff();
+	void clearNamesBuff();
+	void addToNameBuffer(string name);
+	void addToBuffer(EType type);		// создание объекта класса переданного типа (в буфер и в ““) (array, [], ())
+	void addToBuffer(string type);		// создание объекта класса переданного типа (в буфер и в ““) (myType, INTEGER, BOOLEAN)
 };
 // переменна€ может быть не объ€влена, однако использоватьс€, тогда она заноситс€ с меткой BODY и типом NULL (универсальный тип)
 
 class CSemantic {
 private:
 	list<CScope> scopesLst;		// нулевую позицию занимает фиктивный скоуп
-
+	
 public:
 	CSemantic();
 	~CSemantic();
 	void createFictiveScope();
 	void createScope();
+	
 };

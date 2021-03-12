@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <list>
 
 using namespace std;
 
@@ -30,6 +30,7 @@ class CBaseType : public CType {
 	using CType::CType;
 public:
 	CBaseType();
+	CBaseType(EType type);
 	~CBaseType();
 	// const int MAXINT = 2147483647;		// TODO(создание модуля проверки соответствия условиями)
 	// const int MININT = -2147483648;
@@ -37,9 +38,10 @@ public:
 class CEnumType : public CType {
 	using CType::CType;
 private:
-	vector<string> constants;			// список констант
+	list<string> constants;			// список констант
 public:
-	CEnumType(vector<string> constants);
+	CEnumType(list<string> constants);
+	CEnumType();
 	~CEnumType();
 };
 class CArrayType : public CType {
@@ -53,6 +55,7 @@ public:
 	const CType* getIndexType() { return indexType; }
 	int getDimension() const { return dimension; }
 	CArrayType(CType* elType, CType* indexType);
+	CArrayType();
 	~CArrayType();
 };
 /// <summary>
@@ -62,9 +65,16 @@ class CSubrangeType : public CType {
 	using CType::CType;
 private:
 	CType* elType;
+	list<string> childEls;
 public:
-	const CType* getElType() { return elType; }
 	CSubrangeType(CType* elType);
+	CSubrangeType();
 	~CSubrangeType();
 
+	void addEl(string el);					// хранит цифры, строки, имена в string
+	const CType* getElType() { return elType; }
+	bool setElType(CType* type);			// кидает ошибку, если тип не совпал
+	
+	string getStart();
+	string getEnd();
 };
