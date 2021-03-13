@@ -30,7 +30,6 @@ public:
 class CBaseType : public CType {
 	using CType::CType;
 public:
-	CBaseType();
 	CBaseType(EType type);
 	~CBaseType();
 	// const int MAXINT = 2147483647;		// TODO(создание модуля проверки соответствия условиями)

@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include "CVariant.h"
 #include <set>
-#include<tuple>
 
 using namespace std;
 
@@ -62,7 +61,7 @@ void CScope::defineConst(EType type, string constRight) {
 			// создаем безым€нный тип дл€ строки, числа и тд
 			typeTbl.push_back(defineAndCreateType(type));
 			auto type = (&typeTbl.back());
-			identTbl[namesBuff.front()] = std::make_tuple(CIdetificator(namesBuff.front(), flagBlock), type);
+			identTbl.insert(pair<string, CIdetificator>(namesBuff.front(), CIdetificator(namesBuff.front(), flagBlock, type)));
 		}
 	}
 }
@@ -111,7 +110,7 @@ void CScope::addToBuffer(string typeName) {
 					// TODO(throw no_type)
 				} else {
 					// если объ€вление типа найдено, то добавл€ем в скоуп новый идент и ссылку на найденный тип
-					identTbl[typeName] = std::make_tuple(CIdetificator(namesBuff.front(), TYPEBL), type);
+					identTbl.insert(pair<string, CIdetificator>(typeName, CIdetificator(namesBuff.front(), TYPEBL, type)));
 				}
 			}
 		}
@@ -130,13 +129,13 @@ void CScope::setBlock(EBlock block) {
 
 CType* CScope::findType(string name, set<EBlock> block) {
 	CType* type = nullptr;
-	if (identTbl.find(name) != identTbl.end()) {
+	if (identTbl.find(name) < identTbl.end()) {
 		// идентификатор найден
-		if (block.find(get<0>(identTbl[name]).getBlock()) != block.end()) {
-			return get<1>(identTbl[name]);		// тип найден, возвращаемс€
-		} else {
-			// идентификатор найден, но это не тип
-		}
+		//if (block.find((identTbl[name]).getBlock()) != block.end()) {
+		//	return (identTbl[name].getType());		// тип найден, возвращаемс€
+		//} else {
+		//	// идентификатор найден, но это не тип
+		//}
 
 	} else {
 		if (outerScope != nullptr)
@@ -144,23 +143,29 @@ CType* CScope::findType(string name, set<EBlock> block) {
 		else return nullptr;
 	}
 	return type;
+	return nullptr;
 }
 
 void CScope::createFictive() {
 	typeTbl.push_back(CBaseType(eINT));
-	identTbl["integer"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("integer", TYPEBL), &(typeTbl.back()));
+	identTbl.insert(pair<string, CIdetificator>("integer", CIdetificator("integer", TYPEBL, &(typeTbl.back()))));
+
 
 	typeTbl.push_back(CBaseType(eREAL));
-	identTbl["real"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("real", TYPEBL), &(typeTbl.back()));
+	identTbl.insert(pair<string, CIdetificator>("real", CIdetificator("real", TYPEBL, &(typeTbl.back()))));
 
 	typeTbl.push_back(CBaseType(eSTRING));
-	identTbl["string"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("string", TYPEBL), &(typeTbl.back()));
+	identTbl.insert(pair<string, CIdetificator>("string", CIdetificator("string", TYPEBL, &(typeTbl.back()))));
 
 	typeTbl.push_back(CBaseType(eCHAR));
-	identTbl["char"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("char", TYPEBL), &(typeTbl.back()));
+	identTbl.insert(pair<string, CIdetificator>("char", CIdetificator("char", TYPEBL, &(typeTbl.back()))));
 
 	typeTbl.push_back(CEnumType(list<string>{"true", "false"}));
-	identTbl["boolean"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("boolean", TYPEBL), &(typeTbl.back()));
+	identTbl.insert(pair<string, CIdetificator>("boolean", CIdetificator("boolean", TYPEBL, &(typeTbl.back()))));
+}
+
+CIdetificator::CIdetificator(string name, EBlock block, CType* type) {
+
 }
 
 CIdetificator::CIdetificator(string name, EBlock block) {}

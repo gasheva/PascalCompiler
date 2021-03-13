@@ -5,7 +5,6 @@
 #include <vector>
 #include <stack>
 #include "CTypes.h"
-#include <tuple>
 #include <set>
 
 using namespace std;
@@ -14,16 +13,18 @@ using namespace std;
 enum EBlock { FICTIVEBL, CONSTBL, TYPEBL, VARBL, BODYBL };
 
 class CIdetificator {
-
 private:
 	string name;
 	EBlock block;
+	CType* type;
 public:
+	CIdetificator(string name, EBlock block, CType* type);
 	CIdetificator(string name, EBlock block);
 	CIdetificator(string name);
 	~CIdetificator();
 	string getName() const { return name; }
 	EBlock getBlock() const { return block; }
+	CType* getType() { return type; }
 };
 
 class CScope {
@@ -38,7 +39,7 @@ private:
 			return ident.getName().compare(ident2.getName());
 		}
 	};
-	map<string , tuple<CIdetificator, CType*>, identcomp> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
+	map<string , CIdetificator> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
 	list<CType> typeTbl;		// таблица типов
 
 
