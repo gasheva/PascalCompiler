@@ -79,6 +79,11 @@ void CScope::addToBuffer(EType type) {
 	}
 }
 
+void CScope::clearBuffs() {
+	clearNamesBuff();
+	clearTypesBuff();
+}
+
 void CScope::addToBuffer(string typeName) {
 	typeTbl.push_back(*(findType(typeName, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
 

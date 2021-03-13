@@ -241,15 +241,20 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 }
 void Syntax::blockMarks() {}
 void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
+	semantic->getLast()->clearBuffs();
+
 	ifNullThrowExcp();
 	set <string> constDefSet = { ";", "var", "begin", "type" };
 	semantic->getLast()->setBlock(CONSTBL);
 
 	if (checkOper("const")) {
 		getNext();
-		try { constDef(); } catch (PascalExcp& e) {
+		try { constDef(); 
+		} catch (PascalExcp& e) {
 			skip(constDefSet);
 		}
+		semantic->getLast()->clearBuffs();
+
 		while (checkOper(";")) {
 			getNext();
 			if (curToken != nullptr) {
@@ -259,9 +264,12 @@ void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 					((COperToken*)curToken)->getLexem() == "begin"))
 					return;
 			} else return;		// наткнулись на конец файла
-			try { constDef(); } catch (PascalExcp& e) {
+			try { constDef(); 
+			} catch (PascalExcp& e) {
 				skip(constDefSet);
 			}
+			semantic->getLast()->clearBuffs();
+
 		}
 	}
 }
@@ -270,8 +278,8 @@ void Syntax::constDef()throw(PascalExcp, EOFExcp) {
 	string tmpName = "";
 	if (curToken->getType() == IDENT) tmpName = ((CIdentToken*)curToken)->getLexem();
 	name();
-
 	accept("=");
+
 	constanta();
 }
 void Syntax::constanta()throw(PascalExcp, EOFExcp) {

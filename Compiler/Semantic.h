@@ -53,6 +53,7 @@ public:
 	CType defineAndCreateType(EType type);
 	void clearTypesBuff();
 	void clearNamesBuff();
+	void clearBuffs();					// TODO(оставшиеся константы присовить тип eNONE)
 	void addToNameBuffer(string name);
 	void addToBuffer(EType type);		// создание объекта класса переданного типа (в буфер и в ТТ) (array, [], ())
 	void addToBuffer(string type);		// создание объекта класса переданного типа (в буфер и в ТТ) (myType, INTEGER, BOOLEAN)
