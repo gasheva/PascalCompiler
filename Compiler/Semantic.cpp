@@ -23,8 +23,10 @@ CScope::CScope(CScope* outerScopes) {
 
 CScope::~CScope() {}
 
-CType CScope::defineCompleteType(EType type) {
+CType CScope::defineAndCreateType(EType type) {
 	switch (type) {
+	case eINT: case eREAL: case eSTRING: case eCHAR:
+		return CBaseType(type);
 	case eARRAY:
 		return CArrayType();
 	case eSUBRANGE:
@@ -45,36 +47,91 @@ void CScope::addToNameBuffer(string name) {
 	namesBuff.push_back(name);
 }
 
-void CScope::addToBuffer(EType type) {
-	typeTbl.push_back(defineCompleteType(type));
-}
-
-void CScope::addToBuffer(string type) {
-	typeTbl.push_back(*(findType(type, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
-	// если в буфере уже имеетс€ тип, значит это дополнение составного типа
-	if (typesBuff.size() > 0) {
-		CType* type = typesBuff.front();
-		auto typeName = (*type).getType();
-		switch (typeName) {
-		case eARRAY:
-			auto arType = (CArrayType*)type;
-			arType->getIndexType();		//TODO()
-			break;
-		case eSUBRANGE:
-			break;
-		case eENUM:
-			break;
-		default:
-			break;
+void CScope::defineConst(EType type, string constRight) {
+	// объвление константы происходит без использование буфера
+	// провер€ем объ€влена ли константа в данном скоупе
+	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
+		// TODO(throw already_defined)
+	} else {
+		// создаем объ€вление константы
+		// если справа идентификатор, ищем его среди объ€вленных констант
+		if (type == eNONE) {
+			findType(constRight, set<EBlock>{CONSTBL});
+		} else {
+			// создаем безым€нный тип дл€ строки, числа и тд
+			typeTbl.push_back(defineAndCreateType(type));
+			auto type = (&typeTbl.back());
+			identTbl[namesBuff.front()] = std::make_tuple(CIdetificator(namesBuff.front(), flagBlock), type);
 		}
 	}
+}
+void CScope::addToBuffer(EType type) {
+	if (flagBlock == TYPEBL) {
+		typeTbl.push_back(defineAndCreateType(type));
+	} else if (flagBlock == VARBL) {
+
+	} else { 
+		// flagBlock == BODYBL || CONSTBL
+		// TODO(throw not_define)
+	}
+}
+
+void CScope::addToBuffer(string typeName) {
+	typeTbl.push_back(*(findType(typeName, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
+
+	// создание типа
+	if (flagBlock == TYPEBL) {
+		// если в буфере уже имеетс€ тип, значит это дополнение составного типа (type compl = array[x..10] of INTEGER <- INTEGER или '1' или х будут такими типами
+		if (typesBuff.size() > 0) {
+			CType* type = typesBuff.front();
+			auto typeName = (*type).getType();
+			switch (typeName) {
+			case eARRAY:
+				auto arType = (CArrayType*)type;
+				arType->getIndexType();		//TODO()
+				break;
+			case eSUBRANGE:
+				break;
+			case eENUM:
+				break;
+			default:
+				break;
+			}
+		} else {
+			// это базовый тип или пользовательский (не составной) и он не €вл€етс€ дополнением к составному типу (type t = INTEGER)
+			// объвление этого типа происходит без использование буфера
+			// провер€ем не было ли занесено название (name) нового типа в текущий скоуп
+			if (identTbl.find(namesBuff.front()) != identTbl.end()) {		// им€ типа хранитс€ в буфере 
+				// TODO(throw type_already_exists)
+			} else {
+				CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
+				// если объ€вление типа не найдено, кидаем ошибку
+				if (type == nullptr) {
+					// TODO(throw no_type)
+				} else {
+					// если объ€вление типа найдено, то добавл€ем в скоуп новый идент и ссылку на найденный тип
+					identTbl[typeName] = std::make_tuple(CIdetificator(namesBuff.front(), TYPEBL), type);
+				}
+			}
+		}
+	} else if (flagBlock == VARBL) {
+		// объ€вление переменной
+
+	} else {
+		// flagBlock == BODYBL || CONSTBL
+		// TODO(throw not_define)
+	}
+}
+
+void CScope::setBlock(EBlock block) {
+	flagBlock = block;
 }
 
 CType* CScope::findType(string name, set<EBlock> block) {
 	CType* type = nullptr;
 	if (identTbl.find(name) != identTbl.end()) {
 		// идентификатор найден
-		if (block.find(get<0>(identTbl[name]).getBlock())!=block.end()) {
+		if (block.find(get<0>(identTbl[name]).getBlock()) != block.end()) {
 			return get<1>(identTbl[name]);		// тип найден, возвращаемс€
 		} else {
 			// идентификатор найден, но это не тип
@@ -82,8 +139,8 @@ CType* CScope::findType(string name, set<EBlock> block) {
 
 	} else {
 		if (outerScope != nullptr)
-			type = outerScope->findIdent(name);
-		else return nullptr;		// TODO(типа нет)
+			type = outerScope->findIdent(name, block);
+		else return nullptr;
 	}
 	return type;
 }
@@ -103,11 +160,6 @@ void CScope::createFictive() {
 
 	typeTbl.push_back(CEnumType(list<string>{"true", "false"}));
 	identTbl["boolean"] = std::make_tuple<CIdetificator, CType*>(CIdetificator("boolean", TYPEBL), &(typeTbl.back()));
-}
-
-bool CScope::overrideBaseType(string name) {
-	
-	return false;
 }
 
 CIdetificator::CIdetificator(string name, EBlock block) {}

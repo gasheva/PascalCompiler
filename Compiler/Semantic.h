@@ -10,7 +10,7 @@
 using namespace std;
 
 // переменная может быть не объявлена, однако использоваться, тогда она заносится с меткой BODY и типом NULL (универсальный тип)
-enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
+enum EBlock { FICTIVEBL, CONSTBL, TYPEBL, VARBL, BODYBL };
 
 class CIdetificator {
 
@@ -27,8 +27,9 @@ public:
 
 class CScope {
 private:
-	list<CType*> typesBuff;		// буфер создаваемых типов
+	list<CType*> typesBuff;		// буфер создаваемых составных типов
 	list<string> namesBuff;		// буфер имен однотипных переменных
+	EBlock flagBlock;			// флаг, отвечающий за текущий блок
 
 	CScope* outerScope;			// внешняя область действия
 	struct identcomp {
@@ -48,12 +49,16 @@ public:
 	CType* findType(string name, set<EBlock> block);			// находит тип по строке, проходится по всем скоупам
 	void createFictive();										// создание базовых типов для фиктивного скоупа
 	
-	CType defineCompleteType(EType type);
+	CType defineAndCreateType(EType type);
 	void clearTypesBuff();
 	void clearNamesBuff();
 	void addToNameBuffer(string name);
 	void addToBuffer(EType type);		// создание объекта класса переданного типа (в буфер и в ТТ) (array, [], ())
 	void addToBuffer(string type);		// создание объекта класса переданного типа (в буфер и в ТТ) (myType, INTEGER, BOOLEAN)
+
+	void defineConst(EType type, string constName);			// создание определения константы
+
+	void setBlock(EBlock block);
 };
 
 class CSemantic {

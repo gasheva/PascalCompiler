@@ -5,7 +5,7 @@
 using namespace std;
 
 enum EType {
-	eINT, eREAL, eSTRING, eCHAR, eBOOLEAN, eARRAY, eSUBRANGE, eENUM, eNONE
+	eINT, eREAL, eSTRING, eCHAR, eARRAY, eSUBRANGE, eENUM, eNONE
 };
 
 class CType {
