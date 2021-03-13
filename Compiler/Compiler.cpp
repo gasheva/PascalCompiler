@@ -124,7 +124,11 @@ int main()
 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
-    Syntax syntax = Syntax(&eManager, &lexic , nullptr);
+    CSemantic semantic = CSemantic();
+    semantic.createFictiveScope();
+    semantic.createScope();
+
+    Syntax syntax = Syntax(&eManager, &lexic , &semantic);
     syntax.startVer();
 
     IErrorPrinter* printer = new CFileOnlyErrorPrinter();

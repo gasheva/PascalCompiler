@@ -12,35 +12,28 @@ Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic) {
 Syntax::~Syntax() {}
 
 
-void Syntax::startVer()
-{
-	try { getNext(); }
-	catch (PascalExcp& e) {
+void Syntax::startVer() {
+	try { getNext(); } catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
 		return;
-	}
-	catch (EOFExcp& e) {
-		cout << "[!]EOF EXCEPTION" << endl;
-		return;
-	}
-	
-
-	try { ifNullThrowExcp(); }
-	catch (PascalExcp& e) {
-		cout << "[!]EXCEPTION" << endl;
-		return;
-	}
-	catch (EOFExcp& e) {
+	} catch (EOFExcp& e) {
 		cout << "[!]EOF EXCEPTION" << endl;
 		return;
 	}
 
-	try { program(); }
-	catch (PascalExcp& e) {
+
+	try { ifNullThrowExcp(); } catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
 		return;
+	} catch (EOFExcp& e) {
+		cout << "[!]EOF EXCEPTION" << endl;
+		return;
 	}
-	catch (EOFExcp& e) {
+
+	try { program(); } catch (PascalExcp& e) {
+		cout << "[!]EXCEPTION" << endl;
+		return;
+	} catch (EOFExcp& e) {
 		cout << "[!]EOF EXCEPTION" << endl;
 		return;
 	}
@@ -76,15 +69,14 @@ void Syntax::peekNext() {
 void Syntax::skip(set<string> lexemes) {
 	if (curToken == nullptr) return;
 	// если уже на нужном слове
-	if (curToken->getType() == OPER && lexemes.find(((COperToken*)curToken)->lexem) != lexemes.end()) {
+	if (curToken->getType() == OPER && lexemes.find(((COperToken*)curToken)->getLexem()) != lexemes.end()) {
 		return;
 	}
 	removeToken();
 	curToken = this->lexic->skip(lexemes);
 }
 
-void Syntax::removeToken()
-{
+void Syntax::removeToken() {
 	if (curToken != nullptr)
 		delete curToken;
 }
@@ -97,31 +89,25 @@ void Syntax::program() throw(PascalExcp, EOFExcp) {
 	set <string> semicolSet = { "const", "var", "begin" };
 	accept("program");
 
-	try { name(); }
-	catch (PascalExcp& e) {
+	try { name(); } catch (PascalExcp& e) {
 		skip(nameSet);
 	}
-	try { accept("("); }
-	catch (PascalExcp& e) {
+	try { accept("("); } catch (PascalExcp& e) {
 		skip(nameSet);
 	}
-	try { name(); }
-	catch (PascalExcp& e) {
+	try { name(); } catch (PascalExcp& e) {
 		skip(nameSet);
 	}
 	while (checkOper(",")) {
 		getNext();
-		try { name(); }
-		catch (PascalExcp& e) {
+		try { name(); } catch (PascalExcp& e) {
 			skip(nameSet);
 		}
 	}
-	try { accept(")"); }
-	catch (PascalExcp& e) {
+	try { accept(")"); } catch (PascalExcp& e) {
 		skip(branchSet);
 	}
-	try { accept(";"); }
-	catch (PascalExcp& e) {
+	try { accept(";"); } catch (PascalExcp& e) {
 		skip(branchSet);
 	}
 
@@ -150,18 +136,18 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 	ifNullThrowExcp();
 	int oldPosInLine = lexic->getStartPosition();
 	int oldLineNum = lexic->getCurLine();
-	
+
 	if (curToken->getType() != OPER) {
 		skip(searchingLexemes);
 		writeMistake(6, oldPosInLine, oldLineNum);
 		return true;
 	}
 	if (curToken->getType() == OPER)
-		if (((COperToken*)curToken)->lexem != searchingWord) {
+		if (((COperToken*)curToken)->getLexem() != searchingWord) {
 			int oldPos = lexic->getCurPos();
 			skip(searchingLexemes);
 			int curNewPos = lexic->getCurPos();
-			if (curNewPos!= oldPos)
+			if (curNewPos != oldPos)
 				writeMistake(6, oldPosInLine, oldLineNum);
 			return true;
 		}
@@ -175,17 +161,15 @@ void Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 
 	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
-	if(lexem!="" && lexem=="[")
+	if (lexem != "" && lexem == "[")
 		try {
-			compVar();		// indexVar()
-	}
-	catch (PascalExcp& e) {
+		compVar();		// indexVar()
+	} catch (PascalExcp& e) {
 		if (skippingSet.empty())
 			throw e;
 		else
 			skip(skippingSet);
-		}
-	else
+	} else
 		fullVar();			// name()
 }
 
@@ -210,8 +194,7 @@ void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
 	else {
 		try {
 			expression(skipExprSet);	//TODO
-		}
-		catch (PascalExcp& e) {
+		} catch (PascalExcp& e) {
 			writeMistake(2);
 			skip(skipExprSet);
 		}
@@ -243,7 +226,7 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 
 	ifNullThrowExcp();
 	skipUntilBlock(blockTypeSet, "type");
-	blockTypes(); 
+	blockTypes();
 
 	ifNullThrowExcp();
 	skipUntilBlock(blockVarsSet, "var");
@@ -256,40 +239,38 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 	blockOpers();
 
 }
-void Syntax::blockMarks()
-{
-}
+void Syntax::blockMarks() {}
 void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
-	ifNullThrowExcp();		//TODO(кидать не кидать)
+	ifNullThrowExcp();
 	set <string> constDefSet = { ";", "var", "begin", "type" };
+	semantic->getLast()->setBlock(CONSTBL);
 
 	if (checkOper("const")) {
 		getNext();
-		try {constDef();}
-		catch (PascalExcp& e) {
+		try { constDef(); } catch (PascalExcp& e) {
 			skip(constDefSet);
 		}
 		while (checkOper(";")) {
 			getNext();
 			if (curToken != nullptr) {
 				if (curToken->getType() == OPER && (
-					((COperToken*)curToken)->lexem == "var" ||	
-					((COperToken*)curToken)->lexem == "type" ||		
-					((COperToken*)curToken)->lexem == "begin"))		
+					((COperToken*)curToken)->getLexem() == "var" ||
+					((COperToken*)curToken)->getLexem() == "type" ||
+					((COperToken*)curToken)->getLexem() == "begin"))
 					return;
-			}
-			else return;		// наткнулись на конец файла
-			try { constDef(); }
-			catch (PascalExcp& e) {
+			} else return;		// наткнулись на конец файла
+			try { constDef(); } catch (PascalExcp& e) {
 				skip(constDefSet);
 			}
 		}
 	}
 }
-void Syntax::constDef()throw(PascalExcp, EOFExcp)
-{
+void Syntax::constDef()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
+	string tmpName = "";
+	if (curToken->getType() == IDENT) tmpName = ((CIdentToken*)curToken)->getLexem();
 	name();
+
 	accept("=");
 	constanta();
 }
@@ -302,21 +283,19 @@ void Syntax::constanta()throw(PascalExcp, EOFExcp) {
 		// <число без знака>
 		if (curToken->getType() == VALUE) {
 			unsignedNum();
-		}
-		else {
+		} else {
 			// <имя константы>
 			name();
 		}
-	}
-	else {
+	} else {
 		// <имя константы>
 		if (curToken->getType() == IDENT) {
 			getNext();
 			return;
 		}
 		// <строка>
-		if (curToken->getType() == VALUE &&
-			((CValueToken*)curToken)->getVariant().getType() == STRING) {
+		if (curToken->getType() == VALUE &&(
+			((CValueToken*)curToken)->getVariant().getType() == STRING) || ((CValueToken*)curToken)->getVariant().getType() == CHAR) {
 			getNext();		// приняли строку
 			return;
 		}
@@ -324,8 +303,7 @@ void Syntax::constanta()throw(PascalExcp, EOFExcp) {
 		// <число без знака>
 		try {
 			unsignedNum();		// кинет ошибку
-		}
-		catch(PascalExcp& e){
+		} catch (PascalExcp& e) {
 			writeMistake(50);
 			throw e;
 		}
@@ -346,13 +324,11 @@ void Syntax::blockTypes() {
 			getNext();
 			if (curToken != nullptr) {
 				if (curToken->getType() == OPER && (
-					((COperToken*)curToken)->lexem == "begin" ||
-					((COperToken*)curToken)->lexem == "var"))
+					((COperToken*)curToken)->getLexem() == "begin" ||
+					((COperToken*)curToken)->getLexem() == "var"))
 					return;
-			}
-			else return; //throw PascalExcp();		// неожиданный конец файла
-			try { typeDef(); }
-			catch (PascalExcp& e) {
+			} else return; //throw PascalExcp();		// неожиданный конец файла
+			try { typeDef(); } catch (PascalExcp& e) {
 				skip(skipSet);
 			}
 		}
@@ -371,11 +347,10 @@ void Syntax::type()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	if (checkOper("array")) {
 		regularType();
-	}
-	else {
+	} else {
 		simpleType();
 	}
-	
+
 }
 void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
 	//<регулярный тип>:: = array[<простой тип>{, <простой тип>}] of <тип компоненты >
@@ -397,33 +372,29 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 	try {
 		if (checkOper("(")) {
 			enumaratedType();
-		}
-		else {
+		} else {
 			// заглядываем на один токен вперед и проверяем 
 			// является ли он ".."
 			string nextLexem = lexic->peekNext();
 			if (nextLexem != "" && nextLexem == "..")		//<ограниченный тип>
 			{
 				limitedType();
-			}
-			else {
+			} else {
 				// заглядываем еще на один токен вперед и проверяем 
 				// является ли он ".."
 				nextLexem = lexic->peek2Next();
 				if (nextLexem != "" && nextLexem == "..")		//<ограниченный тип>
 				{
 					limitedType();
-				}
-				else
+				} else
 					name();	//<имя типа>
 			}
 		}
-	}
-	catch (PascalExcp& e) {
+	} catch (PascalExcp& e) {
 		writeMistake(324);
 		throw e;
 	}
-	
+
 	//writeMistake(324);
 }
 void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {
@@ -443,16 +414,14 @@ void Syntax::limitedType()throw(PascalExcp, EOFExcp) {
 	constanta();
 }
 
-void Syntax::blockVars() throw(PascalExcp, EOFExcp)
-{
+void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
-	set <string> skipSet = { ";", "begin"};
+	set <string> skipSet = { ";", "begin" };
 	// var <описание однотипных переменных>;
 	if (checkOper("var")) {
 		getNext();		// accept("var");
-		try { descrMonotypeVars(); }
-		catch (PascalExcp& e) {
+		try { descrMonotypeVars(); } catch (PascalExcp& e) {
 			skip(skipSet);
 		}
 		// {<описание однотипных переменных>;}
@@ -460,29 +429,24 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp)
 			getNext();
 			if (curToken != nullptr) {
 				if (curToken->getType() == OPER && (
-					((COperToken*)curToken)->lexem == "begin"))		//TODO(не только эти)
+					((COperToken*)curToken)->getLexem() == "begin"))		//TODO(не только эти)
 					return;
-			}
-			else return; //throw PascalExcp();		// неожиданный конец файла
-			try { descrMonotypeVars(); }
-			catch (PascalExcp& e) {
+			} else return; //throw PascalExcp();		// неожиданный конец файла
+			try { descrMonotypeVars(); } catch (PascalExcp& e) {
 				skip(skipSet);
 			}
 		}
 	}
 }
-void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
-{	
+void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 	set <string> constDefSet = { ",", ":", ";", "begin" };
-	try { name(); }
-	catch (PascalExcp& e) {
+	try { name(); } catch (PascalExcp& e) {
 		skip(constDefSet);
 	}
 	while (checkOper(",")) {
 		getNext();		//accept(",")
-		try { name(); }
-		catch (PascalExcp& e) {
+		try { name(); } catch (PascalExcp& e) {
 			skip(constDefSet);
 		}
 	}
@@ -492,12 +456,10 @@ void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp)
 
 void Syntax::blockFunc() {}
 
-void Syntax::blockOpers()throw(PascalExcp, EOFExcp)
-{
+void Syntax::blockOpers()throw(PascalExcp, EOFExcp) {
 	// <раздел операторов>::=<составной оператор>
 	set<string> skipSet = { "end" };
-	try{ compoundOper(skipSet); }
-	catch (PascalExcp& e) {
+	try { compoundOper(skipSet); } catch (PascalExcp& e) {
 		skip(skipSet);
 	}
 }
@@ -507,27 +469,22 @@ void Syntax::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	if (curToken->getType() == OPER && (checkOper("if") || checkOper("while"))) {
 		if (checkOper("if")) {
-			try{ ifOper(skippingSet); }
-			catch (PascalExcp& e) {
+			try { ifOper(skippingSet); } catch (PascalExcp& e) {
 				skip(skippingSet);
 			}
-		}
-		else
+		} else
 			if (checkOper("while")) {
-				try { whileOper(skippingSet); }
-				catch (PascalExcp& e) {
+				try { whileOper(skippingSet); } catch (PascalExcp& e) {
 					skip(skippingSet);
 				}
 			}
-	}
-	else{
+	} else {
 		try {
 			if (skippingSet.find("end") == skippingSet.end()) skippingSet.insert("end");
 			compoundOper(skippingSet);
-		}
-		catch (PascalExcp& e) {
+		} catch (PascalExcp& e) {
 			skip(skippingSet);
-			cout<<"compound excp"<<endl;
+			cout << "compound excp" << endl;
 		}
 
 	}
@@ -536,28 +493,25 @@ void Syntax::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <условный оператор>::= if <выражение> then <оператор>|
 	// if <выражение> then <оператор> else <оператор>
 	ifNullThrowExcp();
-	set<string> skipIfSet (skippingSet);	// copy set
+	set<string> skipIfSet(skippingSet);	// copy set
 	skipIfSet.insert("then");
 	accept("if");
-	try {expression(skipIfSet);}
-	catch (PascalExcp& e) {
+	try { expression(skipIfSet); } catch (PascalExcp& e) {
 		skip(skipIfSet);
 	}
 	accept("then");
-	set<string> skipThenSet(skippingSet);	
+	set<string> skipThenSet(skippingSet);
 	skipThenSet.insert("else");
-	try {oper(skipThenSet);}
-	catch (PascalExcp& e) {
+	try { oper(skipThenSet); } catch (PascalExcp& e) {
 		skip(skipThenSet);
 	}
 	if (checkOper("else")) {
 		accept("else");
-		try { oper(skippingSet); }
-		catch (PascalExcp& e) {
+		try { oper(skippingSet); } catch (PascalExcp& e) {
 			skip(skippingSet);
 		}
 	}
-	
+
 }
 void Syntax::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	//<цикл с предусловием>::= while <выражение> do <оператор>
@@ -565,13 +519,11 @@ void Syntax::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	set<string> skipIfSet(skippingSet);	// copy set
 	skipIfSet.insert("do");
 	accept("while");
-	try { expression(skipIfSet); }
-	catch (PascalExcp& e) {
+	try { expression(skipIfSet); } catch (PascalExcp& e) {
 		skip(skipIfSet);
 	}
 	accept("do");
-	try { oper(skippingSet); }
-	catch (PascalExcp& e) {
+	try { oper(skippingSet); } catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
 }
@@ -581,28 +533,25 @@ void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	accept("begin");
 	// проверяем, есть ли операторы или сразу end
 	if (curToken != nullptr) {
-		if (curToken->getType() == OPER && ((COperToken*)curToken)->lexem == "end") {
+		if (curToken->getType() == OPER && ((COperToken*)curToken)->getLexem() == "end") {
 			getNext();
 			return;
 		}
 	}
 	skippingSet.insert(";");
-	try{ oper(skippingSet); }
-	catch (PascalExcp& e) {
+	try { oper(skippingSet); } catch (PascalExcp& e) {
 		// writeMistake(6);
 		skip(skippingSet);
 	}
-	
-	while (!checkOper("end")) {		
-		try{ accept(";"); }
-		catch (PascalExcp& e) {}
+
+	while (!checkOper("end")) {
+		try { accept(";"); } catch (PascalExcp& e) {}
 		//TODO(костыль, поскольку else никто, кроме if, не съедает и на нем зацикливание)
-		if (checkOper("else")) { 
+		if (checkOper("else")) {
 			writeMistake(6);
-			getNext(); 
+			getNext();
 		}
-		try { oper(skippingSet); }
-		catch (PascalExcp& e) {
+		try { oper(skippingSet); } catch (PascalExcp& e) {
 			// writeMistake(6);
 			skip(skippingSet);
 		}
@@ -621,22 +570,19 @@ void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// если ;, то в простом операторе есть <пусто>
 	if (curToken->getType() == OPER && (checkOper("begin") || checkOper("if") || checkOper("while"))) {
 		{
-			try{ diffOper(skippingSet); }
-			catch (PascalExcp& e) {
+			try { diffOper(skippingSet); } catch (PascalExcp& e) {
 				skippingSet.insert("end");
 				skip(skippingSet);
 			}
 		}
-	}
-	else
+	} else
 		//TODO(не уверена насчет обработки неож оператора)
-		if(curToken->getType()!=OPER || ((COperToken*)curToken)->lexem==";" ||
-			((COperToken*)curToken)->lexem == "end")
-			try {simpleOper(skippingSet);}
-			catch(PascalExcp& e){
-				skip(skippingSet);
-			}
-		// встречен неожиданный оператор
+		if (curToken->getType() != OPER || ((COperToken*)curToken)->getLexem() == ";" ||
+			((COperToken*)curToken)->getLexem() == "end")
+			try { simpleOper(skippingSet); } catch (PascalExcp& e) {
+			skip(skippingSet);
+		}
+	// встречен неожиданный оператор
 		else {
 			writeMistake(6);
 			// cout << "Not sure" << endl;
@@ -649,7 +595,7 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
 	ifNullThrowExcp();
 	// <пусто>
-	if (curToken->getType() == OPER && (checkOper(";")||checkOper("end")))
+	if (curToken->getType() == OPER && (checkOper(";") || checkOper("end")))
 		return;
 	assignOper(skippingSet);
 }
@@ -664,14 +610,12 @@ void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 }
 void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
-	try { simpleExpr(); }
-	catch (PascalExcp& e) {
+	try { simpleExpr(); } catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
 	if (isBoolOper()) {
 		getNext();		// accept
-		try { simpleExpr(); }
-		catch (PascalExcp& e) {
+		try { simpleExpr(); } catch (PascalExcp& e) {
 			skip(skippingSet);
 		}
 	}
@@ -695,8 +639,7 @@ void Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	offset -= offsetD;
 }
 
-void Syntax::term() throw(PascalExcp, EOFExcp)
-{
+void Syntax::term() throw(PascalExcp, EOFExcp) {
 	// cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
 	offset += offsetD;
 	ifNullThrowExcp();
@@ -709,8 +652,7 @@ void Syntax::term() throw(PascalExcp, EOFExcp)
 	offset -= offsetD;
 }
 
-void Syntax::factor() throw(PascalExcp, EOFExcp)
-{
+void Syntax::factor() throw(PascalExcp, EOFExcp) {
 	//<множитель>::=<переменная>|<константа без знака>|
 	//(<выражение>) | <обозначение функции> | <множество> | not <множитель>
 	// cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
@@ -737,7 +679,7 @@ void Syntax::factor() throw(PascalExcp, EOFExcp)
 
 	set<string> s;
 	var(s);						// <переменная>
-	
+
 	offset -= offsetD;
 }
 
@@ -745,7 +687,7 @@ bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	// число без знака
-	if (curToken->getType() == VALUE) {	
+	if (curToken->getType() == VALUE) {
 		// cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
 		getNext();
 		return true;
@@ -765,22 +707,19 @@ void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	getNext();
 }
 
-void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp)
-{
+void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp) {
 	if (curToken != nullptr && curToken->getType() == UNDEF) {
 		writeMistake(6);
 		throw PascalExcp();
 	}
 }
 
-void Syntax::writeMistake(int code)
-{
-	cout << "Mistake "<<code<<": "<< lexic->getStartPosition() << endl;
+void Syntax::writeMistake(int code) {
+	cout << "Mistake " << code << ": " << lexic->getStartPosition() << endl;
 	erManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
 }
 
-void Syntax::writeMistake(int code, int pos, int oldLineNum)
-{
+void Syntax::writeMistake(int code, int pos, int oldLineNum) {
 	cout << "Mistake2 " << code << ": " << pos << endl;
 	erManager->addError(pos, oldLineNum, code);
 }
@@ -791,8 +730,7 @@ void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	oper = toLower(oper);
-	if (curToken->getType() != OPER || ((COperToken*)curToken)->lexem != oper)
-	{
+	if (curToken->getType() != OPER || ((COperToken*)curToken)->getLexem() != oper) {
 		if (oper == "program") writeMistake(3);
 		else if (oper == ")") writeMistake(4);
 		else if (oper == ":") writeMistake(5);
@@ -816,7 +754,7 @@ void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
 		throw PascalExcp();
 		return;
 	}
-	if (((COperToken*)curToken)->lexem != oper) {
+	if (((COperToken*)curToken)->getLexem() != oper) {
 		throw PascalExcp();
 		return;
 	}
@@ -830,26 +768,23 @@ bool Syntax::tryAccept(string oper) throw(PascalExcp, EOFExcp) {
 		throw PascalExcp();
 		// throw exception("Expected another op");
 	}
-	if (((COperToken*)curToken)->lexem != oper) {
+	if (((COperToken*)curToken)->getLexem() != oper) {
 		return false;
 	}
 	getNext();
 	return true;
 }
 
-bool Syntax::checkOper(string oper)
-{
+bool Syntax::checkOper(string oper) {
 	if (curToken == nullptr) return false;
 	if (curToken->getType() == OPER &&
-		((COperToken*)curToken)->lexem == oper)
+		((COperToken*)curToken)->getLexem() == oper)
 		return true;
 	return false;
 }
 
-bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp)
-{
-	if (curToken == nullptr)
-	{
+bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp) {
+	if (curToken == nullptr) {
 		erManager->addError(lexic->getCurPosInLine(), lexic->getCurLine(), 1000);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
 		throw EOFExcp();
 		// throw exception("Reached eof");
@@ -857,39 +792,38 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp)
 	return false;
 }
 
-bool Syntax::isBoolOper()
-{
+bool Syntax::isBoolOper() {
 	// <операция отношения>::==|<>|<|<=|>=|>|in
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
-	return ((COperToken*)curToken)->lexem == string("=") ||
-		((COperToken*)curToken)->lexem == string("<>") ||
-		((COperToken*)curToken)->lexem == string("<") ||
-		((COperToken*)curToken)->lexem == string("<=") ||
-		((COperToken*)curToken)->lexem == string(">=") ||
-		((COperToken*)curToken)->lexem == string(">") ||
-		((COperToken*)curToken)->lexem == string("in");
+	return ((COperToken*)curToken)->getLexem() == string("=") ||
+		((COperToken*)curToken)->getLexem() == string("<>") ||
+		((COperToken*)curToken)->getLexem() == string("<") ||
+		((COperToken*)curToken)->getLexem() == string("<=") ||
+		((COperToken*)curToken)->getLexem() == string(">=") ||
+		((COperToken*)curToken)->getLexem() == string(">") ||
+		((COperToken*)curToken)->getLexem() == string("in");
 }
 
 bool Syntax::isAdditiveOper() {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
-	return ((COperToken*)curToken)->lexem == string("+") ||
-		((COperToken*)curToken)->lexem == string("-") ||
-		((COperToken*)curToken)->lexem == string("or");
+	return ((COperToken*)curToken)->getLexem() == string("+") ||
+		((COperToken*)curToken)->getLexem() == string("-") ||
+		((COperToken*)curToken)->getLexem() == string("or");
 }
 
 bool Syntax::isMultOper() {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
-	return ((COperToken*)curToken)->lexem == string("*") ||
-		((COperToken*)curToken)->lexem == string("/") ||
-		((COperToken*)curToken)->lexem == string("div") ||
-		((COperToken*)curToken)->lexem == string("mod") ||
-		((COperToken*)curToken)->lexem == string("and");
+	return ((COperToken*)curToken)->getLexem() == string("*") ||
+		((COperToken*)curToken)->getLexem() == string("/") ||
+		((COperToken*)curToken)->getLexem() == string("div") ||
+		((COperToken*)curToken)->getLexem() == string("mod") ||
+		((COperToken*)curToken)->getLexem() == string("and");
 }
 
 
@@ -898,8 +832,8 @@ bool Syntax::acceptSign() throw (PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	if (curToken->getType() != OPER) return false;
-	if (((COperToken*)curToken)->lexem == "+" ||
-		((COperToken*)curToken)->lexem == "-")
+	if (((COperToken*)curToken)->getLexem() == "+" ||
+		((COperToken*)curToken)->getLexem() == "-")
 		getNext();
 	return true;
 }

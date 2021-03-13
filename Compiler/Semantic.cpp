@@ -16,6 +16,9 @@ void CSemantic::createFictiveScope() {
 	scopesLst.push_back(fictiveScp);
 	(*fictiveScp).createFictive();
 }
+void CSemantic::createScope() {
+	scopesLst.push_back(CScope(scopesLst.back()));
+}
 
 CScope::CScope(CScope* outerScopes) {
 	this->outerScope = outerScope;

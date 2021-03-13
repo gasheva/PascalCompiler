@@ -6,8 +6,7 @@ using namespace std;
 
 CTokenFactory::CTokenFactory() {}
 
-CToken* CTokenFactory::createToken(string lexem)
-{
+CToken* CTokenFactory::createToken(string lexem) {
 	string lowerLexem = toLower(lexem);
 	// является ли char (тип value)
 	if (lexem.length() == 3 && lexem[0] == '\'' && lexem[lexem.length() - 1] == '\'')
@@ -26,7 +25,7 @@ CToken* CTokenFactory::createToken(string lexem)
 		int temp = std::stoi(lexem);
 		return new CValueToken(CIntVariant(temp));
 	}
-	
+
 	if (regex_match(lexem, regex(R"(\d+\.\d+)"))) {
 		float temp = std::stof(lexem);
 		return new CValueToken(CRealVariant(temp));
@@ -40,4 +39,4 @@ CToken* CTokenFactory::createToken(string lexem)
 }
 
 
-CTokenFactory::~CTokenFactory(){}
+CTokenFactory::~CTokenFactory() {}

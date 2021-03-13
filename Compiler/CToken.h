@@ -44,8 +44,10 @@ private:
 */
 class CIdentToken: public CToken{
 	using CToken::CToken;
-public:
+private:
 	string lexem;
+public:
+	string getLexem() { return lexem; }
 	CIdentToken(string lexem);
 	~CIdentToken();
 };
@@ -55,8 +57,10 @@ public:
 */
 class COperToken: public CToken {
 	using CToken::CToken;
-public:
+private:	
 	string lexem;
+public:
+	string getLexem(){return lexem;}
 	COperToken(string lexem);
 	~COperToken();
 };

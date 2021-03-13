@@ -71,4 +71,5 @@ public:
 	~CSemantic();
 	void createFictiveScope();
 	void createScope();
+	CScope* getLast() { return &scopesLst.back(); }
 };
