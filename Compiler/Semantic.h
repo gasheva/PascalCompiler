@@ -6,6 +6,7 @@
 #include <stack>
 #include "CTypes.h"
 #include <set>
+#include <unordered_map>
 
 using namespace std;
 
@@ -21,6 +22,7 @@ public:
 	CIdetificator(string name, EBlock block, CType* type);
 	CIdetificator(string name, EBlock block);
 	CIdetificator(string name);
+	CIdetificator();
 	~CIdetificator();
 	string getName() const { return name; }
 	EBlock getBlock() const { return block; }
@@ -39,12 +41,9 @@ private:
 			return ident.getName().compare(ident2.getName());
 		}
 	};
-	map<string , CIdetificator> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
+	unordered_map<string , CIdetificator> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
 	list<CType> typeTbl;		// таблица типов
 
-
-	CType* findIdent(string name, set<EBlock> block);				// возвращает тип
-	// CType* getBase(string typeName);			// проверить базовый тип
 public:
 	CScope(CScope* outerScope);
 	~CScope();						

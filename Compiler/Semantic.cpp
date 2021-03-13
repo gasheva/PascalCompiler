@@ -127,28 +127,27 @@ void CScope::setBlock(EBlock block) {
 	flagBlock = block;
 }
 
-CType* CScope::findType(string name, set<EBlock> block) {
+CType* CScope::findType(string name, const set<EBlock> block) {
 	CType* type = nullptr;
-	if (identTbl.find(name) < identTbl.end()) {
+	if (identTbl.find(name) != identTbl.end()) {
 		// идентификатор найден
-		//if (block.find((identTbl[name]).getBlock()) != block.end()) {
-		//	return (identTbl[name].getType());		// тип найден, возвращаемся
-		//} else {
-		//	// идентификатор найден, но это не тип
-		//}
+		if (block.find((identTbl[name]).getBlock()) != block.end()) {
+			return (identTbl[name].getType());		// тип найден, возвращаемся
+		} else {
+			// идентификатор найден, но это не тип
+		}
 
 	} else {
 		if (outerScope != nullptr)
-			type = outerScope->findIdent(name, block);
+			type = outerScope->findType(name, block);
 		else return nullptr;
 	}
 	return type;
-	return nullptr;
 }
 
 void CScope::createFictive() {
 	typeTbl.push_back(CBaseType(eINT));
-	identTbl.insert(pair<string, CIdetificator>("integer", CIdetificator("integer", TYPEBL, &(typeTbl.back()))));
+	identTbl.insert({ "integer", CIdetificator("integer", TYPEBL, &(typeTbl.back())) });
 
 
 	typeTbl.push_back(CBaseType(eREAL));
@@ -171,5 +170,7 @@ CIdetificator::CIdetificator(string name, EBlock block, CType* type) {
 CIdetificator::CIdetificator(string name, EBlock block) {}
 
 CIdetificator::CIdetificator(string name) {}
+
+CIdetificator::CIdetificator() {}
 
 CIdetificator::~CIdetificator() {}
