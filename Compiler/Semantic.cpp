@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "CVariant.h"
 #include <set>
+#include<tuple>
 
 using namespace std;
 
@@ -87,8 +88,8 @@ void CScope::addToBuffer(string typeName) {
 			auto typeName = (*type).getType();
 			switch (typeName) {
 			case eARRAY:
-				auto arType = (CArrayType*)type;
-				arType->getIndexType();		//TODO()
+				//auto arType = (CArrayType*)type;
+				//arType->getIndexType();		//TODO()
 				break;
 			case eSUBRANGE:
 				break;

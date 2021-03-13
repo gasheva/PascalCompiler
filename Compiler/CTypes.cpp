@@ -16,8 +16,6 @@ bool CSubrangeType::setElType(CType* type) {
 	return elType==type;
 }
 
-CSubrangeType::CSubrangeType(CType* elType) {}
-
 void CSubrangeType::addEl(string el) {
 	childEls.push_back(el);
 }
