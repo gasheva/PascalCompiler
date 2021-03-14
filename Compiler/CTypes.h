@@ -62,13 +62,13 @@ class CArrayType : public CType {
 	using CType::CType;
 private:
 	CType* elType;
-	CType* indexType;
+	list<CType*> indexType;
 	int dimension;				// размерность массива
 public:
 	const CType* getElType() { return elType; }
-	const CType* getIndexType() { return indexType; }
+	void addIndexType(CType* indexType);
 	int getDimension() const { return dimension; }
-	CArrayType(CType* elType, CType* indexType);
+	CArrayType(CType* elType);
 	CArrayType();
 	~CArrayType();
 };

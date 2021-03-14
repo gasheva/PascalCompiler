@@ -134,7 +134,7 @@ string Lexic::getLexem()
 			res += (*text)[oldPos];
 			if (toLower(res) == "end") {
 				if (oldPos < (*text).length() && (*text)[oldPos + 1]=='.') {
-					return res;
+					return toLower(res);
 				}
 				
 			}
@@ -145,13 +145,13 @@ string Lexic::getLexem()
 		if (found != std::string::npos) {
 			res = res.substr(0, found);
 		}
-		return res;
+		return toLower(res);
 	}
 	// если ничего из вышеперечисленного, то неопределенный символ
 	res += (*text)[oldPos];
 	// errorManager->addError(oldPos, lineNum, 6);
 
-    return res;
+	return toLower(res);
 }
 
 Lexic::Lexic(CErrorManager* errorManager, const string *text)

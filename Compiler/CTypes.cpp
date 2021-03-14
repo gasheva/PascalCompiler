@@ -40,7 +40,13 @@ void CEnumType::addEl(CEnumElType* el) {
 	els.push_back(el);
 }
 
-CArrayType::CArrayType(CType* elType, CType* indexType) : CType(eARRAY) {}
+CArrayType::CArrayType(CType* elType) : CType(eARRAY) {
+	this->elType = elType;
+}
+
+void CArrayType::addIndexType(CType* indexType) {
+	this->indexType.push_back(indexType);
+}
 
 CArrayType::CArrayType() : CType(eARRAY) {}
 
@@ -48,7 +54,9 @@ CArrayType::~CArrayType() {}
 
 CSubrangeType::CSubrangeType(): CType(eSUBRANGE){}
 CSubrangeType::~CSubrangeType(){}
-CSubrangeType::CSubrangeType(CType* elType): CType(eSUBRANGE){}
+CSubrangeType::CSubrangeType(CType* elType): CType(eSUBRANGE){
+	this->elType = elType;
+}
 
 CEnumElType::CEnumElType() : CType(eENUMEL) {}
 
