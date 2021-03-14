@@ -5,7 +5,7 @@
 using namespace std;
 
 enum EType {
-	eINT, eREAL, eSTRING, eCHAR, eARRAY, eSUBRANGE, eENUM, eNONE
+	eINT, eREAL, eSTRING, eCHAR, eARRAY, eSUBRANGE, eENUM, eENUMEL, eNONE
 };
 
 class CType {
@@ -24,6 +24,20 @@ public:
 	~CNoneType();
 };
 
+class CEnumType;
+
+class CEnumElType : public CType {
+	using CType::CType;
+private:
+	CEnumType* parent;
+public:
+	CEnumElType();
+	CEnumElType(CEnumType* parent);
+	~CEnumElType();
+	void setParent(CEnumType* parent);
+	CEnumType* getParent() { return parent; };
+};
+
 /// <summary>
 /// Класс соответствующий простым (базовым) типам
 /// </summary>
@@ -38,11 +52,11 @@ public:
 class CEnumType : public CType {
 	using CType::CType;
 private:
-	list<string> constants;			// список констант
+	list<CEnumElType*> els;			// список констант
 public:
-	CEnumType(list<string> constants);
 	CEnumType();
 	~CEnumType();
+	void addEl(CEnumElType* el);
 };
 class CArrayType : public CType {
 	using CType::CType;

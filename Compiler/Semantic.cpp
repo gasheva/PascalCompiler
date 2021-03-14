@@ -216,8 +216,23 @@ void CScope::createFictive() {
 	typeTbl.push_back(CBaseType(eCHAR));
 	identTbl.insert(pair<string, CIdetificator>("char", CIdetificator("char", TYPEBL, &(typeTbl.back()))));
 
-	typeTbl.push_back(CEnumType(list<string>{"true", "false"}));
-	identTbl.insert(pair<string, CIdetificator>("boolean", CIdetificator("boolean", TYPEBL, &(typeTbl.back()))));
+	// boolean
+	typeTbl.push_back(CEnumType());
+	auto boolPtr = &(typeTbl.back());
+	identTbl.insert({ "boolean", CIdetificator("boolean", TYPEBL, boolPtr) });
+
+	typeTbl.push_back(CEnumElType());
+	identTbl.insert({ "true", CIdetificator("true", VARBL, &(typeTbl.back())) });
+	typeTbl.push_back(CEnumElType());
+	identTbl.insert({ "false", CIdetificator("false", VARBL, &(typeTbl.back())) });
+
+	// создание предопределенных констант
+	typeTbl.push_back(CBaseType(eINT));
+	identTbl.insert({ "maxint", CIdetificator("maxint", VARBL, &(typeTbl.back())) });
+	typeTbl.push_back(CBaseType(eINT));
+	identTbl.insert({ "minint", CIdetificator("minint", VARBL, &(typeTbl.back())) });
+	typeTbl.push_back(CBaseType(eREAL));
+	identTbl.insert({ "pi", CIdetificator("pi", VARBL, &(typeTbl.back())) });
 }
 
 CIdetificator::CIdetificator(string name, EBlock block, CType* type) {

@@ -32,11 +32,13 @@ CBaseType::CBaseType(EType type) : CType(type) {}
 
 CBaseType::~CBaseType() {}
 
-CEnumType::CEnumType(list<string> constants) : CType(eENUM) {}
-
 CEnumType::CEnumType() : CType(eENUM) {}
 
 CEnumType::~CEnumType() {}
+
+void CEnumType::addEl(CEnumElType* el) {
+	els.push_back(el);
+}
 
 CArrayType::CArrayType(CType* elType, CType* indexType) : CType(eARRAY) {}
 
@@ -47,3 +49,15 @@ CArrayType::~CArrayType() {}
 CSubrangeType::CSubrangeType(): CType(eSUBRANGE){}
 CSubrangeType::~CSubrangeType(){}
 CSubrangeType::CSubrangeType(CType* elType): CType(eSUBRANGE){}
+
+CEnumElType::CEnumElType() : CType(eENUMEL) {}
+
+CEnumElType::CEnumElType(CEnumType* parent) : CType(eENUMEL) {
+	this->parent = parent;
+}
+
+CEnumElType::~CEnumElType() {}
+
+void CEnumElType::setParent(CEnumType* parent) {
+	this->parent = parent;
+}

@@ -81,7 +81,6 @@ void Syntax::removeToken() {
 		delete curToken;
 }
 
-
 void Syntax::program() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	set<string> nameSet = { "(", ",", ";", "const", "var", "begin" };
@@ -321,6 +320,7 @@ pair<EType, string> Syntax::constanta()throw(PascalExcp, EOFExcp) {
 void Syntax::blockTypes() {
 	//<раздел типов>::=<пусто>|type <определение типа>;{<определение типа>; }
 	semantic->getLast()->setBlock(TYPEBL);
+	semantic->getLast()->clearBuffs();
 	ifNullThrowExcp();
 	set <string> skipSet = { ";", "begin", "var" };
 	if (checkOper("type")) {
@@ -328,7 +328,9 @@ void Syntax::blockTypes() {
 		try { typeDef(); }		//<определение типа>
 		catch (PascalExcp& e) {
 			skip(skipSet);
+			semantic->getLast()->createNone();
 		}
+		semantic->getLast()->clearBuffs();
 		// {<определение типа>;}
 		while (checkOper(";")) {
 			getNext();
@@ -340,14 +342,16 @@ void Syntax::blockTypes() {
 			} else return; //throw PascalExcp();		// неожиданный конец файла
 			try { typeDef(); } catch (PascalExcp& e) {
 				skip(skipSet);
+				semantic->getLast()->createNone();
 			}
+			semantic->getLast()->clearBuffs();
 		}
 	}
 }
 
 void Syntax::typeDef()throw(PascalExcp, EOFExcp) {
 	//<определение типа>::=<имя>=<тип>
-	name();
+	semantic->getLast()->addToNameBuffer(name());
 	accept("=");
 	type();
 }
