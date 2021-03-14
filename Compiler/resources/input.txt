@@ -1,4 +1,6 @@
 PROGRAM pre(f1); 
+const 9a = k2;
+	  9b = a;
 type mas = array [(a,b,c), 'a'..'z']
 			of array [2..30] of real;
 var b, a : number; c: two.. three;

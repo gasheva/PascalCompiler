@@ -5,23 +5,28 @@
 
 using namespace std;
 
-CSemantic::CSemantic() {}
+CSemantic::CSemantic(CErrorManager* eManager, Lexic* lexic) {
+	this->eManager = eManager;
+	this->lexic = lexic;
+}
 
 CSemantic::~CSemantic() {}
 
 void CSemantic::createFictiveScope() {
 	// integer, real, string, char - BaseType, true, false - EnumType
-	scopesLst.push_back(CScope(nullptr));
+	//scopesLst.push_back(CScope(nullptr, this));
+	scopesLst.push_back(CScope(nullptr, this->lexic, this->eManager));
 	auto fictiveScp = &scopesLst.back();
-	scopesLst.push_back(fictiveScp);
 	(*fictiveScp).createFictive();
 }
 void CSemantic::createScope() {
-	scopesLst.push_back(CScope(scopesLst.back()));
+	scopesLst.push_back(CScope(&scopesLst.back(), lexic, eManager));
 }
 
-CScope::CScope(CScope* outerScopes) {
+CScope::CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager) {
 	this->outerScope = outerScope;
+	this->lexic = lexic;
+	this->eManager = eManager;
 }
 
 CScope::~CScope() {}
@@ -44,6 +49,33 @@ void CScope::clearTypesBuff() {
 	typesBuff.clear();
 }
 void CScope::clearNamesBuff() {
+	CType* none = nullptr;
+	// если произошла кака€-то ошибка в синтаксисе и не был передан тип
+	if (typesBuff.empty()) {
+		typeTbl.push_back(CNoneType());
+		for (auto name : namesBuff) {
+			identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
+		}
+		namesBuff.clear();
+		return;
+	}
+	// если хот€ бы один из типов не корректен, то и тип, включающий его также некорректен
+	for (auto type : typesBuff) {
+		if (type->getType() == eNONE) {
+			none = type;
+			break;
+		}
+	}
+	if (none!=nullptr) {
+		for (auto name : namesBuff) {
+			identTbl.insert({ name, CIdetificator(name, flagBlock, none) });
+		}
+	}
+	else
+		// если тип определен корректно, то присваиваем его всем переменным
+		for (auto name: namesBuff) {
+			identTbl.insert({ name, CIdetificator(name, flagBlock, typesBuff.front()) });
+		}
 	namesBuff.clear();
 }
 void CScope::addToNameBuffer(string name) {
@@ -51,22 +83,34 @@ void CScope::addToNameBuffer(string name) {
 }
 
 void CScope::defineConst(EType type, string constRight) {
-	// объвление константы происходит без использование буфера
 	// провер€ем объ€влена ли константа в данном скоупе
 	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
-		// TODO(throw already_defined)
+		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого об€ъвлени€
+		writeMistake(101);
+		namesBuff.clear();
 	} else {
 		// создаем объ€вление константы
 		// если справа идентификатор, ищем его среди объ€вленных констант
 		if (type == eNONE) {
-			findType(constRight, set<EBlock>{CONSTBL});
+			auto type = findType(constRight, set<EBlock>{CONSTBL});
+			// если переменна€ не найдена
+			if (type == nullptr) {
+				writeMistake(1002);
+			} else {
+				typesBuff.push_back(type);
+			}
 		} else {
 			// создаем безым€нный тип дл€ строки, числа и тд
 			typeTbl.push_back(defineAndCreateType(type));
 			auto type = (&typeTbl.back());
-			identTbl.insert(pair<string, CIdetificator>(namesBuff.front(), CIdetificator(namesBuff.front(), flagBlock, type)));
+			typesBuff.push_back(type);
+			//identTbl.insert(pair<string, CIdetificator>(namesBuff.front(), CIdetificator(namesBuff.front(), flagBlock, type)));
 		}
 	}
+}
+void CScope::createNone() {
+	typeTbl.push_back(CNoneType());
+	typesBuff.push_back(&typeTbl.back());
 }
 void CScope::addToBuffer(EType type) {
 	if (flagBlock == TYPEBL) {
@@ -142,7 +186,8 @@ CType* CScope::findType(string name, const set<EBlock> block) {
 		if (block.find((identTbl[name]).getBlock()) != block.end()) {
 			return (identTbl[name].getType());		// тип найден, возвращаемс€
 		} else {
-			// идентификатор найден, но это не тип
+			// идентификатор найден, но это не того типа
+			return nullptr;
 		}
 
 	} else {
@@ -153,10 +198,14 @@ CType* CScope::findType(string name, const set<EBlock> block) {
 	return type;
 }
 
+void CScope::writeMistake(int code) {
+	cout << "Mistake " << code << ": " << lexic->getStartPosition() << endl;
+	eManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
+}
+
 void CScope::createFictive() {
 	typeTbl.push_back(CBaseType(eINT));
 	identTbl.insert({ "integer", CIdetificator("integer", TYPEBL, &(typeTbl.back())) });
-
 
 	typeTbl.push_back(CBaseType(eREAL));
 	identTbl.insert(pair<string, CIdetificator>("real", CIdetificator("real", TYPEBL, &(typeTbl.back()))));
@@ -172,12 +221,10 @@ void CScope::createFictive() {
 }
 
 CIdetificator::CIdetificator(string name, EBlock block, CType* type) {
-
+	this->name = name;
+	this->block = block;
+	this->type = type;
 }
-
-CIdetificator::CIdetificator(string name, EBlock block) {}
-
-CIdetificator::CIdetificator(string name) {}
 
 CIdetificator::CIdetificator() {}
 

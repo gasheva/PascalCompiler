@@ -1,9 +1,10 @@
 #include "CVariant.h"
 #include <iostream>
 
-CVariant::CVariant(EVarType type)
+CVariant::CVariant(EVarType type, string lexem)
 {
 	this->T = type;
+	this->lexem = lexem;
 }
 EVarType CVariant::getType()
 {
@@ -13,7 +14,7 @@ CVariant::CVariant(){ }
 CVariant::~CVariant(){}
 
 
-CIntVariant::CIntVariant(int val) : CVariant(INT)
+CIntVariant::CIntVariant(int val) : CVariant(INT, to_string(val))
 {
 	// std::cout << "[C] CIntVariant constructor" << std::endl;
 	this->m_val = val;
@@ -23,25 +24,20 @@ CIntVariant::~CIntVariant() {
 };
 
 
-CRealVariant::CRealVariant(float val) : CVariant(REAL)
+CRealVariant::CRealVariant(float val) : CVariant(REAL, to_string(val))
 {
 	this->m_val = val;
 }
 CRealVariant::~CRealVariant() {};
 
 
-CStringVariant::CStringVariant(string lexem) : CVariant(STRING) {
+CStringVariant::CStringVariant(string lexem) : CVariant(STRING, lexem) {
 	this->m_val = lexem;
 }
 CStringVariant::~CStringVariant(){}
 
 
-CCharVariant::CCharVariant(char ch) : CVariant(CHAR) {
+CCharVariant::CCharVariant(char ch) : CVariant(CHAR, to_string(ch)) {
 	this->m_val = ch;
 }
 CCharVariant::~CCharVariant(){}
-
-CBooleanVariant::CBooleanVariant(bool b) : CVariant(BOOLEAN) {
-	this->m_val = b;
-}
-CBooleanVariant::~CBooleanVariant() {}

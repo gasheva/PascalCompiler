@@ -3,6 +3,21 @@
 #include "FStringFunc.h"
 
 
+EType Syntax::ssTypeAdapter(EVarType type) {
+	switch (type) {
+	case INT:
+		return eINT;
+	case REAL:
+		return eREAL;
+	case STRING:
+		return eSTRING;
+	case CHAR:
+		return eCHAR;
+	default:
+		return eNONE;
+	}
+}
+
 Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic) {
 	this->erManager = erManager;
 	this->lexic = lexic;
@@ -37,21 +52,6 @@ void Syntax::startVer() {
 		cout << "[!]EOF EXCEPTION" << endl;
 		return;
 	}
-
-	//// TODO(пропуск строки)
-	//try {
-	//	simpleExpr();
-	//}
-	//catch (PascalExcp& e) {
-	//	cout << "[!]EXCEPTION" << endl;
-	//}
-
-	// пока не достигли конца файла
-	/*while (curToken!= nullptr) {
-
-
-		getNext();
-	}*/
 }
 
 void Syntax::getNext() throw(PascalExcp, EOFExcp) {
@@ -121,13 +121,15 @@ void Syntax::program() throw(PascalExcp, EOFExcp) {
 	}
 }
 
-void Syntax::name() throw(PascalExcp, EOFExcp) {
+string Syntax::name() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	if (curToken->getType() != IDENT) {
 		writeMistake(2);
 		throw PascalExcp();
 	}
+	string nameStr = ((CIdentToken*)curToken)->getLexem();
 	getNext();
+	return nameStr;
 }
 
 bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) throw(PascalExcp, EOFExcp) {
@@ -242,7 +244,6 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 void Syntax::blockMarks() {}
 void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->clearBuffs();
-
 	ifNullThrowExcp();
 	set <string> constDefSet = { ";", "var", "begin", "type" };
 	semantic->getLast()->setBlock(CONSTBL);
@@ -252,6 +253,7 @@ void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 		try { constDef(); 
 		} catch (PascalExcp& e) {
 			skip(constDefSet);
+			semantic->getLast()->createNone();
 		}
 		semantic->getLast()->clearBuffs();
 
@@ -267,25 +269,24 @@ void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 			try { constDef(); 
 			} catch (PascalExcp& e) {
 				skip(constDefSet);
+				semantic->getLast()->createNone();
 			}
 			semantic->getLast()->clearBuffs();
-
 		}
 	}
+	semantic->getLast()->clearBuffs();
 }
 void Syntax::constDef()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
-	string tmpName = "";
-	if (curToken->getType() == IDENT) tmpName = ((CIdentToken*)curToken)->getLexem();
-	name();
+	auto constLeft = name();
+	semantic->getLast()->addToNameBuffer(constLeft);
 	accept("=");
-
-	constanta();
+	auto constRight = constanta();
+	semantic->getLast()->defineConst(get<0>(constRight), get<1>(constRight));
 }
-void Syntax::constanta()throw(PascalExcp, EOFExcp) {
+pair<EType, string> Syntax::constanta()throw(PascalExcp, EOFExcp) {
 	//<константа>::=<число без знака>|<знак><число без знака>|
 	//<имя константы> | <знак><имя константы> | <строка>
-
 	//<знак>
 	if (acceptSign()) {
 		// <число без знака>
@@ -293,24 +294,24 @@ void Syntax::constanta()throw(PascalExcp, EOFExcp) {
 			unsignedNum();
 		} else {
 			// <имя константы>
-			name();
+			return std::make_pair(eNONE, name());
 		}
 	} else {
 		// <имя константы>
 		if (curToken->getType() == IDENT) {
-			getNext();
-			return;
+			return  std::make_pair(eNONE, name());
 		}
 		// <строка>
 		if (curToken->getType() == VALUE &&(
 			((CValueToken*)curToken)->getVariant().getType() == STRING) || ((CValueToken*)curToken)->getVariant().getType() == CHAR) {
+			auto constStr = ((CValueToken*)curToken)->getVariant().getLexem();
+			auto resPair = std::make_pair(ssTypeAdapter(((CValueToken*)curToken)->getVariant().getType()), constStr);
 			getNext();		// приняли строку
-			return;
+			return resPair;
 		}
-
 		// <число без знака>
 		try {
-			unsignedNum();		// кинет ошибку
+			return unsignedNum();		// кинет ошибку
 		} catch (PascalExcp& e) {
 			writeMistake(50);
 			throw e;
@@ -319,6 +320,7 @@ void Syntax::constanta()throw(PascalExcp, EOFExcp) {
 }
 void Syntax::blockTypes() {
 	//<раздел типов>::=<пусто>|type <определение типа>;{<определение типа>; }
+	semantic->getLast()->setBlock(TYPEBL);
 	ifNullThrowExcp();
 	set <string> skipSet = { ";", "begin", "var" };
 	if (checkOper("type")) {
@@ -423,6 +425,7 @@ void Syntax::limitedType()throw(PascalExcp, EOFExcp) {
 }
 
 void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
+	semantic->getLast()->setBlock(VARBL);
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
 	set <string> skipSet = { ";", "begin" };
@@ -465,6 +468,7 @@ void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 void Syntax::blockFunc() {}
 
 void Syntax::blockOpers()throw(PascalExcp, EOFExcp) {
+	semantic->getLast()->setBlock(BODYBL);
 	// <раздел операторов>::=<составной оператор>
 	set<string> skipSet = { "end" };
 	try { compoundOper(skipSet); } catch (PascalExcp& e) {
@@ -704,7 +708,7 @@ bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
 
 }
 
-void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
+pair<EType, string> Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	if (curToken->getType() != VALUE) {
 		throw PascalExcp();
 	}
@@ -712,7 +716,9 @@ void Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	if (tokType != INT && tokType != REAL) {
 		throw PascalExcp();
 	}
+	auto resPair = std::make_pair(ssTypeAdapter(tokType), ((CValueToken*)curToken)->getVariant().getLexem());
 	getNext();
+	return resPair;
 }
 
 void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp) {

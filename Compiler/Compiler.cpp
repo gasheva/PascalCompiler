@@ -124,7 +124,7 @@ int main()
 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
     Lexic lexic = Lexic(&eManager, &text);
-    CSemantic semantic = CSemantic();
+    CSemantic semantic = CSemantic(&eManager, &lexic);
     semantic.createFictiveScope();
     semantic.createScope();
 

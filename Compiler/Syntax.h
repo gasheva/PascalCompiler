@@ -27,7 +27,7 @@ private:
 
 
 	void program();
-	void name();
+	string name();
 	void indexVar();
 	void arrayVar();
 	void var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
@@ -44,7 +44,7 @@ private:
 	void blockOpers();
 	
 	void constDef();
-	void constanta();
+	pair<EType, string> constanta();			// возвращает тип константы, eNONE - если это идент, но получаем идент
 	void descrMonotypeVars();	// TODO() пропуск до след имени
 	
 	void type();
@@ -71,7 +71,7 @@ private:
 	void term();		// слагаемое
 	void factor();		// множитель
 	bool unsignedConst();
-	void unsignedNum();
+	pair<EType, string> unsignedNum();
 
 	bool isBoolOper();			// является ли операцией отношения
 	bool isAdditiveOper();		// является ли аддит. операцией
@@ -84,6 +84,7 @@ private:
 	void writeMistake(int code, int pos, int line);
 
 
+	EType ssTypeAdapter(EVarType type);		// адаптер типов синтаксических в семантич
 public:
 	Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic);
 	~Syntax();
