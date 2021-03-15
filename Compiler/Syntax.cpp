@@ -654,8 +654,6 @@ void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 
 void Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
-	// cout <<setw(offset)<<" "<<std::left<< "Checking simple Expr" << endl;
-	offset += offsetD;
 	ifNullThrowExcp();
 
 	acceptSign();
@@ -666,12 +664,10 @@ void Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 		getNext();
 		term();
 	}
-	offset -= offsetD;
 }
 
 void Syntax::term() throw(PascalExcp, EOFExcp) {
 	// cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
-	offset += offsetD;
 	ifNullThrowExcp();
 
 	factor();
@@ -679,51 +675,30 @@ void Syntax::term() throw(PascalExcp, EOFExcp) {
 		getNext();
 		factor();
 	}
-	offset -= offsetD;
 }
 
-void Syntax::factor() throw(PascalExcp, EOFExcp) {
+EType Syntax::factor() throw(PascalExcp, EOFExcp) {
 	//<множитель>::=<переменная>|<константа без знака>|
 	//(<выражение>) | <обозначение функции> | <множество> | not <множитель>
-	// cout <<setw(offset)<<" "<<std::left<< "Checking factor" << endl;
-	offset += offsetD;
 	ifNullThrowExcp();
 
 	if (checkOper("not")) {		// not <множитель>
 		getNext();
-		offset -= offsetD;
-		factor();
-		return;
+		return factor();
 	}
-	if (unsignedConst()) {		// константа без знака
-		offset -= offsetD;
-		return;
+	if (curToken->getType() == VALUE) {		// константа без знака
+		auto curTokenType = ((CValueToken*)curToken)->getVariant().getType();
+		getNext();
+		return semantic->getLast()->defineType(curTokenType, "");
 	}
 
 	if (checkOper("(")) {		// (<выражение>)
 		accept("(");
-		simpleExpr();
+		auto curTokenType = simpleExpr();
 		accept(")");
-		return;
+		return semantic->getLast()->defineType(curTokenType, "");
 	}
-
-	set<string> s;
-	var(s);						// <переменная>
-
-	offset -= offsetD;
-}
-
-bool Syntax::unsignedConst()throw(PascalExcp, EOFExcp) {
-	ifNullThrowExcp();
-
-	// число без знака
-	if (curToken->getType() == VALUE) {
-		// cout <<setw(offset)<<" "<<std::left<< "Checking unsigned Const" << endl;
-		getNext();
-		return true;
-	}
-	return false;
-
+	var(set<string>());						// <переменная>
 }
 
 pair<EType, string> Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {

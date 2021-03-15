@@ -67,6 +67,8 @@ public:
 	void createNone();
 
 	void setBlock(EBlock block);
+
+	EType defineType(EVarType type, string identName);		// определяет семантический тип переменной из синтаксического, также находит тип идентификатора
 };
 
 class CSemantic {

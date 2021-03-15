@@ -12,9 +12,6 @@ private:
 	CSemantic* semantic;
 	CToken* curToken;
 
-	int offset = 0;
-	int offsetD = 5;
-
 	void getNext();		// получить следующий токен
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
 	void removeToken();	// очистить память
@@ -61,16 +58,13 @@ private:
 	void ifOper(set<string> skippingSet);
 	void whileOper(set<string> skippingSet);
 	void simpleOper(set<string> skippingSet);
-	void assignOper(set<string> skippingSet);		// оператор присваивания		//TODO 
-	void goOper();			// оператор перехода
-	void emptyOper();		// пустой оператор
+	void assignOper(set<string> skippingSet);		// оператор присваивания
 
 
 	void expression(set<string> skippingSet);		// выражение
 	void simpleExpr();
 	void term();		// слагаемое
-	void factor();		// множитель
-	bool unsignedConst();
+	EType factor();		// множитель
 	pair<EType, string> unsignedNum();
 
 	bool isBoolOper();			// является ли операцией отношения

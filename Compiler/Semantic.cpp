@@ -45,6 +45,27 @@ CType CScope::defineAndCreateType(EType type) {
 		return CNoneType();
 	}
 }
+EType CScope::defineType(EVarType type, string identName) {
+	// попытка найти и определить тип идентификатора
+	if (identName != "") {
+		auto typePtr = findType(identName, set<EBlock>{CONSTBL, TYPEBL, VARBL, BODYBL});
+		if (typePtr == nullptr) return eNONE;
+		else return typePtr->getType();
+	}
+	switch (type) {
+	case INT:
+		return eINT;
+	case REAL:
+		return eREAL;
+	case STRING:
+		return eSTRING;
+	case CHAR:
+		return eCHAR;
+	default:
+		return eNONE;
+	}
+}
+
 void CScope::clearTypesBuff() {
 	typesBuff.clear();
 }
