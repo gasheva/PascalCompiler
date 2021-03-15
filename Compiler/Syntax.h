@@ -28,7 +28,7 @@ private:
 	void indexVar();
 	void arrayVar();
 	void var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
-	void fullVar();
+	string fullVar();
 	void compVar();			// <компонента переменной>
 
 	void block();
@@ -62,8 +62,8 @@ private:
 
 
 	void expression(set<string> skippingSet);		// выражение
-	void simpleExpr();
-	void term();		// слагаемое
+	EType simpleExpr();
+	EType term();		// слагаемое
 	EType factor();		// множитель
 	pair<EType, string> unsignedNum();
 
@@ -79,6 +79,7 @@ private:
 
 
 	EType ssTypeAdapter(EVarType type);		// адаптер типов синтаксических в семантич
+	bool eTypeIsDefine(EType type);
 public:
 	Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic);
 	~Syntax();

@@ -162,55 +162,55 @@ void Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 
 	string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
-	if (lexem != "" && lexem == "[")
-		try {
-		compVar();		// indexVar()
-	} catch (PascalExcp& e) {
-		if (skippingSet.empty())
-			throw e;
-		else
-			skip(skippingSet);
-	} else
-		fullVar();			// name()
+	//if (lexem != "" && lexem == "[")
+	//	try {
+	//	compVar();		// indexVar()
+	//} catch (PascalExcp& e) {
+	//	if (skippingSet.empty())
+	//		throw e;
+	//	else
+	//		skip(skippingSet);
+	//} else
+	fullVar();			// name()
 }
 
-void Syntax::fullVar() throw(PascalExcp, EOFExcp) {
+string Syntax::fullVar() throw(PascalExcp, EOFExcp) {
 	//<полная переменная>::=<имя переменной>
-	name();
+	return name();
 }
-void Syntax::compVar()throw(PascalExcp, EOFExcp) {
-	//<компонента переменной>:: = <индексированная переменная>| <обозначение поля> | <буфер файла>
-	indexVar();
-}
-void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
-	// <индексированная переменная>::=<переменная-массив>[<выражение>{, <выражение>}]
-	ifNullThrowExcp();
-	fullVar();
-	accept("[");
-	set<string> skipExprSet = { ";", "]",",", "end" };
-	string lexem = lexic->peekNext();
-	//если после имени переменной стоит "["
-	if (lexem != "" && lexem == "[")
-		arrayVar();
-	else {
-		try {
-			expression(skipExprSet);	//TODO
-		} catch (PascalExcp& e) {
-			writeMistake(2);
-			skip(skipExprSet);
-		}
-	}
-	while (checkOper(",")) {
-		getNext();
-		expression(skipExprSet);
-	}
-	accept("]");
-}
-void Syntax::arrayVar()throw(PascalExcp, EOFExcp) {
-	// <переменная - массив>:: = <переменная>
-	set<string> skipSet = { ";", "]",",", "end" };
-	var(skipSet);
-}
+//void Syntax::compVar()throw(PascalExcp, EOFExcp) {
+//	//<компонента переменной>:: = <индексированная переменная>| <обозначение поля> | <буфер файла>
+//	indexVar();
+//}
+//void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
+//	// <индексированная переменная>::=<переменная-массив>[<выражение>{, <выражение>}]
+//	ifNullThrowExcp();
+//	fullVar();
+//	accept("[");
+//	set<string> skipExprSet = { ";", "]",",", "end" };
+//	string lexem = lexic->peekNext();
+//	//если после имени переменной стоит "["
+//	if (lexem != "" && lexem == "[")
+//		arrayVar();
+//	else {
+//		try {
+//			expression(skipExprSet);	//TODO
+//		} catch (PascalExcp& e) {
+//			writeMistake(2);
+//			skip(skipExprSet);
+//		}
+//	}
+//	while (checkOper(",")) {
+//		getNext();
+//		expression(skipExprSet);
+//	}
+//	accept("]");
+//}
+//void Syntax::arrayVar()throw(PascalExcp, EOFExcp) {
+//	// <переменная - массив>:: = <переменная>
+//	set<string> skipSet = { ";", "]",",", "end" };
+//	var(skipSet);
+//}
 
 void Syntax::block() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
@@ -632,48 +632,52 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
-	set<string> s;
-	var(s);
+	var(set<string>());
 	ifNullThrowExcp();
 	accept(":=");
 	expression(skippingSet);
 }
 void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
-	try { simpleExpr(); } catch (PascalExcp& e) {
+	EType leftType, rightType;
+	try { 
+		leftType = simpleExpr(); 
+	} catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
 	if (isBoolOper()) {
 		getNext();		// accept
-		try { simpleExpr(); } catch (PascalExcp& e) {
+		try { 
+			rightType = simpleExpr(); 
+			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
+		} catch (PascalExcp& e) {
 			skip(skippingSet);
 		}
 	}
 }
 
 
-void Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
+EType Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
 	ifNullThrowExcp();
-
 	acceptSign();
-	term();
+	EType leftType = term();
 
 	// то, что в {}
 	while (isAdditiveOper()) {
 		getNext();
-		term();
+		EType rightType = term();
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
 	}
 }
 
-void Syntax::term() throw(PascalExcp, EOFExcp) {
-	// cout <<setw(offset)<<" "<<std::left<< "Checking term" << endl; 
+EType Syntax::term() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
-
-	factor();
+	EType leftType = factor();
 	while (curToken != nullptr && isMultOper()) {
 		getNext();
-		factor();
+		EType rightType = factor();
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
 	}
 }
 
@@ -845,3 +849,6 @@ bool Syntax::acceptSign() throw (PascalExcp, EOFExcp) {
 	return true;
 }
 
+bool Syntax::eTypeIsDefine(EType type) {
+	return !(type <= INT_MIN || type >= INT_MAX);
+}
