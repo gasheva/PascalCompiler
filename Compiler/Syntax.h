@@ -25,11 +25,11 @@ private:
 
 	void program();
 	string name();
-	void indexVar();
-	void arrayVar();
-	void var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
+	//void indexVar();
+	//void arrayVar();
+	string var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
 	string fullVar();
-	void compVar();			// <компонента переменной>
+	//void compVar();			// <компонента переменной>
 
 	void block();
 
@@ -61,7 +61,7 @@ private:
 	void assignOper(set<string> skippingSet);		// оператор присваивания
 
 
-	void expression(set<string> skippingSet);		// выражение
+	EType expression(set<string> skippingSet);		// выражение
 	EType simpleExpr();
 	EType term();		// слагаемое
 	EType factor();		// множитель

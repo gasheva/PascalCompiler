@@ -23,6 +23,18 @@ void CSemantic::createScope() {
 	scopesLst.push_back(CScope(&scopesLst.back(), lexic, eManager));
 }
 
+EType CSemantic::unionTypes(EType left, EType right) {
+	if (left == eREAL && (right == eREAL || right == eINT))
+		return eREAL;
+	if (right == eREAL && (left == eREAL || left == eINT))
+		return eREAL;
+	if ((left == eSTRING || left == eCHAR) && (right == eSTRING || right == eCHAR))
+		return eSTRING;
+	if (left == eBOOLEAN && right == eBOOLEAN)
+		return eBOOLEAN;
+	return EType();
+}
+
 CScope::CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager) {
 	this->outerScope = outerScope;
 	this->lexic = lexic;
@@ -48,8 +60,13 @@ CType CScope::defineAndCreateType(EType type) {
 EType CScope::defineType(EVarType type, string identName) {
 	// попытка найти и определить тип идентификатора
 	if (identName != "") {
-		auto typePtr = findType(identName, set<EBlock>{CONSTBL, TYPEBL, VARBL, BODYBL});
-		if (typePtr == nullptr) return eNONE;
+		auto typePtr = findType(identName, set<EBlock>{CONSTBL, VARBL, BODYBL});
+		if (typePtr == nullptr) {
+			writeMistake(1002);
+			typeTbl.push_back(CNoneType());
+			identTbl.insert({ identName, CIdetificator(identName, BODYBL, &typeTbl.back()) });
+			return eNONE;
+		}
 		else return typePtr->getType();
 	}
 	switch (type) {
@@ -63,6 +80,27 @@ EType CScope::defineType(EVarType type, string identName) {
 		return eCHAR;
 	default:
 		return eNONE;
+	}
+}
+
+void CScope::checkAssignTypes(string name, EType right) {
+	auto leftPtr = findType(name, set<EBlock>(VARBL, BODYBL));
+	if (leftPtr == nullptr) {
+		writeMistake(1002);
+		typeTbl.push_back(CNoneType());
+		identTbl.insert({ name, CIdetificator(name, BODYBL, &typeTbl.back()) });
+	} else {
+		if (leftPtr->getType() == eREAL && (right == eREAL || right == eINT))
+			return;
+		if (leftPtr->getType() == eINT && right == eINT)
+			return;
+		if (leftPtr->getType() == eSTRING && (right == eSTRING || right == eCHAR))
+			return;
+		if (leftPtr->getType() == eCHAR && right == eCHAR)
+			return;
+		if (leftPtr->getType() == eBOOLEAN && right == eBOOLEAN)
+			return;
+		writeMistake(328);
 	}
 }
 

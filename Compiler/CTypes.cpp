@@ -58,9 +58,9 @@ CSubrangeType::CSubrangeType(CType* elType): CType(eSUBRANGE){
 	this->elType = elType;
 }
 
-CEnumElType::CEnumElType() : CType(eENUMEL) {}
+CEnumElType::CEnumElType() : CType(eBOOLEAN) {}
 
-CEnumElType::CEnumElType(CEnumType* parent) : CType(eENUMEL) {
+CEnumElType::CEnumElType(CEnumType* parent) : CType(eBOOLEAN) {
 	this->parent = parent;
 }
 

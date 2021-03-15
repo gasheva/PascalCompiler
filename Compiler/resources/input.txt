@@ -1,7 +1,5 @@
 PROGRAM pre(f1);
-VAR true, 5b, false: STRING;
 BEGIN 
-	true:= 'tr';
-	int:= true;
 	x:=r[r2[1], a]];
+	y:=2;
 END.

@@ -69,6 +69,7 @@ public:
 	void setBlock(EBlock block);
 
 	EType defineType(EVarType type, string identName);		// определяет семантический тип переменной из синтаксического, также находит тип идентификатора
+	void checkAssignTypes(string name, EType right);
 };
 
 class CSemantic {
@@ -82,5 +83,7 @@ public:
 	void createFictiveScope();
 	void createScope();
 	CScope* getLast() { return &scopesLst.back(); }
+
+	EType unionTypes(EType left, EType right);
 };
 

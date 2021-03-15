@@ -156,11 +156,11 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 	return false;
 }
 
-void Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
+string Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
 	ifNullThrowExcp();
 
-	string lexem = lexic->peekNext();
+	//string lexem = lexic->peekNext();
 	//если после имени переменной стоит "["
 	//if (lexem != "" && lexem == "[")
 	//	try {
@@ -171,7 +171,7 @@ void Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	//	else
 	//		skip(skippingSet);
 	//} else
-	fullVar();			// name()
+	return fullVar();			// name()
 }
 
 string Syntax::fullVar() throw(PascalExcp, EOFExcp) {
@@ -632,12 +632,13 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
-	var(set<string>());
+	auto varName = var(set<string>());
 	ifNullThrowExcp();
 	accept(":=");
-	expression(skippingSet);
+	auto rightType = expression(skippingSet);
+	semantic->getLast()->checkAssignTypes(varName, rightType);
 }
-void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
 	EType leftType, rightType;
 	try { 
@@ -649,11 +650,13 @@ void Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 		getNext();		// accept
 		try { 
 			rightType = simpleExpr(); 
-			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
+			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
 		} catch (PascalExcp& e) {
 			skip(skippingSet);
 		}
-	}
+		return eBOOLEAN;
+	} else
+		return leftType;
 }
 
 
@@ -667,8 +670,9 @@ EType Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	while (isAdditiveOper()) {
 		getNext();
 		EType rightType = term();
-		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
 	}
+	return leftType;
 }
 
 EType Syntax::term() throw(PascalExcp, EOFExcp) {
@@ -677,8 +681,9 @@ EType Syntax::term() throw(PascalExcp, EOFExcp) {
 	while (curToken != nullptr && isMultOper()) {
 		getNext();
 		EType rightType = factor();
-		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = semantic.unionTypes(leftType, rightType);
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
 	}
+	return leftType;
 }
 
 EType Syntax::factor() throw(PascalExcp, EOFExcp) {
@@ -698,11 +703,12 @@ EType Syntax::factor() throw(PascalExcp, EOFExcp) {
 
 	if (checkOper("(")) {		// (<выражение>)
 		accept("(");
-		auto curTokenType = simpleExpr();
+		auto factorType = simpleExpr();
 		accept(")");
-		return semantic->getLast()->defineType(curTokenType, "");
+		return factorType;
 	}
-	var(set<string>());						// <переменная>
+	auto varType = semantic->getLast()->defineType(EVarType(), var(set<string>()));				// <переменная>
+	return varType;
 }
 
 pair<EType, string> Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
