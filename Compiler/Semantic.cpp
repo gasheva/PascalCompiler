@@ -85,7 +85,7 @@ void CScope::addToNameBuffer(string name) {
 void CScope::defineConst(EType type, string constRight) {
 	// провер€ем объ€влена ли константа в данном скоупе
 	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
-		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого об€ъвлени€
+		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого объ€влени€
 		writeMistake(101);
 		namesBuff.clear();
 	} else {
@@ -117,9 +117,6 @@ void CScope::addToBuffer(EType type) {
 		typeTbl.push_back(defineAndCreateType(type));
 	} else if (flagBlock == VARBL) {
 
-	} else { 
-		// flagBlock == BODYBL || CONSTBL
-		// TODO(throw not_define)
 	}
 }
 
@@ -128,44 +125,36 @@ void CScope::clearBuffs() {
 	clearTypesBuff();
 }
 
-void CScope::addToBuffer(string typeName) {
-	typeTbl.push_back(*(findType(typeName, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
+void CScope::addToBuffer(string typeName, EType type) {
+
+	// провер€ем не €вл€етс€ ли переданный тип простым числом или строкой
+	//if (type != eNONE) {
+	//	// число или строка
+	//	typeTbl.push_back(defineAndCreateType(type));
+	//	typesBuff.push_back(&typeTbl.back());
+
+	//}
+
+	//typeTbl.push_back(*(findType(typeName, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
 
 	// создание типа
 	if (flagBlock == TYPEBL) {
-		// если в буфере уже имеетс€ тип, значит это дополнение составного типа (type compl = array[x..10] of INTEGER <- INTEGER или '1' или х будут такими типами
-		if (typesBuff.size() > 0) {
-			CType* type = typesBuff.front();
-			auto typeName = (*type).getType();
-			switch (typeName) {
-			case eARRAY:
-				//auto arType = (CArrayType*)type;
-				//arType->getIndexType();		//TODO()
-				break;
-			case eSUBRANGE:
-				break;
-			case eENUM:
-				break;
-			default:
-				break;
-			}
+		// это базовый тип или пользовательский (не составной) и он не €вл€етс€ дополнением к составному типу (type t = INTEGER)
+		// провер€ем не было ли занесено название (name) нового типа в текущий скоуп
+			
+		if (identTbl.find(namesBuff.front()) != identTbl.end()) {		// им€ типа хранитс€ в буфере 
+			// TODO(throw type_already_exists)
 		} else {
-			// это базовый тип или пользовательский (не составной) и он не €вл€етс€ дополнением к составному типу (type t = INTEGER)
-			// объвление этого типа происходит без использование буфера
-			// провер€ем не было ли занесено название (name) нового типа в текущий скоуп
-			if (identTbl.find(namesBuff.front()) != identTbl.end()) {		// им€ типа хранитс€ в буфере 
-				// TODO(throw type_already_exists)
+			CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
+			// если объ€вление типа не найдено, кидаем ошибку
+			if (type == nullptr) {
+				// TODO(throw no_type)
 			} else {
-				CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
-				// если объ€вление типа не найдено, кидаем ошибку
-				if (type == nullptr) {
-					// TODO(throw no_type)
-				} else {
-					// если объ€вление типа найдено, то добавл€ем в скоуп новый идент и ссылку на найденный тип
-					identTbl.insert(pair<string, CIdetificator>(typeName, CIdetificator(namesBuff.front(), TYPEBL, type)));
-				}
+				// если объ€вление типа найдено, то добавл€ем в скоуп новый идент и ссылку на найденный тип
+				identTbl.insert(pair<string, CIdetificator>(typeName, CIdetificator(namesBuff.front(), TYPEBL, type)));
 			}
 		}
+		
 	} else if (flagBlock == VARBL) {
 		// объ€вление переменной
 
