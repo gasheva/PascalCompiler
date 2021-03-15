@@ -1,8 +1,9 @@
-PROGRAM pre(f1); 
+PROGRAM pre(f1);
+CONST a = 5; 
 TYPE myIntT = INTEGER;
 	myBoolT = BOOLEAN;
 VAR true: STRING2;
-	int: myIntT;
+	a: myIntT;
 BEGIN 
 	true: = 'tr';
 	int: = true;

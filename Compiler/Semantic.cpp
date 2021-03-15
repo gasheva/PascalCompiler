@@ -74,18 +74,20 @@ void CScope::clearNamesBuff() {
 			if (identTbl.find(namesBuff.front()) != identTbl.end())
 				writeMistake(101);
 			// identTbl.insert({ name, CIdetificator(name, flagBlock, none) });
-			identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
+			identTbl.find(name)->second = CIdetificator(name, flagBlock, &typeTbl.back());
 		}
 	}
 	else
 		// если тип определен корректно, то присваиваем его всем переменным
 		for (auto name: namesBuff) {
-			if (identTbl.find(namesBuff.front()) != identTbl.end()) {
+			if (identTbl.find(name) != identTbl.end()) {
 				// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
 				writeMistake(101);
 				typeTbl.push_back(CNoneType());
 				// identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
-				identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
+				//identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
+				//identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
+				identTbl.find(name)->second = CIdetificator(name, flagBlock, &typeTbl.back());
 			} else
 				identTbl.insert({ name, CIdetificator(name, flagBlock, typesBuff.front()) });
 		}
