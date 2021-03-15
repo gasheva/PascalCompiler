@@ -1,9 +1,9 @@
 PROGRAM pre(f1); 
-const f = 3ek;
-type mas = array [(a,b,c), 'a'..'z'] of array [2..30] of real;
-	  f = 3ek;
-var b, a : number; c: two.. three;
+TYPE myIntT = INTEGER;
+	myBoolT = BOOLEAN;
+VAR true: STRING2;
+	int: myIntT;
 BEGIN 
-	
-	a[&d[(6+(inner[4r]-4)+4)/2*3]]:='gred';
+	true: = 'tr';
+	int: = true;
 END.

@@ -48,9 +48,11 @@ CType CScope::defineAndCreateType(EType type) {
 void CScope::clearTypesBuff() {
 	typesBuff.clear();
 }
+
 void CScope::clearNamesBuff() {
 	CType* none = nullptr;
 	// если произошла кака€-то ошибка в синтаксисе и не был передан тип
+	if (namesBuff.empty()) return;
 	if (typesBuff.empty()) {
 		typeTbl.push_back(CNoneType());
 		for (auto name : namesBuff) {
@@ -68,13 +70,24 @@ void CScope::clearNamesBuff() {
 	}
 	if (none!=nullptr) {
 		for (auto name : namesBuff) {
-			identTbl.insert({ name, CIdetificator(name, flagBlock, none) });
+			// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
+			if (identTbl.find(namesBuff.front()) != identTbl.end())
+				writeMistake(101);
+			// identTbl.insert({ name, CIdetificator(name, flagBlock, none) });
+			identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
 		}
 	}
 	else
 		// если тип определен корректно, то присваиваем его всем переменным
 		for (auto name: namesBuff) {
-			identTbl.insert({ name, CIdetificator(name, flagBlock, typesBuff.front()) });
+			if (identTbl.find(namesBuff.front()) != identTbl.end()) {
+				// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
+				writeMistake(101);
+				typeTbl.push_back(CNoneType());
+				// identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
+				identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
+			} else
+				identTbl.insert({ name, CIdetificator(name, flagBlock, typesBuff.front()) });
 		}
 	namesBuff.clear();
 }
@@ -83,29 +96,21 @@ void CScope::addToNameBuffer(string name) {
 }
 
 void CScope::defineConst(EType type, string constRight) {
-	// провер€ем объ€влена ли константа в данном скоупе
-	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
-		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого объ€влени€
-		writeMistake(101);
-		namesBuff.clear();
-	} else {
-		// создаем объ€вление константы
-		// если справа идентификатор, ищем его среди объ€вленных констант
-		if (type == eNONE) {
-			auto type = findType(constRight, set<EBlock>{CONSTBL});
-			// если переменна€ не найдена
-			if (type == nullptr) {
-				writeMistake(1002);
-			} else {
-				typesBuff.push_back(type);
-			}
+	// создаем объ€вление константы
+	// если справа идентификатор, ищем его среди объ€вленных констант
+	if (type == eNONE) {
+		auto type = findType(constRight, set<EBlock>{CONSTBL});
+		// если переменна€ не найдена
+		if (type == nullptr) {
+			writeMistake(1002);
 		} else {
-			// создаем безым€нный тип дл€ строки, числа и тд
-			typeTbl.push_back(defineAndCreateType(type));
-			auto type = (&typeTbl.back());
 			typesBuff.push_back(type);
-			//identTbl.insert(pair<string, CIdetificator>(namesBuff.front(), CIdetificator(namesBuff.front(), flagBlock, type)));
 		}
+	} else {
+		// создаем безым€нный тип дл€ строки, числа и тд
+		typeTbl.push_back(defineAndCreateType(type));
+		auto type = (&typeTbl.back());
+		typesBuff.push_back(type);
 	}
 }
 void CScope::createNone() {
@@ -114,7 +119,7 @@ void CScope::createNone() {
 }
 
 void CScope::addToBuffer(string typeName) {
-	auto type = findType(typeName, set<EBlock>{flagBlock});
+	auto type = findType(typeName, set<EBlock>{TYPEBL});
 	// если тип не найден
 	if (type == nullptr) {
 		writeMistake(1002);

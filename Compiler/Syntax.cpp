@@ -432,6 +432,7 @@ void Syntax::limitedType()throw(PascalExcp, EOFExcp) {
 
 void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->setBlock(VARBL);
+	semantic->getLast()->clearBuffs();
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
 	ifNullThrowExcp();
 	set <string> skipSet = { ";", "begin" };
@@ -440,7 +441,9 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
 		getNext();		// accept("var");
 		try { descrMonotypeVars(); } catch (PascalExcp& e) {
 			skip(skipSet);
+			semantic->getLast()->createNone();
 		}
+		semantic->getLast()->clearBuffs();
 		// {<описание однотипных переменных>;}
 		while (checkOper(";")) {
 			getNext();
@@ -449,32 +452,41 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
 					((COperToken*)curToken)->getLexem() == "begin"))		//TODO(не только эти)
 					return;
 			} else return; //throw PascalExcp();		// неожиданный конец файла
-			try { descrMonotypeVars(); } catch (PascalExcp& e) {
+			try { descrMonotypeVars(); 
+			} catch (PascalExcp& e) {
 				skip(skipSet);
+				semantic->getLast()->createNone();
 			}
+			semantic->getLast()->clearBuffs();
 		}
 	}
 }
 void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 	set <string> constDefSet = { ",", ":", ";", "begin" };
-	try { name(); } catch (PascalExcp& e) {
+	try { 
+		semantic->getLast()->addToNameBuffer(name());
+	} catch (PascalExcp& e) {
 		skip(constDefSet);
 	}
 	while (checkOper(",")) {
 		getNext();		//accept(",")
-		try { name(); } catch (PascalExcp& e) {
+		try { 
+			semantic->getLast()->addToNameBuffer(name());
+		} catch (PascalExcp& e) {
 			skip(constDefSet);
 		}
 	}
 	accept(":");
-	type();
+	auto typeName = type();
+	semantic->getLast()->addToBuffer(typeName);
 }
 
 void Syntax::blockFunc() {}
 
 void Syntax::blockOpers()throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->setBlock(BODYBL);
+	semantic->getLast()->clearBuffs();
 	// <раздел операторов>::=<составной оператор>
 	set<string> skipSet = { "end" };
 	try { compoundOper(skipSet); } catch (PascalExcp& e) {
