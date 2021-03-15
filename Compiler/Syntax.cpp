@@ -353,17 +353,19 @@ void Syntax::typeDef()throw(PascalExcp, EOFExcp) {
 	//<определение типа>::=<имя>=<тип>
 	semantic->getLast()->addToNameBuffer(name());
 	accept("=");
-	type();
+	auto typeName = type();
+	semantic->getLast()->addToBuffer(typeName);
 }
-void Syntax::type()throw(PascalExcp, EOFExcp) {
+string Syntax::type()throw(PascalExcp, EOFExcp) {
 	// <тип>:: = <простой тип> | <составной тип> | <ссылочный тип>
 	// <тип>:: = простой тип или массив
 	ifNullThrowExcp();
 	if (checkOper("array")) {
 		regularType();
 	} else {
-		simpleType();
+		return simpleType();
 	}
+	return "";
 
 }
 void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
@@ -379,7 +381,7 @@ void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
 	accept("of");
 	type();
 }
-void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
+string Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 	//<простой тип>::=<перечислимый тип>|<ограниченный тип>|<имя типа>
 	ifNullThrowExcp();
 	//<перечислимый тип>
@@ -401,14 +403,14 @@ void Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 				{
 					limitedType();
 				} else
-					name();	//<имя типа>
+					return name();	//<имя типа>
 			}
 		}
 	} catch (PascalExcp& e) {
 		writeMistake(324);
 		throw e;
 	}
-
+	return "";
 	//writeMistake(324);
 }
 void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {

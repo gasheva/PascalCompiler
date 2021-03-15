@@ -120,47 +120,52 @@ void CScope::addToBuffer(EType type) {
 	}
 }
 
+void CScope::addToBuffer(string typeName) {
+	auto type = findType(typeName, set<EBlock>{TYPEBL});
+	// если тип не найден
+	if (type == nullptr) {
+		writeMistake(1002);
+	} else {
+		typesBuff.push_back(type);
+	}
+}
+
 void CScope::clearBuffs() {
 	clearNamesBuff();
 	clearTypesBuff();
 }
 
 void CScope::addToBuffer(string typeName, EType type) {
-
-	// провер€ем не €вл€етс€ ли переданный тип простым числом или строкой
-	//if (type != eNONE) {
-	//	// число или строка
-	//	typeTbl.push_back(defineAndCreateType(type));
-	//	typesBuff.push_back(&typeTbl.back());
-
-	//}
-
-	//typeTbl.push_back(*(findType(typeName, set<EBlock>{CONSTBL, TYPEBL})));			// получаем ссылку на простой или уже созданный тип
-
-	// создание типа
-	if (flagBlock == TYPEBL) {
-		// это базовый тип или пользовательский (не составной) и он не €вл€етс€ дополнением к составному типу (type t = INTEGER)
-		// провер€ем не было ли занесено название (name) нового типа в текущий скоуп
-			
-		if (identTbl.find(namesBuff.front()) != identTbl.end()) {		// им€ типа хранитс€ в буфере 
-			// TODO(throw type_already_exists)
-		} else {
-			CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
-			// если объ€вление типа не найдено, кидаем ошибку
-			if (type == nullptr) {
-				// TODO(throw no_type)
-			} else {
-				// если объ€вление типа найдено, то добавл€ем в скоуп новый идент и ссылку на найденный тип
-				identTbl.insert(pair<string, CIdetificator>(typeName, CIdetificator(namesBuff.front(), TYPEBL, type)));
-			}
-		}
-		
-	} else if (flagBlock == VARBL) {
-		// объ€вление переменной
-
+	// провер€ем объ€влена ли константа в данном скоупе
+	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
+		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого объ€влени€
+		writeMistake(101);
+		namesBuff.clear();
 	} else {
-		// flagBlock == BODYBL || CONSTBL
-		// TODO(throw not_define)
+		// создаем объ€вление константы
+		// если справа идентификатор, ищем его среди объ€вленных констант
+		if (type == eNONE) {
+			auto type = findType(typeName, set<EBlock>{TYPEBL});
+			// если переменна€ не найдена
+			if (type == nullptr) {
+				writeMistake(1002);
+			} else {
+				typesBuff.push_back(type);
+			}
+		} 
+	}
+
+
+
+
+	if (flagBlock == TYPEBL) {
+		CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
+			// если объ€вление типа не найдено, кидаем ошибку
+		if (type == nullptr) {
+			writeMistake(1002);
+		} else {
+			typesBuff.push_back(type);
+		}
 	}
 }
 

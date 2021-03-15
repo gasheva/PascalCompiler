@@ -1,8 +1,7 @@
 PROGRAM pre(f1); 
 const integer = 2;
 	  b = a;
-type mas = array [(a,b,c), 'a'..'z']
-			of array [2..30] of real;
+type mas = array [(a,b,c), 'a'..'z'] of array [2..30] of real;
 var b, a : number; c: two.. three;
 BEGIN 
 	

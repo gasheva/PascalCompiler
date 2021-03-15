@@ -47,9 +47,9 @@ private:
 	pair<EType, string> constanta();			// возвращает тип константы, eNONE - если это идент, но получаем идент
 	void descrMonotypeVars();	// TODO() пропуск до след имени
 	
-	void type();
+	string type();
 	void regularType();		// массив
-	void simpleType();		// TODO()
+	string simpleType();		// TODO()
 	void enumaratedType();	// перечислимый тип
 	void limitedType();		// ограниченный тип
 	void typeDef();
