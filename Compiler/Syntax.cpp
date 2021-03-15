@@ -301,8 +301,8 @@ pair<EType, string> Syntax::constanta()throw(PascalExcp, EOFExcp) {
 			return  std::make_pair(eNONE, name());
 		}
 		// <строка>
-		if (curToken->getType() == VALUE &&(
-			((CValueToken*)curToken)->getVariant().getType() == STRING) || ((CValueToken*)curToken)->getVariant().getType() == CHAR) {
+		if (curToken->getType() == VALUE &&((
+			((CValueToken*)curToken)->getVariant().getType() == STRING) || ((CValueToken*)curToken)->getVariant().getType() == CHAR)) {
 			auto constStr = ((CValueToken*)curToken)->getVariant().getLexem();
 			auto resPair = std::make_pair(ssTypeAdapter(((CValueToken*)curToken)->getVariant().getType()), constStr);
 			getNext();		// приняли строку

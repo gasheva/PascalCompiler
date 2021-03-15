@@ -61,9 +61,7 @@ public:
 	// очищает оба буфера
 	void clearBuffs();				
 	void addToNameBuffer(string name);
-	void addToBuffer(EType type);		// создание объекта класса переданного типа (в буфер и в ТТ) (array, [], ())
-	void addToBuffer(string typeName);		// создание объекта класса переданного типа (в буфер и в ТТ) (array, [], ())
-	void addToBuffer(string typeName, EType type);		// создание объекта класса переданного типа (в буфер и в ТТ) (myType, INTEGER, BOOLEAN)
+	void addToBuffer(string typeName);
 
 	void defineConst(EType type, string constName);			// создание определения константы
 	void createNone();

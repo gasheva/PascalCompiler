@@ -112,16 +112,9 @@ void CScope::createNone() {
 	typeTbl.push_back(CNoneType());
 	typesBuff.push_back(&typeTbl.back());
 }
-void CScope::addToBuffer(EType type) {
-	if (flagBlock == TYPEBL) {
-		typeTbl.push_back(defineAndCreateType(type));
-	} else if (flagBlock == VARBL) {
-
-	}
-}
 
 void CScope::addToBuffer(string typeName) {
-	auto type = findType(typeName, set<EBlock>{TYPEBL});
+	auto type = findType(typeName, set<EBlock>{flagBlock});
 	// если тип не найден
 	if (type == nullptr) {
 		writeMistake(1002);
@@ -133,40 +126,6 @@ void CScope::addToBuffer(string typeName) {
 void CScope::clearBuffs() {
 	clearNamesBuff();
 	clearTypesBuff();
-}
-
-void CScope::addToBuffer(string typeName, EType type) {
-	// провер€ем объ€влена ли константа в данном скоупе
-	if (identTbl.find(namesBuff.front()) != identTbl.end()) {
-		// если уже объвлена, то кидаем ошибку и оставл€ем тип первого объ€влени€
-		writeMistake(101);
-		namesBuff.clear();
-	} else {
-		// создаем объ€вление константы
-		// если справа идентификатор, ищем его среди объ€вленных констант
-		if (type == eNONE) {
-			auto type = findType(typeName, set<EBlock>{TYPEBL});
-			// если переменна€ не найдена
-			if (type == nullptr) {
-				writeMistake(1002);
-			} else {
-				typesBuff.push_back(type);
-			}
-		} 
-	}
-
-
-
-
-	if (flagBlock == TYPEBL) {
-		CType* type = findType(typeName, set<EBlock>{TYPEBL});	// ищем объ€вление типа (typeName)
-			// если объ€вление типа не найдено, кидаем ошибку
-		if (type == nullptr) {
-			writeMistake(1002);
-		} else {
-			typesBuff.push_back(type);
-		}
-	}
 }
 
 void CScope::setBlock(EBlock block) {
