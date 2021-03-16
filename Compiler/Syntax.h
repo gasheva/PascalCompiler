@@ -25,11 +25,8 @@ private:
 
 	void program();
 	string name();
-	//void indexVar();
-	//void arrayVar();
 	string var(set<string> skippingSet);		// если пустой пропускной сет, кидает ошибку
 	string fullVar();
-	//void compVar();			// <компонента переменной>
 
 	void block();
 

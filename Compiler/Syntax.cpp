@@ -159,18 +159,6 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 string Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
 	ifNullThrowExcp();
-
-	//string lexem = lexic->peekNext();
-	//если после имени переменной стоит "["
-	//if (lexem != "" && lexem == "[")
-	//	try {
-	//	compVar();		// indexVar()
-	//} catch (PascalExcp& e) {
-	//	if (skippingSet.empty())
-	//		throw e;
-	//	else
-	//		skip(skippingSet);
-	//} else
 	return fullVar();			// name()
 }
 
@@ -178,39 +166,6 @@ string Syntax::fullVar() throw(PascalExcp, EOFExcp) {
 	//<полная переменная>::=<имя переменной>
 	return name();
 }
-//void Syntax::compVar()throw(PascalExcp, EOFExcp) {
-//	//<компонента переменной>:: = <индексированная переменная>| <обозначение поля> | <буфер файла>
-//	indexVar();
-//}
-//void Syntax::indexVar()throw(PascalExcp, EOFExcp) {
-//	// <индексированная переменная>::=<переменная-массив>[<выражение>{, <выражение>}]
-//	ifNullThrowExcp();
-//	fullVar();
-//	accept("[");
-//	set<string> skipExprSet = { ";", "]",",", "end" };
-//	string lexem = lexic->peekNext();
-//	//если после имени переменной стоит "["
-//	if (lexem != "" && lexem == "[")
-//		arrayVar();
-//	else {
-//		try {
-//			expression(skipExprSet);	//TODO
-//		} catch (PascalExcp& e) {
-//			writeMistake(2);
-//			skip(skipExprSet);
-//		}
-//	}
-//	while (checkOper(",")) {
-//		getNext();
-//		expression(skipExprSet);
-//	}
-//	accept("]");
-//}
-//void Syntax::arrayVar()throw(PascalExcp, EOFExcp) {
-//	// <переменная - массив>:: = <переменная>
-//	set<string> skipSet = { ";", "]",",", "end" };
-//	var(skipSet);
-//}
 
 void Syntax::block() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
@@ -640,7 +595,8 @@ void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 }
 EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
-	EType leftType, rightType;
+	EType leftType = EType();
+	EType rightType = EType();
 	try { 
 		leftType = simpleExpr(); 
 	} catch (PascalExcp& e) {
@@ -653,6 +609,7 @@ EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
 		} catch (PascalExcp& e) {
 			skip(skippingSet);
+			leftType = eNONE;
 		}
 		return eBOOLEAN;
 	} else
@@ -668,9 +625,10 @@ EType Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 
 	// то, что в {}
 	while (isAdditiveOper()) {
+		string oper = ((COperToken*)curToken)->getLexem();
 		getNext();
 		EType rightType = term();
-		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType, oper);
 	}
 	return leftType;
 }
@@ -679,9 +637,10 @@ EType Syntax::term() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	EType leftType = factor();
 	while (curToken != nullptr && isMultOper()) {
+		string oper = ((COperToken*)curToken)->getLexem();
 		getNext();
 		EType rightType = factor();
-		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
+		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType, oper);
 	}
 	return leftType;
 }
@@ -693,7 +652,12 @@ EType Syntax::factor() throw(PascalExcp, EOFExcp) {
 
 	if (checkOper("not")) {		// not <множитель>
 		getNext();
-		return factor();
+		auto type = factor();
+		if (type != eBOOLEAN) {
+			writeMistake(1004);
+			return eNONE;
+		}
+		return type;
 	}
 	if (curToken->getType() == VALUE) {		// константа без знака
 		auto curTokenType = ((CValueToken*)curToken)->getVariant().getType();

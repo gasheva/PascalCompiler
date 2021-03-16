@@ -13,7 +13,7 @@
 using namespace std;
 
 // переменная может быть не объявлена, однако использоваться, тогда она заносится с меткой BODY и типом NULL (универсальный тип)
-enum EBlock { FICTIVEBL, CONSTBL, TYPEBL, VARBL, BODYBL };
+enum EBlock { CONSTBL, TYPEBL, VARBL, BODYBL };
 
 class CIdetificator {
 private:
@@ -48,7 +48,7 @@ private:
 	unordered_map<string , CIdetificator> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
 	list<CType> typeTbl;		// таблица типов
 
-	CType* findType(string name, set<EBlock> block);			// находит тип по строке, проходится по всем скоупам
+	CIdetificator* findType(string name, set<EBlock> block);			// находит тип по строке, проходится по всем скоупам
 	void writeMistake(int code);
 public:
 	CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager);
@@ -70,6 +70,9 @@ public:
 
 	EType defineType(EVarType type, string identName);		// определяет семантический тип переменной из синтаксического, также находит тип идентификатора
 	void checkAssignTypes(string name, EType right);
+
+	EType unionTypes(EType left, EType right);
+	EType unionTypes(EType left, EType right, string oper);
 };
 
 class CSemantic {
@@ -85,5 +88,6 @@ public:
 	CScope* getLast() { return &scopesLst.back(); }
 
 	EType unionTypes(EType left, EType right);
+	EType unionTypes(EType left, EType right, string oper);
 };
 

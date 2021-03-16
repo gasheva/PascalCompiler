@@ -9,7 +9,6 @@ CSemantic::CSemantic(CErrorManager* eManager, Lexic* lexic) {
 	this->eManager = eManager;
 	this->lexic = lexic;
 }
-
 CSemantic::~CSemantic() {}
 
 void CSemantic::createFictiveScope() {
@@ -22,17 +21,78 @@ void CSemantic::createFictiveScope() {
 void CSemantic::createScope() {
 	scopesLst.push_back(CScope(&scopesLst.back(), lexic, eManager));
 }
-
-EType CSemantic::unionTypes(EType left, EType right) {
+EType CScope::unionTypes(EType left, EType right) {
 	if (left == eREAL && (right == eREAL || right == eINT))
 		return eREAL;
 	if (right == eREAL && (left == eREAL || left == eINT))
 		return eREAL;
+	if (left == eINT && right == eINT)
+		return eINT;
 	if ((left == eSTRING || left == eCHAR) && (right == eSTRING || right == eCHAR))
 		return eSTRING;
 	if (left == eBOOLEAN && right == eBOOLEAN)
 		return eBOOLEAN;
-	return EType();
+	if (left == eNONE || right == eNONE)
+		return eNONE;
+	writeMistake(328);
+	return eNONE;
+}
+EType CScope::unionTypes(EType left, EType right, string oper) {
+	if (left == eNONE || right == eNONE)
+		return eNONE;
+	if (left == eBOOLEAN || right == eBOOLEAN) {
+		writeMistake(1004);
+		return eNONE;
+	}
+	if (oper == "/") {
+		if ((right == eREAL || right == eINT) && (left == eREAL || left == eINT))
+			return eREAL;
+		writeMistake(1004);
+		return eNONE;
+	}
+	if (oper == "*") {
+		if ((left == eSTRING || left==eCHAR) && right == eINT || (right == eSTRING || right == eCHAR)&& left == eINT)
+			return eSTRING;
+		if ((left == eREAL) && (right == eREAL || right == eINT))
+			return eREAL;
+		if ((right == eREAL) && (left == eREAL || left == eINT))
+			return eREAL;
+		if (right == eINT && left == eINT)
+			return eINT;
+		writeMistake(1004);
+		return eNONE;
+	}
+	if (oper == "+" || oper == "-") {
+		if (oper == "+" && (left == eSTRING || left == eCHAR) && (right == eSTRING || right == eCHAR))
+			return eSTRING;
+		if ((left == eREAL) && (right == eREAL || right == eINT))
+			return eREAL;
+		if ((right == eREAL) && (left == eREAL || left == eINT))
+			return eREAL;
+		if (right == eINT && left == eINT)
+			return eINT;
+		writeMistake(1004);
+		return eNONE;
+	}
+	if (oper == "div" || oper == "mod") {
+		if ((left == eREAL) && (right == eREAL || right == eINT))
+			return eREAL;
+		if ((right == eREAL) && (left == eREAL || left == eINT))
+			return eREAL;
+		if (right == eINT && left == eINT)
+			return eINT;
+		writeMistake(1004);
+		return eNONE;
+	}
+
+
+}
+EType CSemantic::unionTypes(EType left, EType right) {
+	return scopesLst.back().unionTypes(left, right);
+}
+
+EType CSemantic::unionTypes(EType left, EType right, string oper) {
+	return scopesLst.back().unionTypes(left, right, oper);
 }
 
 CScope::CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager) {
@@ -45,14 +105,8 @@ CScope::~CScope() {}
 
 CType CScope::defineAndCreateType(EType type) {
 	switch (type) {
-	case eINT: case eREAL: case eSTRING: case eCHAR:
+	case eINT: case eREAL: case eSTRING: case eCHAR: 
 		return CBaseType(type);
-	case eARRAY:
-		return CArrayType();
-	case eSUBRANGE:
-		return CSubrangeType();
-	case eENUM:
-		return CEnumType();
 	default:
 		return CNoneType();
 	}
@@ -67,7 +121,7 @@ EType CScope::defineType(EVarType type, string identName) {
 			identTbl.insert({ identName, CIdetificator(identName, BODYBL, &typeTbl.back()) });
 			return eNONE;
 		}
-		else return typePtr->getType();
+		else return typePtr->getType()->getType();
 	}
 	switch (type) {
 	case INT:
@@ -84,23 +138,25 @@ EType CScope::defineType(EVarType type, string identName) {
 }
 
 void CScope::checkAssignTypes(string name, EType right) {
-	auto leftPtr = findType(name, set<EBlock>{VARBL, BODYBL});
+	auto leftPtr = findType(name, set<EBlock>{CONSTBL, VARBL, BODYBL});
 	if (leftPtr == nullptr) {
 		writeMistake(1002);
 		typeTbl.push_back(CNoneType());
 		identTbl.insert({ name, CIdetificator(name, BODYBL, &typeTbl.back()) });
-	} else if (leftPtr->getType()==eNONE) {
+	} else if (leftPtr->getType()->getType()==eNONE || right == eNONE) {
 		return;
+	} else if (leftPtr->getBlock() == CONSTBL) {
+		writeMistake(1003);
 	} else {
-		if (leftPtr->getType() == eREAL && (right == eREAL || right == eINT))
+		if (leftPtr->getType()->getType() == eREAL && (right == eREAL || right == eINT))
 			return;
-		if (leftPtr->getType() == eINT && right == eINT)
+		if (leftPtr->getType()->getType() == eINT && right == eINT)
 			return;
-		if (leftPtr->getType() == eSTRING && (right == eSTRING || right == eCHAR))
+		if (leftPtr->getType()->getType() == eSTRING && (right == eSTRING || right == eCHAR))
 			return;
-		if (leftPtr->getType() == eCHAR && right == eCHAR)
+		if (leftPtr->getType()->getType() == eCHAR && right == eCHAR)
 			return;
-		if (leftPtr->getType() == eBOOLEAN && right == eBOOLEAN)
+		if (leftPtr->getType()->getType() == eBOOLEAN && right == eBOOLEAN)
 			return;
 		writeMistake(328);
 	}
@@ -132,10 +188,11 @@ void CScope::clearNamesBuff() {
 	if (none!=nullptr) {
 		for (auto name : namesBuff) {
 			// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
-			if (identTbl.find(namesBuff.front()) != identTbl.end())
+			if (identTbl.find(namesBuff.front()) != identTbl.end()) {
 				writeMistake(101);
-			// identTbl.insert({ name, CIdetificator(name, flagBlock, none) });
-			identTbl.find(name)->second = CIdetificator(name, flagBlock, &typeTbl.back());
+				identTbl.find(name)->second = CIdetificator(name, flagBlock, none);
+			}
+			else identTbl.insert({ name, CIdetificator(name, flagBlock, none) });		// создаем новый идентификатор типа eNONE
 		}
 	}
 	else
@@ -145,9 +202,6 @@ void CScope::clearNamesBuff() {
 				// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
 				writeMistake(101);
 				typeTbl.push_back(CNoneType());
-				// identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
-				//identTbl.emplace(name, CIdetificator(name, flagBlock, &typeTbl.back()));
-				//identTbl.insert({ name, CIdetificator(name, flagBlock, &typeTbl.back()) });
 				identTbl.find(name)->second = CIdetificator(name, flagBlock, &typeTbl.back());
 			} else
 				identTbl.insert({ name, CIdetificator(name, flagBlock, typesBuff.front()) });
@@ -162,12 +216,12 @@ void CScope::defineConst(EType type, string constRight) {
 	// создаем объ€вление константы
 	// если справа идентификатор, ищем его среди объ€вленных констант
 	if (type == eNONE) {
-		auto type = findType(constRight, set<EBlock>{CONSTBL});
+		auto type = findType(constRight, set<EBlock>{CONSTBL, VARBL});
 		// если переменна€ не найдена
 		if (type == nullptr) {
 			writeMistake(1002);
 		} else {
-			typesBuff.push_back(type);
+			typesBuff.push_back(type->getType());
 		}
 	} else {
 		// создаем безым€нный тип дл€ строки, числа и тд
@@ -187,7 +241,7 @@ void CScope::addToBuffer(string typeName) {
 	if (type == nullptr) {
 		writeMistake(1002);
 	} else {
-		typesBuff.push_back(type);
+		typesBuff.push_back(type->getType());
 	}
 }
 
@@ -200,17 +254,16 @@ void CScope::setBlock(EBlock block) {
 	flagBlock = block;
 }
 
-CType* CScope::findType(string name, const set<EBlock> block) {
-	CType* type = nullptr;
+CIdetificator* CScope::findType(string name, const set<EBlock> block) {
+	CIdetificator* type = nullptr;
 	if (identTbl.find(name) != identTbl.end()) {
 		// идентификатор найден
 		if (block.find((identTbl[name]).getBlock()) != block.end()) {
-			return (identTbl[name].getType());		// тип найден, возвращаемс€
+			return (&identTbl[name]);		// тип найден, возвращаемс€
 		} else {
 			// идентификатор найден, но это не того типа
 			return nullptr;
 		}
-
 	} else {
 		if (outerScope != nullptr)
 			type = outerScope->findType(name, block);
@@ -261,7 +314,5 @@ CIdetificator::CIdetificator(string name, EBlock block, CType* type) {
 	this->block = block;
 	this->type = type;
 }
-
 CIdetificator::CIdetificator() {}
-
 CIdetificator::~CIdetificator() {}
