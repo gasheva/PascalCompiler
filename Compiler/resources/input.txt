@@ -1,5 +1,5 @@
 PROGRAM pre(f1);
+VAR y: INTEGER;
 BEGIN 
-	x:=r[r2[1], a]];
 	y:=2;
 END.

@@ -84,11 +84,13 @@ EType CScope::defineType(EVarType type, string identName) {
 }
 
 void CScope::checkAssignTypes(string name, EType right) {
-	auto leftPtr = findType(name, set<EBlock>(VARBL, BODYBL));
+	auto leftPtr = findType(name, set<EBlock>{VARBL, BODYBL});
 	if (leftPtr == nullptr) {
 		writeMistake(1002);
 		typeTbl.push_back(CNoneType());
 		identTbl.insert({ name, CIdetificator(name, BODYBL, &typeTbl.back()) });
+	} else if (leftPtr->getType()==eNONE) {
+		return;
 	} else {
 		if (leftPtr->getType() == eREAL && (right == eREAL || right == eINT))
 			return;
