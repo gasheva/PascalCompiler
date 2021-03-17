@@ -20,7 +20,7 @@ void CSemantic::createFictiveScope() {
 void CSemantic::createScope() {
 	scopesLst.push_back(CScope(&scopesLst.back(), lexic, eManager));
 }
-EType CScope::unionTypes(EType left, EType right) {
+EType CScope::unionBoolExprTypes(EType left, EType right) {
 	if (left == eREAL && (right == eREAL || right == eINT))
 		return eREAL;
 	if (right == eREAL && (left == eREAL || left == eINT))
@@ -86,8 +86,8 @@ EType CScope::unionTypes(EType left, EType right, string oper) {
 
 
 }
-EType CSemantic::unionTypes(EType left, EType right) {
-	return scopesLst.back().unionTypes(left, right);
+EType CSemantic::unionBoolExprTypes(EType left, EType right) {
+	return scopesLst.back().unionBoolExprTypes(left, right);
 }
 
 EType CSemantic::unionTypes(EType left, EType right, string oper) {

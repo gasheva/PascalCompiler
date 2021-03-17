@@ -606,7 +606,7 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 		getNext();		// accept
 		try { 
 			rightType = simpleExpr(); 
-			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType);
+			if(eTypeIsDefine(leftType)&& eTypeIsDefine(rightType)) leftType = (*semantic).unionBoolExprTypes(leftType, rightType);
 		} catch (PascalExcp& e) {
 			skip(skippingSet);
 			leftType = eNONE;

@@ -64,7 +64,7 @@ public:
 	EType defineType(EVarType type, string identName);		// определяет семант тип переменной из синт, находит тип передаваемого идент
 	void checkAssignTypes(string name, EType right);
 
-	EType unionTypes(EType left, EType right);
+	EType unionBoolExprTypes(EType left, EType right);
 	EType unionTypes(EType left, EType right, string oper);
 };
 
@@ -80,7 +80,7 @@ public:
 	void createScope();
 	CScope* getLast() { return &scopesLst.back(); }
 
-	EType unionTypes(EType left, EType right);
+	EType unionBoolExprTypes(EType left, EType right);
 	EType unionTypes(EType left, EType right, string oper);
 };
 
