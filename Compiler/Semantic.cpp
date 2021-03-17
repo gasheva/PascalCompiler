@@ -5,7 +5,7 @@
 
 using namespace std;
 
-CSemantic::CSemantic(CErrorManager* eManager, Lexic* lexic) {
+CSemantic::CSemantic(CErrorManager* eManager, CLexic* lexic) {
 	this->eManager = eManager;
 	this->lexic = lexic;
 }
@@ -95,7 +95,7 @@ EType CSemantic::unionTypes(EType left, EType right, string oper) {
 	return scopesLst.back().unionTypes(left, right, oper);
 }
 
-CScope::CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager) {
+CScope::CScope(CScope* outerScope, CLexic* lexic, CErrorManager* eManager) {
 	this->outerScope = outerScope;
 	this->lexic = lexic;
 	this->eManager = eManager;

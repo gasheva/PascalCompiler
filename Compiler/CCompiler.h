@@ -2,13 +2,13 @@
 #include "Lexic.h"
 #include "Semantic.h"
 
-class Syntax {
+class CCompiler {
 	//if, while, раздел описания типов (перечислимый, интервальный(ограниченный))
 
 	// функции, начинающиеся с is и check не "съедают" токен
 private:
 	CErrorManager* erManager;
-	Lexic* lexic;
+	CLexic* lexic;
 	CSemantic* semantic;
 	CToken* curToken;
 
@@ -39,11 +39,11 @@ private:
 	
 	void constDef();
 	pair<EType, string> constanta();			// возвращает тип константы, eNONE - если это идент, но получаем идент
-	void descrMonotypeVars();	// TODO() пропуск до след имени
+	void descrMonotypeVars();	// пропуск до след имени
 	
 	string type();
 	void regularType();		// массив
-	string simpleType();		// TODO()
+	string simpleType();		
 	void enumaratedType();	// перечислимый тип
 	void limitedType();		// ограниченный тип
 	void typeDef();
@@ -78,8 +78,8 @@ private:
 	EType ssTypeAdapter(EVarType type);		// адаптер типов синтаксических в семантич
 	bool eTypeIsDefine(EType type);
 public:
-	Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic);
-	~Syntax();
+	CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic);
+	~CCompiler();
 	void startVer();
 };
 

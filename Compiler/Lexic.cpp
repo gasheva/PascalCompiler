@@ -3,19 +3,19 @@
 #include "FStringFunc.h"
 using namespace std;
 
-bool Lexic::isLetter(char ch) {
+bool CLexic::isLetter(char ch) {
 	if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
 		return true;
 	else return false;
 }
-bool Lexic::isDigit(char ch)
+bool CLexic::isDigit(char ch)
 {
 	if (ch >= '0' && ch <= '9')
 		return true;
 	else return false;
 }
 
-void Lexic::passWhitespaces() {
+void CLexic::passWhitespaces() {
 	
 	while ((*text)[pos] == ' ' || (*text)[pos] == '\r' || (*text)[pos] == '\t' || (*text)[pos] == '\n') {
 		if ((*text)[pos] == '\n') {
@@ -29,7 +29,7 @@ void Lexic::passWhitespaces() {
 }
 
 
-void Lexic::skipComments()
+void CLexic::skipComments()
 {
 	while (pos < (*text).length() && (*text)[pos] != '}') {
 		if ((*text)[pos] == '\n') {
@@ -46,7 +46,7 @@ void Lexic::skipComments()
 }
 
 
-string Lexic::getLexem()
+string CLexic::getLexem()
 {
 	int oldPos = pos;
     string res = "";
@@ -154,7 +154,7 @@ string Lexic::getLexem()
 	return toLower(res);
 }
 
-Lexic::Lexic(CErrorManager* errorManager, const string *text)
+CLexic::CLexic(CErrorManager* errorManager, const string *text)
 {
 	this->errorManager = errorManager;
 	this->text = text;
@@ -162,7 +162,7 @@ Lexic::Lexic(CErrorManager* errorManager, const string *text)
 	factory = CTokenFactory();
 }
 
-CToken* Lexic::getNext(bool get)
+CToken* CLexic::getNext(bool get)
 {
 	int _lineNum = lineNum;
 	int _lastNewLinePos = lastNewLinePos;
@@ -193,13 +193,13 @@ CToken* Lexic::getNext(bool get)
 	return factory.createToken(lexem);
 }
 
-void Lexic::setOldPos(int _pos, int _lineNum, int _lastNewLinePos, int _lastLexemStartPos) {
+void CLexic::setOldPos(int _pos, int _lineNum, int _lastNewLinePos, int _lastLexemStartPos) {
 	lineNum = _lineNum;
 	lastNewLinePos = _lastNewLinePos;
 	lastLexemStartPos = _lastLexemStartPos;
 	if (_pos>0) pos = _pos;
 }
-string Lexic::peekNext() {
+string CLexic::peekNext() {
 	int _lineNum = lineNum;
 	int _lastNewLinePos = lastNewLinePos;
 	int _lastLexemStartPos = lastLexemStartPos;
@@ -226,7 +226,7 @@ string Lexic::peekNext() {
 
 	return lexem;
 }
-string Lexic::peek2Next() {
+string CLexic::peek2Next() {
 	// сохран€ем старые позиции, чтобы восстановить их при выходе
 	int _lineNum = lineNum;
 	int _lastNewLinePos = lastNewLinePos;
@@ -256,17 +256,17 @@ string Lexic::peek2Next() {
 	return lexem;
 }
 // ¬озвращает индекс начала последней лексемы в строке
-int Lexic::getStartPosition()
+int CLexic::getStartPosition()
 {
 	return lastLexemStartPos - lastNewLinePos;
 }
 
-int Lexic::getCurLine()
+int CLexic::getCurLine()
 {
 	return lineNum;
 }
 
-void Lexic::passToNewLine()
+void CLexic::passToNewLine()
 {
 	do {
 		pos++;
@@ -278,7 +278,7 @@ void Lexic::passToNewLine()
 	lastNewLinePos = pos;
 }
 
-CToken* Lexic::skip(set<string> lexemes) {
+CToken* CLexic::skip(set<string> lexemes) {
 	string lexem = "";
 	if (pos >= (*text).length()) return nullptr;
 
@@ -296,13 +296,13 @@ CToken* Lexic::skip(set<string> lexemes) {
 	return factory.createToken(lexem);
 }
 /* возвращает текущую позицию в файле*/
-int Lexic::getCurPos()
+int CLexic::getCurPos()
 {
 	return pos;
 }
 
 // возвращает текущую позицию в строке
-int Lexic::getCurPosInLine() {
+int CLexic::getCurPosInLine() {
 	return pos - lastNewLinePos;
 }
 

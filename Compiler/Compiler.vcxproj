@@ -142,7 +142,7 @@
     <ClCompile Include="CError.cpp" />
     <ClCompile Include="CErrorManager.cpp" />
     <ClCompile Include="CFileOnlyErrorPrinter.cpp" />
-    <ClCompile Include="Compiler.cpp" />
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="CToken.cpp" />
     <ClCompile Include="CTokenFactory.cpp" />
     <ClCompile Include="CTypes.cpp" />
@@ -164,7 +164,7 @@
     <ClInclude Include="IErrorPrinter.h" />
     <ClInclude Include="Lexic.h" />
     <ClInclude Include="Semantic.h" />
-    <ClInclude Include="Syntax.h" />
+    <ClInclude Include="CCompiler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

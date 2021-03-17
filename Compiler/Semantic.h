@@ -32,7 +32,7 @@ public:
 class CScope {
 private:
 	//CSemantic* semantic;
-	Lexic* lexic;
+	CLexic* lexic;
 	CErrorManager* eManager;
 
 	list<CType*> typesBuff;		// буфер создаваемых составных типов
@@ -51,7 +51,7 @@ private:
 	CIdetificator* findType(string name, set<EBlock> block);			// находит тип по строке, проходится по всем скоупам
 	void writeMistake(int code);
 public:
-	CScope(CScope* outerScope, Lexic* lexic, CErrorManager* eManager);
+	CScope(CScope* outerScope, CLexic* lexic, CErrorManager* eManager);
 	~CScope();				
 	void createFictive();										// создание базовых типов для фиктивного скоупа
 	
@@ -79,9 +79,9 @@ class CSemantic {
 private:
 	list<CScope> scopesLst;		// нулевую позицию занимает фиктивный скоуп
 	CErrorManager* eManager;
-	Lexic* lexic;
+	CLexic* lexic;
 public:
-	CSemantic(CErrorManager* eManager, Lexic* lexic);
+	CSemantic(CErrorManager* eManager, CLexic* lexic);
 	~CSemantic();
 	void createFictiveScope();
 	void createScope();

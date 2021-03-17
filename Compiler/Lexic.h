@@ -12,7 +12,7 @@ using namespace std;
 /*
 * Класс, отвечающий за лексический анализ
 */
-class Lexic {
+class CLexic {
 private:
 	const string *text;
 	const char NEW_LINE_SYMBOL = '\n';
@@ -30,7 +30,7 @@ private:
 	void setOldPos(int _pos, int _lineNum, int _lastNewLinePos, int _lastLexemStartPos);
 
 public:
-	Lexic(CErrorManager* errorManager, const string *text);
+	CLexic(CErrorManager* errorManager, const string *text);
 	CToken* getNext(bool get);		// получить или посмотреть следующий токен
 	string peekNext();				// посмотреть следующую лексему
 	string peek2Next();		// посмотреть через лексему

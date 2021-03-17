@@ -1,9 +1,9 @@
-#include "Syntax.h"
+#include "CCompiler.h"
 #include <iomanip>
 #include "FStringFunc.h"
 
 
-EType Syntax::ssTypeAdapter(EVarType type) {
+EType CCompiler::ssTypeAdapter(EVarType type) {
 	switch (type) {
 	case INT:
 		return eINT;
@@ -18,16 +18,16 @@ EType Syntax::ssTypeAdapter(EVarType type) {
 	}
 }
 
-Syntax::Syntax(CErrorManager* erManager, Lexic* lexic, CSemantic* semantic) {
+CCompiler::CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic) {
 	this->erManager = erManager;
 	this->lexic = lexic;
 	this->semantic = semantic;
 }
 
-Syntax::~Syntax() {}
+CCompiler::~CCompiler() {}
 
 
-void Syntax::startVer() {
+void CCompiler::startVer() {
 	try { getNext(); } catch (PascalExcp& e) {
 		cout << "[!]EXCEPTION" << endl;
 		return;
@@ -54,19 +54,19 @@ void Syntax::startVer() {
 	}
 }
 
-void Syntax::getNext() throw(PascalExcp, EOFExcp) {
+void CCompiler::getNext() throw(PascalExcp, EOFExcp) {
 	removeToken();
 	curToken = this->lexic->getNext(true);
 }
 
-void Syntax::peekNext() {
+void CCompiler::peekNext() {
 	removeToken();
 	curToken = this->lexic->getNext(false);
 	checkForbiddenSymbol();
 
 }
 
-void Syntax::skip(set<string> lexemes) {
+void CCompiler::skip(set<string> lexemes) {
 	if (curToken == nullptr) return;
 	// если уже на нужном слове
 	if (curToken->getType() == OPER && lexemes.find(((COperToken*)curToken)->getLexem()) != lexemes.end()) {
@@ -76,12 +76,12 @@ void Syntax::skip(set<string> lexemes) {
 	curToken = this->lexic->skip(lexemes);
 }
 
-void Syntax::removeToken() {
+void CCompiler::removeToken() {
 	if (curToken != nullptr)
 		delete curToken;
 }
 
-void Syntax::program() throw(PascalExcp, EOFExcp) {
+void CCompiler::program() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	set<string> nameSet = { "(", ",", ";", "const", "var", "begin" };
 	set <string> branchSet = { ";", "const", "var", "begin" };
@@ -120,7 +120,7 @@ void Syntax::program() throw(PascalExcp, EOFExcp) {
 	}
 }
 
-string Syntax::name() throw(PascalExcp, EOFExcp) {
+string CCompiler::name() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	if (curToken->getType() != IDENT) {
 		writeMistake(2);
@@ -131,7 +131,7 @@ string Syntax::name() throw(PascalExcp, EOFExcp) {
 	return nameStr;
 }
 
-bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) throw(PascalExcp, EOFExcp) {
+bool CCompiler::skipUntilBlock(set<string> searchingLexemes, string searchingWord) throw(PascalExcp, EOFExcp) {
 	// проверяем находимся ли на лексема const, 
 	// если нет, пытаемся скипнуть до const или до начала следующих блоков
 	ifNullThrowExcp();
@@ -156,18 +156,18 @@ bool Syntax::skipUntilBlock(set<string> searchingLexemes, string searchingWord) 
 	return false;
 }
 
-string Syntax::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
+string CCompiler::var(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	//<переменная>::=<полная переменная>|<компонента переменной> | <указанная переменная>
 	ifNullThrowExcp();
 	return fullVar();			// name()
 }
 
-string Syntax::fullVar() throw(PascalExcp, EOFExcp) {
+string CCompiler::fullVar() throw(PascalExcp, EOFExcp) {
 	//<полная переменная>::=<имя переменной>
 	return name();
 }
 
-void Syntax::block() throw(PascalExcp, EOFExcp) {
+void CCompiler::block() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	set <string> blockConstSet = { "const", "type", "var", "begin" };
 	set <string> blockTypeSet = { "type", "var", "begin" };
@@ -195,8 +195,8 @@ void Syntax::block() throw(PascalExcp, EOFExcp) {
 	blockOpers();
 
 }
-void Syntax::blockMarks() {}
-void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
+void CCompiler::blockMarks() {}
+void CCompiler::blockConst() throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->clearBuffs();
 	ifNullThrowExcp();
 	set <string> constDefSet = { ";", "var", "begin", "type" };
@@ -230,7 +230,7 @@ void Syntax::blockConst() throw(PascalExcp, EOFExcp) {
 	}
 	semantic->getLast()->clearBuffs();
 }
-void Syntax::constDef()throw(PascalExcp, EOFExcp) {
+void CCompiler::constDef()throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	auto constLeft = name();
 	semantic->getLast()->addToNameBuffer(constLeft);
@@ -238,7 +238,7 @@ void Syntax::constDef()throw(PascalExcp, EOFExcp) {
 	auto constRight = constanta();
 	semantic->getLast()->defineConst(get<0>(constRight), get<1>(constRight));
 }
-pair<EType, string> Syntax::constanta()throw(PascalExcp, EOFExcp) {
+pair<EType, string> CCompiler::constanta()throw(PascalExcp, EOFExcp) {
 	//<константа>::=<число без знака>|<знак><число без знака>|
 	//<имя константы> | <знак><имя константы> | <строка>
 	//<знак>
@@ -272,7 +272,7 @@ pair<EType, string> Syntax::constanta()throw(PascalExcp, EOFExcp) {
 		}
 	}
 }
-void Syntax::blockTypes() {
+void CCompiler::blockTypes() {
 	//<раздел типов>::=<пусто>|type <определение типа>;{<определение типа>; }
 	semantic->getLast()->setBlock(TYPEBL);
 	semantic->getLast()->clearBuffs();
@@ -304,14 +304,14 @@ void Syntax::blockTypes() {
 	}
 }
 
-void Syntax::typeDef()throw(PascalExcp, EOFExcp) {
+void CCompiler::typeDef()throw(PascalExcp, EOFExcp) {
 	//<определение типа>::=<имя>=<тип>
 	semantic->getLast()->addToNameBuffer(name());
 	accept("=");
 	auto typeName = type();
 	semantic->getLast()->addToBuffer(typeName);
 }
-string Syntax::type()throw(PascalExcp, EOFExcp) {
+string CCompiler::type()throw(PascalExcp, EOFExcp) {
 	// <тип>:: = <простой тип> | <составной тип> | <ссылочный тип>
 	// <тип>:: = простой тип или массив
 	ifNullThrowExcp();
@@ -323,7 +323,7 @@ string Syntax::type()throw(PascalExcp, EOFExcp) {
 	return "";
 
 }
-void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
+void CCompiler::regularType()  throw(PascalExcp, EOFExcp) {
 	//<регулярный тип>:: = array[<простой тип>{, <простой тип>}] of <тип компоненты >
 	accept("array");
 	accept("[");
@@ -336,7 +336,7 @@ void Syntax::regularType()  throw(PascalExcp, EOFExcp) {
 	accept("of");
 	type();
 }
-string Syntax::simpleType() throw(PascalExcp, EOFExcp) {
+string CCompiler::simpleType() throw(PascalExcp, EOFExcp) {
 	//<простой тип>::=<перечислимый тип>|<ограниченный тип>|<имя типа>
 	ifNullThrowExcp();
 	//<перечислимый тип>
@@ -368,7 +368,7 @@ string Syntax::simpleType() throw(PascalExcp, EOFExcp) {
 	return "";
 	//writeMistake(324);
 }
-void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {
+void CCompiler::enumaratedType()throw(PascalExcp, EOFExcp) {
 	// <перечислимый тип>::=(<имя>{,<имя>})
 	accept("(");
 	name();
@@ -378,14 +378,14 @@ void Syntax::enumaratedType()throw(PascalExcp, EOFExcp) {
 	}
 	accept(")");
 }
-void Syntax::limitedType()throw(PascalExcp, EOFExcp) {
+void CCompiler::limitedType()throw(PascalExcp, EOFExcp) {
 	//<ограниченный тип>::=<константа>..<константа>
 	constanta();
 	accept("..");
 	constanta();
 }
 
-void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
+void CCompiler::blockVars() throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->setBlock(VARBL);
 	semantic->getLast()->clearBuffs();
 	//<раздел переменных>::= var <описание однотипных переменных>;{<описание однотипных переменных>; } | <пусто>
@@ -416,7 +416,7 @@ void Syntax::blockVars() throw(PascalExcp, EOFExcp) {
 		}
 	}
 }
-void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
+void CCompiler::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 	// <описание однотипных переменных>::=<имя>{,<имя>}:<тип>
 	set <string> constDefSet = { ",", ":", ";", "begin" };
 	try { 
@@ -437,9 +437,9 @@ void Syntax::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->addToBuffer(typeName);
 }
 
-void Syntax::blockFunc() {}
+void CCompiler::blockFunc() {}
 
-void Syntax::blockOpers()throw(PascalExcp, EOFExcp) {
+void CCompiler::blockOpers()throw(PascalExcp, EOFExcp) {
 	semantic->getLast()->setBlock(BODYBL);
 	semantic->getLast()->clearBuffs();
 	// <раздел операторов>::=<составной оператор>
@@ -448,7 +448,7 @@ void Syntax::blockOpers()throw(PascalExcp, EOFExcp) {
 		skip(skipSet);
 	}
 }
-void Syntax::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
+void CCompiler::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <сложный оператор>::=<составной оператор>|<выбирающий оператор>|
 	// <оператор цикла> |<оператор присоединения>
 	ifNullThrowExcp();
@@ -474,7 +474,7 @@ void Syntax::diffOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 
 	}
 }
-void Syntax::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <условный оператор>::= if <выражение> then <оператор>|
 	// if <выражение> then <оператор> else <оператор>
 	ifNullThrowExcp();
@@ -498,7 +498,7 @@ void Syntax::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	}
 
 }
-void Syntax::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	//<цикл с предусловием>::= while <выражение> do <оператор>
 	ifNullThrowExcp();
 	set<string> skipIfSet(skippingSet);	// copy set
@@ -512,7 +512,7 @@ void Syntax::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 		skip(skippingSet);
 	}
 }
-void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end
 	ifNullThrowExcp();
 	accept("begin");
@@ -545,11 +545,11 @@ void Syntax::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	accept("end");
 }
 
-void Syntax::oper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::oper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <оператор>::=<непомеченный оператор>|<метка><непомеченный оператор>
 	unmarkedOper(skippingSet);
 }
-void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <непомеченный оператор>:: = <простой оператор> |<сложный оператор>
 	ifNullThrowExcp();
 	// если ;, то в простом операторе есть <пусто>
@@ -575,7 +575,7 @@ void Syntax::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 		}
 }
 
-void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+void CCompiler::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
 	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
 	ifNullThrowExcp();
@@ -584,7 +584,7 @@ void Syntax::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 		return;
 	assignOper(skippingSet);
 }
-void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
+void CCompiler::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	// <оператор присваивания>:: = <переменная>: = <выражение> |<имя функции> : = <выражение>
 	ifNullThrowExcp();
 	auto varName = var(set<string>());
@@ -593,7 +593,7 @@ void Syntax::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	auto rightType = expression(skippingSet);
 	semantic->getLast()->checkAssignTypes(varName, rightType);
 }
-EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
+EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
 	EType leftType = EType();
 	EType rightType = EType();
@@ -617,7 +617,7 @@ EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 }
 
 
-EType Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
+EType CCompiler::simpleExpr() throw(PascalExcp, EOFExcp) {
 	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
 	ifNullThrowExcp();
 	acceptSign();
@@ -633,7 +633,7 @@ EType Syntax::simpleExpr() throw(PascalExcp, EOFExcp) {
 	return leftType;
 }
 
-EType Syntax::term() throw(PascalExcp, EOFExcp) {
+EType CCompiler::term() throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	EType leftType = factor();
 	while (curToken != nullptr && isMultOper()) {
@@ -645,7 +645,7 @@ EType Syntax::term() throw(PascalExcp, EOFExcp) {
 	return leftType;
 }
 
-EType Syntax::factor() throw(PascalExcp, EOFExcp) {
+EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 	//<множитель>::=<переменная>|<константа без знака>|
 	//(<выражение>) | <обозначение функции> | <множество> | not <множитель>
 	ifNullThrowExcp();
@@ -675,7 +675,7 @@ EType Syntax::factor() throw(PascalExcp, EOFExcp) {
 	return varType;
 }
 
-pair<EType, string> Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
+pair<EType, string> CCompiler::unsignedNum() throw(PascalExcp, EOFExcp) {
 	if (curToken->getType() != VALUE) {
 		throw PascalExcp();
 	}
@@ -688,26 +688,26 @@ pair<EType, string> Syntax::unsignedNum() throw(PascalExcp, EOFExcp) {
 	return resPair;
 }
 
-void Syntax::checkForbiddenSymbol() throw(PascalExcp, EOFExcp) {
+void CCompiler::checkForbiddenSymbol() throw(PascalExcp, EOFExcp) {
 	if (curToken != nullptr && curToken->getType() == UNDEF) {
 		writeMistake(6);
 		throw PascalExcp();
 	}
 }
 
-void Syntax::writeMistake(int code) {
+void CCompiler::writeMistake(int code) {
 	cout << "Mistake " << code << ": " << lexic->getStartPosition() << endl;
 	erManager->addError(lexic->getStartPosition(), lexic->getCurLine(), code);
 }
 
-void Syntax::writeMistake(int code, int pos, int oldLineNum) {
+void CCompiler::writeMistake(int code, int pos, int oldLineNum) {
 	cout << "Mistake2 " << code << ": " << pos << endl;
 	erManager->addError(pos, oldLineNum, code);
 }
 
 
 // "съедаем" токен, проверяя, что лексема нужная
-void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
+void CCompiler::accept(string oper) throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	oper = toLower(oper);
@@ -742,7 +742,7 @@ void Syntax::accept(string oper) throw(PascalExcp, EOFExcp) {
 	getNext();
 }
 
-bool Syntax::tryAccept(string oper) throw(PascalExcp, EOFExcp) {
+bool CCompiler::tryAccept(string oper) throw(PascalExcp, EOFExcp) {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) {
@@ -756,7 +756,7 @@ bool Syntax::tryAccept(string oper) throw(PascalExcp, EOFExcp) {
 	return true;
 }
 
-bool Syntax::checkOper(string oper) {
+bool CCompiler::checkOper(string oper) {
 	if (curToken == nullptr) return false;
 	if (curToken->getType() == OPER &&
 		((COperToken*)curToken)->getLexem() == oper)
@@ -764,7 +764,7 @@ bool Syntax::checkOper(string oper) {
 	return false;
 }
 
-bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp) {
+bool CCompiler::ifNullThrowExcp() throw(PascalExcp, EOFExcp) {
 	if (curToken == nullptr) {
 		erManager->addError(lexic->getCurPosInLine(), lexic->getCurLine(), 1000);		//TODO(по факту здесь достижение конца файла, но кинем "ожидалась ;"
 		throw EOFExcp();
@@ -773,7 +773,7 @@ bool Syntax::ifNullThrowExcp() throw(PascalExcp, EOFExcp) {
 	return false;
 }
 
-bool Syntax::isBoolOper() {
+bool CCompiler::isBoolOper() {
 	// <операция отношения>::==|<>|<|<=|>=|>|in
 	if (curToken == nullptr) return false;
 
@@ -790,7 +790,7 @@ bool Syntax::isBoolOper() {
 
 }
 
-bool Syntax::isAdditiveOper() {
+bool CCompiler::isAdditiveOper() {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
@@ -799,7 +799,7 @@ bool Syntax::isAdditiveOper() {
 		//((COperToken*)curToken)->getLexem() == string("or");
 }
 
-bool Syntax::isMultOper() {
+bool CCompiler::isMultOper() {
 	if (curToken == nullptr) return false;
 
 	if (curToken->getType() != OPER) return false;
@@ -812,7 +812,7 @@ bool Syntax::isMultOper() {
 
 
 // "съедаем" знак, если он есть
-bool Syntax::acceptSign() throw (PascalExcp, EOFExcp) {
+bool CCompiler::acceptSign() throw (PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
 	if (curToken->getType() != OPER) return false;
@@ -822,6 +822,6 @@ bool Syntax::acceptSign() throw (PascalExcp, EOFExcp) {
 	return true;
 }
 
-bool Syntax::eTypeIsDefine(EType type) {
+bool CCompiler::eTypeIsDefine(EType type) {
 	return !(type <= INT_MIN || type >= INT_MAX);
 }

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "CFileOnlyErrorPrinter.h"
-#include "Syntax.h"
+#include "CCompiler.h"
 
 using namespace std;
 
@@ -123,12 +123,12 @@ int main()
         cout << "empty";
 
     eManager.readException("C:/Users/DocGashe/source/repos/Compiler/Compiler/resources/errors.txt");
-    Lexic lexic = Lexic(&eManager, &text);
+    CLexic lexic = CLexic(&eManager, &text);
     CSemantic semantic = CSemantic(&eManager, &lexic);
     semantic.createFictiveScope();
     semantic.createScope();
 
-    Syntax syntax = Syntax(&eManager, &lexic , &semantic);
+    CCompiler syntax = CCompiler(&eManager, &lexic , &semantic);
     syntax.startVer();
 
     IErrorPrinter* printer = new CFileOnlyErrorPrinter();

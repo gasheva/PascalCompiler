@@ -33,9 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Compiler.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="CError.cpp">
       <Filter>Исходные файлы\errors</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     <ClCompile Include="CTypes.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CError.h">
@@ -98,13 +98,13 @@
     <ClInclude Include="Lexic.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
-    <ClInclude Include="Syntax.h">
-      <Filter>Файлы заголовков\modules</Filter>
-    </ClInclude>
     <ClInclude Include="Semantic.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
     <ClInclude Include="CTypes.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="CCompiler.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
   </ItemGroup>
