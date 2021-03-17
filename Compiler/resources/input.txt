@@ -8,7 +8,7 @@ BEGIN
 	IF expr<>true and t=true THEN
 		BEGIN
 			IF x+c1*z/4<18 THEN 
-				x:=4;
+				x:=4
 			ELSE 
 				x:=8;
 			IF x+1=7 THEN

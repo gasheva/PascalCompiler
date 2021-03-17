@@ -602,7 +602,7 @@ EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	} catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
-	if (isBoolOper()) {
+	while (isBoolOper()) {
 		getNext();		// accept
 		try { 
 			rightType = simpleExpr(); 
@@ -611,9 +611,9 @@ EType Syntax::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 			skip(skippingSet);
 			leftType = eNONE;
 		}
-		return eBOOLEAN;
-	} else
-		return leftType;
+		leftType = eBOOLEAN;
+	}
+	return leftType;
 }
 
 
@@ -784,7 +784,10 @@ bool Syntax::isBoolOper() {
 		((COperToken*)curToken)->getLexem() == string("<=") ||
 		((COperToken*)curToken)->getLexem() == string(">=") ||
 		((COperToken*)curToken)->getLexem() == string(">") ||
+		((COperToken*)curToken)->getLexem() == string("and") ||
+		((COperToken*)curToken)->getLexem() == string("or") ||
 		((COperToken*)curToken)->getLexem() == string("in");
+
 }
 
 bool Syntax::isAdditiveOper() {
@@ -792,8 +795,8 @@ bool Syntax::isAdditiveOper() {
 
 	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->getLexem() == string("+") ||
-		((COperToken*)curToken)->getLexem() == string("-") ||
-		((COperToken*)curToken)->getLexem() == string("or");
+		((COperToken*)curToken)->getLexem() == string("-");
+		//((COperToken*)curToken)->getLexem() == string("or");
 }
 
 bool Syntax::isMultOper() {
@@ -803,8 +806,8 @@ bool Syntax::isMultOper() {
 	return ((COperToken*)curToken)->getLexem() == string("*") ||
 		((COperToken*)curToken)->getLexem() == string("/") ||
 		((COperToken*)curToken)->getLexem() == string("div") ||
-		((COperToken*)curToken)->getLexem() == string("mod") ||
-		((COperToken*)curToken)->getLexem() == string("and");
+		((COperToken*)curToken)->getLexem() == string("mod");
+		//((COperToken*)curToken)->getLexem() == string("and");
 }
 
 
