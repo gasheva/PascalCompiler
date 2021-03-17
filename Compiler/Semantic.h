@@ -31,7 +31,6 @@ public:
 
 class CScope {
 private:
-	//CSemantic* semantic;
 	CLexic* lexic;
 	CErrorManager* eManager;
 
@@ -40,35 +39,29 @@ private:
 	EBlock flagBlock;			// флаг, отвечающий за текущий блок
 
 	CScope* outerScope;			// внешняя область действия
-	struct identcomp {
-		bool operator()(const CIdetificator ident, const CIdetificator ident2) const {
-			return ident.getName().compare(ident2.getName());
-		}
-	};
-	unordered_map<string , CIdetificator> identTbl;			// таблица идентификаторов <имя_идент, индекс_типа>	
+	unordered_map<string , CIdetificator> identTbl;			// таблица идентификаторов
 	list<CType> typeTbl;		// таблица типов
 
-	CIdetificator* findType(string name, set<EBlock> block);			// находит тип по строке, проходится по всем скоупам
+	CIdetificator* findType(string name, set<EBlock> block);			// находит идентификатор по названию, проходится по всем скоупам
 	void writeMistake(int code);
 public:
 	CScope(CScope* outerScope, CLexic* lexic, CErrorManager* eManager);
 	~CScope();				
 	void createFictive();										// создание базовых типов для фиктивного скоупа
 	
-	CType defineAndCreateType(EType type);
-	void clearTypesBuff();
+	CType makeType(EType type);		// адаптер для синт\сем типов. Возвращает новый объект соотв класса
+	void clearTypesBuff();				// очистка буфера типов
 	void clearNamesBuff();				// добавляет в ТИ идентификаторы 
-	// очищает оба буфера
-	void clearBuffs();				
-	void addToNameBuffer(string name);
-	void addToBuffer(string typeName);
+	void clearBuffs();				// очищает оба буфера
+	void addToNameBuffer(string name);		// добавление в буфер имен
+	void addToBuffer(string typeName);		// добавление в буфер типов
 
 	void defineConst(EType type, string constName);			// создание определения константы
-	void createNone();
+	void createNone();		// создание типа none
 
-	void setBlock(EBlock block);
+	void setBlock(EBlock block);		// назначение текущего блока
 
-	EType defineType(EVarType type, string identName);		// определяет семантический тип переменной из синтаксического, также находит тип идентификатора
+	EType defineType(EVarType type, string identName);		// определяет семант тип переменной из синт, находит тип передаваемого идент
 	void checkAssignTypes(string name, EType right);
 
 	EType unionTypes(EType left, EType right);

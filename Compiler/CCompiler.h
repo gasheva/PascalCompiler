@@ -3,8 +3,6 @@
 #include "Semantic.h"
 
 class CCompiler {
-	//if, while, раздел описания типов (перечислимый, интервальный(ограниченный))
-
 	// функции, начинающиеся с is и check не "съедают" токен
 private:
 	CErrorManager* erManager;
@@ -83,12 +81,18 @@ public:
 	void startVer();
 };
 
-
+/// <summary>
+/// Паскаль - ошибка
+/// </summary>
 struct PascalExcp : public std::exception {
 	const char* what() const throw() {
 		return "Some exception in Pascal code";
 	}
 };
+
+/// <summary>
+/// Паскаль-ошибка конца файла
+/// </summary>
 struct EOFExcp : public std::exception {
 	const char* what() const throw() {
 		return "Reached eof";

@@ -12,7 +12,6 @@ using namespace std;
 */
 class CTokenFactory {
 private:
-	// end.
 	set<string> sOperators = { "and","array","asm","begin","break","case","const","constructor","continue","destructor",
 		"div","do","downto","else","end","file","for","function","goto","if","implementation","in",
 		"inline","interface","label","mod","nil","not","object","of","on","operator","or","packed","procedure",
@@ -21,7 +20,6 @@ private:
 		"finally","inherited","initialization","is","library","new","on","out","property","raise","self","threadvar",
 		"try", "*", "/", "=", ",", ";", ":", ".", "^", "(",")", "[", "]", "{", "}", "<", ">", "<=",">=",
 		"<>", "+", "-", ":=", "return", ".."
-		//"float", "integer", "string", "char"
 	};
 public:
 	CTokenFactory();

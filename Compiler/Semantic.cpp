@@ -13,7 +13,6 @@ CSemantic::~CSemantic() {}
 
 void CSemantic::createFictiveScope() {
 	// integer, real, string, char - BaseType, true, false - EnumType
-	//scopesLst.push_back(CScope(nullptr, this));
 	scopesLst.push_back(CScope(nullptr, this->lexic, this->eManager));
 	auto fictiveScp = &scopesLst.back();
 	(*fictiveScp).createFictive();
@@ -103,7 +102,7 @@ CScope::CScope(CScope* outerScope, CLexic* lexic, CErrorManager* eManager) {
 
 CScope::~CScope() {}
 
-CType CScope::defineAndCreateType(EType type) {
+CType CScope::makeType(EType type) {
 	switch (type) {
 	case eINT: case eREAL: case eSTRING: case eCHAR: 
 		return CBaseType(type);
@@ -225,7 +224,7 @@ void CScope::defineConst(EType type, string constRight) {
 		}
 	} else {
 		// создаем безымянный тип для строки, числа и тд
-		typeTbl.push_back(defineAndCreateType(type));
+		typeTbl.push_back(makeType(type));
 		auto type = (&typeTbl.back());
 		typesBuff.push_back(type);
 	}

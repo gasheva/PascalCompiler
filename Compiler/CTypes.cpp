@@ -1,15 +1,12 @@
 #include "CTypes.h"
 
-CType::CType(EType type)
-{
+CType::CType(EType type) {
 	this->type = type;
 }
 
-CType::~CType()
-{
-}
+CType::~CType() {}
 
-CNoneType::CNoneType():CType(eNONE) {}
+CNoneType::CNoneType() :CType(eNONE) {}
 
 CNoneType::~CNoneType() {}
 
