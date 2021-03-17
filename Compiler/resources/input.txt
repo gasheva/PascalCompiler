@@ -4,14 +4,14 @@ TYPE bT = BOOLEAN;
 VAR expr: bT;
 	x, y, z: REAL;
 	t: BOOLEAN;
+	str: STRING;
 BEGIN
-	IF expr<>true and t=true THEN
+	WHILE 'str'=str OR t<>true DO
 		BEGIN
-			IF x+c1*z/4<18 THEN 
+			IF x+c1*z/4<9.8 THEN 
 				x:=4
 			ELSE 
-				x:=8;
-			IF x+1=7 THEN
-				y:=3;
+				WHILE true<=7 DO
+					x:=3;
 		END
 END.
