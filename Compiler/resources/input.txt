@@ -1,15 +1,18 @@
 PROGRAM pre(f1);
-CONST c1 = 3;
+CONST c1 = 6;
 TYPE bT = BOOLEAN;
 VAR expr: bT;
 	x, y, z: REAL;
 	t: BOOLEAN;
 	str: STRING;
 BEGIN
+	y = 5;
+	z:= y;
 	WHILE 'str'=str OR t<>true DO
 		BEGIN
 			IF x+c1*z/4<9.8 THEN 
-				x:=4
+				x:=4;
+				y:=x+1;
 			ELSE 
 				WHILE true<=7 DO
 					x:=3;
