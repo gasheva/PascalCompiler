@@ -1,6 +1,7 @@
 #pragma once
 #include "Lexic.h"
 #include "Semantic.h"
+#include "CodeGen.h"
 
 class CCompiler {
 	// функции, начинающиеся с is и check не "съедают" токен
@@ -9,6 +10,7 @@ private:
 	CLexic* lexic;
 	CSemantic* semantic;
 	CToken* curToken;
+	CCodeGen* codeGen;
 
 	void getNext();		// получить следующий токен
 	void peekNext();	// посмотреть следующий токен (позиция не сдвигается)
@@ -17,7 +19,7 @@ private:
 	bool skipUntilBlock(set<string> lexemes, string word);			// пропуск до начала какого-либо блока. Возвращает истину, если был осуществлен пропуск
 
 	void accept(string oper);	// принять операцию
-	bool acceptSign();			// принять знак, если он есть
+	string acceptSign();			// возвращает знак или пустую строку, принимает знак
 	bool tryAccept(string oper);	// попытка принять операцию
 
 
@@ -76,7 +78,7 @@ private:
 	EType ssTypeAdapter(EVarType type);		// адаптер типов синтаксических в семантич
 	bool eTypeIsDefine(EType type);
 public:
-	CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic);
+	CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic, CCodeGen* codeGen);
 	~CCompiler();
 	void startVer();
 };

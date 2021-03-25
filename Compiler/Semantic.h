@@ -62,10 +62,12 @@ public:
 	void setBlock(EBlock block);		// назначение текущего блока
 
 	EType defineType(EVarType type, string identName);		// определяет семант тип переменной из синт, находит тип передаваемого идент
-	void checkAssignTypes(string name, EType right);
+	EType checkAssignTypes(string name, EType right);
 
 	EType unionBoolExprTypes(EType left, EType right);
 	EType unionTypes(EType left, EType right, string oper);
+
+	list<string> getNamesBuff();
 };
 
 class CSemantic {

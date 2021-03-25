@@ -86,6 +86,9 @@ EType CScope::unionTypes(EType left, EType right, string oper) {
 
 
 }
+list<string> CScope::getNamesBuff() {
+	return namesBuff;
+}
 EType CSemantic::unionBoolExprTypes(EType left, EType right) {
 	return scopesLst.back().unionBoolExprTypes(left, right);
 }
@@ -136,29 +139,31 @@ EType CScope::defineType(EVarType type, string identName) {
 	}
 }
 
-void CScope::checkAssignTypes(string name, EType right) {
+EType CScope::checkAssignTypes(string name, EType right) {
 	auto leftPtr = findType(name, set<EBlock>{CONSTBL, VARBL, BODYBL});
 	if (leftPtr == nullptr) {
 		writeMistake(1002);
 		typeTbl.push_back(CNoneType());
 		identTbl.insert({ name, CIdetificator(name, BODYBL, &typeTbl.back()) });
+		return eNONE;
 	} else if (leftPtr->getType()->getType()==eNONE || right == eNONE) {
-		return;
+		return leftPtr->getType()->getType();
 	} else if (leftPtr->getBlock() == CONSTBL) {
 		writeMistake(1003);
 	} else {
 		if (leftPtr->getType()->getType() == eREAL && (right == eREAL || right == eINT))
-			return;
+			return leftPtr->getType()->getType();
 		if (leftPtr->getType()->getType() == eINT && right == eINT)
-			return;
+			return leftPtr->getType()->getType();
 		if (leftPtr->getType()->getType() == eSTRING && (right == eSTRING || right == eCHAR))
-			return;
+			return leftPtr->getType()->getType();
 		if (leftPtr->getType()->getType() == eCHAR && right == eCHAR)
-			return;
+			return leftPtr->getType()->getType();
 		if (leftPtr->getType()->getType() == eBOOLEAN && right == eBOOLEAN)
-			return;
+			return leftPtr->getType()->getType();
 		writeMistake(328);
 	}
+	
 }
 
 void CScope::clearTypesBuff() {
@@ -187,7 +192,7 @@ void CScope::clearNamesBuff() {
 	if (none!=nullptr) {
 		for (auto name : namesBuff) {
 			// если уже объвлена, то кидаем ошибку и присваиваем тип NONE
-			if (identTbl.find(namesBuff.front()) != identTbl.end()) {
+			if (identTbl.find(name) != identTbl.end()) {
 				writeMistake(101);
 				identTbl.find(name)->second = CIdetificator(name, flagBlock, none);
 			}

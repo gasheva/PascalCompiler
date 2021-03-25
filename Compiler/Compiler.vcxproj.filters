@@ -72,6 +72,9 @@
     <ClCompile Include="App.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="CodeGen.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CError.h">
@@ -105,6 +108,9 @@
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
     <ClInclude Include="CCompiler.h">
+      <Filter>Файлы заголовков\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeGen.h">
       <Filter>Файлы заголовков\modules</Filter>
     </ClInclude>
   </ItemGroup>

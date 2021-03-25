@@ -3,6 +3,7 @@
 #include "FStringFunc.h"
 
 
+
 EType CCompiler::ssTypeAdapter(EVarType type) {
 	switch (type) {
 	case INT:
@@ -18,10 +19,11 @@ EType CCompiler::ssTypeAdapter(EVarType type) {
 	}
 }
 
-CCompiler::CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic) {
+CCompiler::CCompiler(CErrorManager* erManager, CLexic* lexic, CSemantic* semantic, CCodeGen* codeGen) {
 	this->erManager = erManager;
 	this->lexic = lexic;
 	this->semantic = semantic;
+	this->codeGen = codeGen;
 }
 
 CCompiler::~CCompiler() {}
@@ -88,9 +90,12 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 	set <string> semicolSet = { "const", "var", "begin" };
 	accept("program");
 
-	try { name(); } catch (PascalExcp& e) {
+	string programName = "";
+	try { programName = name(); } catch (PascalExcp& e) {
 		skip(nameSet);
 	}
+	codeGen->openFile("", programName);
+
 	try { accept("("); } catch (PascalExcp& e) {
 		skip(nameSet);
 	}
@@ -109,6 +114,7 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 	try { accept(";"); } catch (PascalExcp& e) {
 		skip(branchSet);
 	}
+	codeGen->stackWriteBegin();
 
 	block();
 
@@ -118,6 +124,8 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 		writeMistake(1000);
 		throw PascalExcp();
 	}
+	codeGen->stackWriteEnd();
+	codeGen->closeFile();
 }
 
 string CCompiler::name() throw(PascalExcp, EOFExcp) {
@@ -242,7 +250,7 @@ pair<EType, string> CCompiler::constanta()throw(PascalExcp, EOFExcp) {
 	//<константа>::=<число без знака>|<знак><число без знака>|
 	//<имя константы> | <знак><имя константы> | <строка>
 	//<знак>
-	if (acceptSign()) {
+	if (acceptSign()!="") {
 		// <число без знака>
 		if (curToken->getType() == VALUE) {
 			unsignedNum();
@@ -404,15 +412,17 @@ void CCompiler::blockVars() throw(PascalExcp, EOFExcp) {
 			getNext();
 			if (curToken != nullptr) {
 				if (curToken->getType() == OPER && (
-					((COperToken*)curToken)->getLexem() == "begin"))		//TODO(не только эти)
+					((COperToken*)curToken)->getLexem() == "begin"))
 					return;
 			} else return; //throw PascalExcp();		// неожиданный конец файла
-			try { descrMonotypeVars(); 
+			try { 
+				descrMonotypeVars();
 			} catch (PascalExcp& e) {
 				skip(skipSet);
 				semantic->getLast()->createNone();
 			}
 			semantic->getLast()->clearBuffs();
+
 		}
 	}
 }
@@ -435,6 +445,13 @@ void CCompiler::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 	accept(":");
 	auto typeName = type();
 	semantic->getLast()->addToBuffer(typeName);
+
+
+	// add variables from buffer to gen
+	auto names = semantic->getLast()->getNamesBuff();
+	for (auto name: names) {
+		codeGen->stackInitVar(typeName, name);
+	}
 }
 
 void CCompiler::blockFunc() {}
@@ -561,7 +578,6 @@ void CCompiler::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp)
 			}
 		}
 	} else
-		//TODO(не уверена насчет обработки неож оператора)
 		if (curToken->getType() != OPER || ((COperToken*)curToken)->getLexem() == ";" ||
 			((COperToken*)curToken)->getLexem() == "end")
 			try { simpleOper(skippingSet); } catch (PascalExcp& e) {
@@ -570,14 +586,12 @@ void CCompiler::unmarkedOper(set<string> skippingSet) throw(PascalExcp, EOFExcp)
 	// встречен неожиданный оператор
 		else {
 			writeMistake(6);
-			// cout << "Not sure" << endl;
 			throw PascalExcp();
 		}
 }
 
 void CCompiler::simpleOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <простой оператор>::=<оператор присваивания>|<оператор процедуры> | <оператор перехода> |<пустой оператор>
-	// TODO(<пустой оператор>::= <пусто>::= - что это вообще?)
 	ifNullThrowExcp();
 	// <пусто>
 	if (curToken->getType() == OPER && (checkOper(";") || checkOper("end")))
@@ -591,7 +605,10 @@ void CCompiler::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 	accept(":=");
 	auto rightType = expression(skippingSet);
-	semantic->getLast()->checkAssignTypes(varName, rightType);
+	auto leftType = semantic->getLast()->checkAssignTypes(varName, rightType);
+	codeGen->stackStloc(varName, leftType);
+	
+	codeGen->stackPrint(varName, leftType);
 }
 EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>
@@ -620,8 +637,9 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 EType CCompiler::simpleExpr() throw(PascalExcp, EOFExcp) {
 	//<простое выражение>:: = <знак><слагаемое>{ <аддитивная операция><слагаемое> }
 	ifNullThrowExcp();
-	acceptSign();
+	auto sign = acceptSign();
 	EType leftType = term();
+	codeGen->stackSign(sign);
 
 	// то, что в {}
 	while (isAdditiveOper()) {
@@ -629,6 +647,7 @@ EType CCompiler::simpleExpr() throw(PascalExcp, EOFExcp) {
 		getNext();
 		EType rightType = term();
 		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType, oper);
+		codeGen->stackAdditOper(oper);
 	}
 	return leftType;
 }
@@ -641,6 +660,7 @@ EType CCompiler::term() throw(PascalExcp, EOFExcp) {
 		getNext();
 		EType rightType = factor();
 		if (eTypeIsDefine(leftType) && eTypeIsDefine(rightType)) leftType = (*semantic).unionTypes(leftType, rightType, oper);
+		codeGen->stakMultOper(oper);
 	}
 	return leftType;
 }
@@ -661,8 +681,11 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 	}
 	if (curToken->getType() == VALUE) {		// константа без знака
 		auto curTokenType = ((CValueToken*)curToken)->getVariant().getType();
+		auto eType = semantic->getLast()->defineType(curTokenType, "");
+		codeGen->stackLdcNum(eType, ((CValueToken*)curToken)->getVariant().getLexem());		// кладем в стек
 		getNext();
-		return semantic->getLast()->defineType(curTokenType, "");
+
+		return eType;
 	}
 
 	if (checkOper("(")) {		// (<выражение>)
@@ -671,7 +694,10 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 		accept(")");
 		return factorType;
 	}
-	auto varType = semantic->getLast()->defineType(EVarType(), var(set<string>()));				// <переменная>
+	string varName = var(set<string>());
+	auto varType = semantic->getLast()->defineType(EVarType(), varName);				// <переменная>
+	codeGen->stackLdloc(varName, varType);
+
 	return varType;
 }
 
@@ -812,14 +838,14 @@ bool CCompiler::isMultOper() {
 
 
 // "съедаем" знак, если он есть
-bool CCompiler::acceptSign() throw (PascalExcp, EOFExcp) {
+string CCompiler::acceptSign() throw (PascalExcp, EOFExcp) {
 	ifNullThrowExcp();
 
-	if (curToken->getType() != OPER) return false;
-	if (((COperToken*)curToken)->getLexem() == "+" ||
-		((COperToken*)curToken)->getLexem() == "-")
+	if (curToken->getType() != OPER) return "";
+	string sign = ((COperToken*)curToken)->getLexem();
+	if (sign == "+" || sign == "-")
 		getNext();
-	return true;
+	return sign;
 }
 
 bool CCompiler::eTypeIsDefine(EType type) {

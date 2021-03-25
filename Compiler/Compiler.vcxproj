@@ -143,6 +143,7 @@
     <ClCompile Include="CErrorManager.cpp" />
     <ClCompile Include="CFileOnlyErrorPrinter.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="CodeGen.cpp" />
     <ClCompile Include="CToken.cpp" />
     <ClCompile Include="CTokenFactory.cpp" />
     <ClCompile Include="CTypes.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="CError.h" />
     <ClInclude Include="CErrorManager.h" />
     <ClInclude Include="CFileOnlyErrorPrinter.h" />
+    <ClInclude Include="CodeGen.h" />
     <ClInclude Include="CToken.h" />
     <ClInclude Include="CTokenFactory.h" />
     <ClInclude Include="CTypes.h" />
