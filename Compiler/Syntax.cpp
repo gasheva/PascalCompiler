@@ -526,13 +526,19 @@ void CCompiler::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	set<string> skipIfSet(skippingSet);	// copy set
 	skipIfSet.insert("do");
 	accept("while");
+	codeGen->stackWhileExpr();
+
 	try { expression(skipIfSet); } catch (PascalExcp& e) {
 		skip(skipIfSet);
 	}
 	accept("do");
+	codeGen->stackWhileGenCont();
+
 	try { oper(skippingSet); } catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
+	codeGen->stackWhileWhileEnd();
+	codeGen->stackWhileCont();
 }
 void CCompiler::compoundOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <составной оператор>::= begin <оператор>{;<оператор>} end

@@ -14,7 +14,10 @@ private:
 	string typeToString(string type);
 
 	stack<string> marksElse;
-	string markCont = "";
+	string markContIf = "";
+	stack<string> marksWhileExpr;
+	stack<string> marksWhileCont;
+
 	int markNum = 0;
 
 	void stackNeg();		// сделать предыдущее число отрицательным
@@ -26,8 +29,12 @@ private:
 	void stackAssignConv(EType varType);		// конвертирует в тип результата
 	void stackConv(EType termType);			// конвертирует во флоат
 
-	void stackGenMark();			// генерирует метку else и добавляет в очередь и в файл
-	void stackGenMarkCont();		// генерирует мету continue
+	string genMark(string str);
+	void stackGenMarkElse();			// генерирует метку else и добавляет в очередь
+	void stackGenMarkContIf();			// генерирует метку continue if
+	void stackGenMarkContWhile();		// генерирует метку continue while
+	void stackGenMarkWhileExpr();		// генерирует метку expression
+
 
 	void stackPopMark();			// пишет верхнюю метку в файл и pop
 	void stackBrfalse();
@@ -62,6 +69,10 @@ public:
 	void stackElse();				// метка else
 	void stackIfEnd();				// метка continue (конец if)
 
+	void stackWhileExpr();			// генерирует метку выражения в while
+	void stackWhileGenCont();		// генерирует метку конца while
+	void stackWhileWhileEnd();		// возвращает к выражению
+	void stackWhileCont();			// метка continue после while
 
 	void stackPrint(string lexem, EType type);
 };

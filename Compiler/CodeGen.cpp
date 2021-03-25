@@ -174,17 +174,26 @@ void CCodeGen::stackAdditOper(string oper) {
 		genFile << "or\n";
 }
 
-void CCodeGen::stackGenMark() {
-	string mark = "LE_" + std::to_string(markNum);
-	marksElse.push(mark);
-	genFile << " " + mark + "\n";
+string CCodeGen::genMark(string str) {
+	auto res = str + std::to_string(markNum);
 	markNum++;
+	return res;
 }
 
-void CCodeGen::stackGenMarkCont() {
-	markCont = "LC_" + std::to_string(markNum);
-	genFile << " " + markCont + "\n";
-	markNum++;
+void CCodeGen::stackGenMarkElse() {
+	marksElse.push(genMark("LE_"));
+}
+
+void CCodeGen::stackGenMarkContIf() {
+	markContIf = genMark("LC_");
+}
+
+void CCodeGen::stackGenMarkContWhile() {
+	marksWhileCont.push(genMark("LWC_"));
+}
+
+void CCodeGen::stackGenMarkWhileExpr() {
+	marksWhileExpr.push(genMark("LWE_"));
 }
 
 void CCodeGen::stackPopMark() {
@@ -196,12 +205,14 @@ void CCodeGen::stackPopMark() {
 
 void CCodeGen::stackBrfalse() {
 	genFile << "brfalse ";
-	stackGenMark();
+	stackGenMarkElse();
+	genFile << " " + marksElse.top() + "\n";
 }
 
 void CCodeGen::stackBrS() {
 	genFile << "br.s ";
-	stackGenMarkCont();
+	stackGenMarkContIf();
+	genFile << " " + markContIf + "\n";
 }
 
 void CCodeGen::stackIf() {
@@ -220,7 +231,27 @@ void CCodeGen::stackElse() {
 }
 
 void CCodeGen::stackIfEnd() {
-	genFile << markCont << ":\n";
+	genFile << markContIf << ":\n";
+}
+
+void CCodeGen::stackWhileExpr() {
+	stackGenMarkWhileExpr();
+	genFile << marksWhileExpr.top() + ":\n";
+}
+
+void CCodeGen::stackWhileGenCont() {
+	stackGenMarkContWhile();
+	genFile <<"brfalse " + marksWhileCont.top() + "\n";
+}
+
+void CCodeGen::stackWhileWhileEnd() {
+	genFile << "br.s " + marksWhileExpr.top() + "\n";
+	marksWhileExpr.pop();
+}
+
+void CCodeGen::stackWhileCont() {
+	genFile << marksWhileCont.top()+":\n";
+	marksWhileCont.pop();
 }
 
 void CCodeGen::stackPrint(string lexem, EType type) {

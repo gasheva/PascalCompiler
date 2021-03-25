@@ -1,14 +1,9 @@
 PROGRAM pre(f1);
 VAR 
 	x: boolean;
-	y, res: integer;
+	i, res: integer;
 BEGIN
-	y:=-38;
-	if (y>=-5) and (y<5) then
-		if (y>=-2) and (y<2) then
-			res:=1
-		else
-			res:=2;
-	
-	x:=true;
+	i:=0;
+	while(i<3) do
+		i:=i+1;
 END.
