@@ -620,6 +620,7 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 		skip(skippingSet);
 	}
 	if (isBoolOper()) {
+		string oper = ((COperToken*)curToken)->getLexem();
 		getNext();		// accept
 		try { 
 			rightType = simpleExpr(); 
@@ -628,6 +629,7 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 			skip(skippingSet);
 			leftType = eNONE;
 		}
+		codeGen->stakBoolOper(oper);
 	}
 	return leftType;
 }
@@ -695,7 +697,14 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 	}
 	string varName = var(set<string>());
 	auto varType = semantic->getLast()->defineType(EVarType(), varName);				// <переменная>
-	codeGen->stackLdloc(varName, varType);
+
+	// если это был true\false
+	if (varType == eBOOLEAN)
+		if (varName == "true")
+			codeGen->stackLdcNum(eINT, "1");
+		else 
+			codeGen->stackLdcNum(eINT, "0");
+	else codeGen->stackLdloc(varName, varType);
 
 	return varType;
 }

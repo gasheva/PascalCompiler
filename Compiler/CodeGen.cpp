@@ -34,28 +34,6 @@ string CCodeGen::typeToString(string type) {
 	return type;
 }
 
-string CCodeGen::boolOperToString(string oper) {
-	if (oper == "<")
-		return "clt\n";
-	if (oper == "=")
-		return "ceq\n";
-	if (oper == "<>")
-		return "ceq \n"
-			"ldc.i4.0\n"
-			"ceq\n";
-	if (oper == ">")
-		return "cgt\n";
-	if (oper == ">=")
-		return "clt\n"
-		"ldc.i4.0\n"
-		"ceq";
-	if (oper == "<=")
-		return "cgt\n"
-		"ldc.i4.0\n"
-		"ceq\n";
-	return "";
-}
-
 CCodeGen::CCodeGen() {}
 
 void CCodeGen::openFile(string path, string name) {
@@ -154,6 +132,27 @@ void CCodeGen::stackConv(EType termType) {
 		genFile << "conv.r4\n";
 }
 
+void CCodeGen::stakBoolOper(string oper) {
+	if (oper == "<")
+		genFile << "clt\n";
+	if (oper == "=")
+		genFile << "ceq\n";
+	if (oper == "<>")
+		genFile << "ceq \n"
+		"ldc.i4.0\n"
+		"ceq\n";
+	if (oper == ">")
+		genFile << "cgt\n";
+	if (oper == ">=")
+		genFile << "clt\n"
+		"ldc.i4.0\n"
+		"ceq\n";
+	if (oper == "<=")
+		genFile << "cgt\n"
+		"ldc.i4.0\n"
+		"ceq\n";
+}
+
 void CCodeGen::stakMultOper(string oper) {
 	if (oper == string("*"))
 		stackMul();
@@ -161,6 +160,8 @@ void CCodeGen::stakMultOper(string oper) {
 		stackDiv();
 	else if (oper == string("mod"))
 		return stackMod();
+	else if (oper == string("and"))
+		genFile << "and\n";
 }
 
 void CCodeGen::stackAdditOper(string oper) {
@@ -168,6 +169,8 @@ void CCodeGen::stackAdditOper(string oper) {
 		return stackSub();
 	else if (oper == string("+"))
 		return stackAdd();
+	else if (oper == string("or"))
+		genFile << "or\n";
 }
 
 void CCodeGen::stackGenMark() {

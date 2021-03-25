@@ -12,7 +12,6 @@ private:
 	string programName;
 	string typeToString(EType type);
 	string typeToString(string type);
-	string boolOperToString(string oper);
 
 	queue<string> marks;
 	int markNum = 0;
@@ -49,6 +48,7 @@ public:
 	
 	void stackSign(string sign);		// если знак "-", пишет операцию neg
 
+	void stakBoolOper(string oper);		// для <, > ...
 	void stakMultOper(string oper);
 	void stackAdditOper(string oper);
 
