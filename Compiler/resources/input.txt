@@ -3,12 +3,12 @@ VAR
 	x: boolean;
 	y, res: integer;
 BEGIN
-	y:=-2;
-	if (y>=-5) or (y<5) then
+	y:=-38;
+	if (y>=-5) and (y<5) then
 		if (y>=-2) and (y<2) then
 			res:=1
 		else
-			res:=2
-	else 
-		res:=3
+			res:=2;
+	
+	x:=true;
 END.
