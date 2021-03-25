@@ -135,22 +135,23 @@ void CCodeGen::stackConv(EType termType) {
 void CCodeGen::stakBoolOper(string oper) {
 	if (oper == "<")
 		genFile << "clt\n";
-	if (oper == "=")
+	else if (oper == "=")
 		genFile << "ceq\n";
-	if (oper == "<>")
+	else if (oper == "<>")
 		genFile << "ceq \n"
 		"ldc.i4.0\n"
 		"ceq\n";
-	if (oper == ">")
+	else if (oper == ">")
 		genFile << "cgt\n";
-	if (oper == ">=")
+	else if (oper == ">=")
 		genFile << "clt\n"
 		"ldc.i4.0\n"
 		"ceq\n";
-	if (oper == "<=")
+	else if (oper == "<=")
 		genFile << "cgt\n"
 		"ldc.i4.0\n"
 		"ceq\n";
+	stackConv(eINT);		// все вычисления в float
 }
 
 void CCodeGen::stakMultOper(string oper) {

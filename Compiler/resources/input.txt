@@ -2,5 +2,5 @@ PROGRAM pre(f1);
 VAR 
 	x, y: boolean;
 BEGIN
-	x:= 8/63 <> 8/3;
+	x:= (8=3) or (6>=9);
 END.
