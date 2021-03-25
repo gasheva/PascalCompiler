@@ -1,6 +1,14 @@
 PROGRAM pre(f1);
 VAR 
-	x, y: boolean;
+	x: boolean;
+	y, res: integer;
 BEGIN
-	x:= (8=3) or (6>=9);
+	y:=-2;
+	if (y>=-5) or (y<5) then
+		if (y>=-2) and (y<2) then
+			res:=1
+		else
+			res:=2
+	else 
+		res:=3
 END.

@@ -175,16 +175,22 @@ void CCodeGen::stackAdditOper(string oper) {
 }
 
 void CCodeGen::stackGenMark() {
-	string mark = "L_" + markNum;
-	marks.push(mark);
+	string mark = "LE_" + std::to_string(markNum);
+	marksElse.push(mark);
 	genFile << " " + mark + "\n";
 	markNum++;
 }
 
+void CCodeGen::stackGenMarkCont() {
+	markCont = "LC_" + std::to_string(markNum);
+	genFile << " " + markCont + "\n";
+	markNum++;
+}
+
 void CCodeGen::stackPopMark() {
-	if (!marks.empty()) {
-		genFile << marks.front()<<":\n";
-		marks.pop();
+	if (!marksElse.empty()) {
+		genFile << marksElse.top()<<":\n";
+		marksElse.pop();
 	}
 }
 
@@ -195,7 +201,26 @@ void CCodeGen::stackBrfalse() {
 
 void CCodeGen::stackBrS() {
 	genFile << "br.s ";
-	stackGenMark();
+	stackGenMarkCont();
+}
+
+void CCodeGen::stackIf() {
+	// в стеке лежит посчитанное выражение, сравниваем его с 1 (true)
+	genFile << "ldc.r4 1\n"
+		"ceq\n";
+	stackBrfalse();
+}
+
+void CCodeGen::stackThenEnd() {
+	stackBrS();
+}
+
+void CCodeGen::stackElse() {
+	stackPopMark();
+}
+
+void CCodeGen::stackIfEnd() {
+	genFile << markCont << ":\n";
 }
 
 void CCodeGen::stackPrint(string lexem, EType type) {

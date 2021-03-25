@@ -501,19 +501,24 @@ void CCompiler::ifOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	try { expression(skipIfSet); } catch (PascalExcp& e) {
 		skip(skipIfSet);
 	}
+	codeGen->stackIf();
+
 	accept("then");
 	set<string> skipThenSet(skippingSet);
 	skipThenSet.insert("else");
 	try { oper(skipThenSet); } catch (PascalExcp& e) {
 		skip(skipThenSet);
 	}
+	codeGen->stackThenEnd();
+	codeGen->stackElse();
+
 	if (checkOper("else")) {
 		accept("else");
 		try { oper(skippingSet); } catch (PascalExcp& e) {
 			skip(skippingSet);
 		}
 	}
-
+	codeGen->stackIfEnd();
 }
 void CCompiler::whileOper(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	//<цикл с предусловием>::= while <выражение> do <оператор>

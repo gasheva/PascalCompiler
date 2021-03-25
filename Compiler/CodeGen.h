@@ -2,7 +2,7 @@
 #include "CTypes.h"
 #include <fstream>
 #include <iostream>
-#include <queue>
+#include <stack>
 
 class CCodeGen {
 	// Все вычисления ведутся во флоат, результат вычислений конвертируется 
@@ -13,7 +13,8 @@ private:
 	string typeToString(EType type);
 	string typeToString(string type);
 
-	queue<string> marks;
+	stack<string> marksElse;
+	string markCont = "";
 	int markNum = 0;
 
 	void stackNeg();		// сделать предыдущее число отрицательным
@@ -25,7 +26,12 @@ private:
 	void stackAssignConv(EType varType);		// конвертирует в тип результата
 	void stackConv(EType termType);			// конвертирует во флоат
 
-	void stackGenMark();			// генерирует метку и добавляет в очередь и в файл
+	void stackGenMark();			// генерирует метку else и добавляет в очередь и в файл
+	void stackGenMarkCont();		// генерирует мету continue
+
+	void stackPopMark();			// пишет верхнюю метку в файл и pop
+	void stackBrfalse();
+	void stackBrS();
 
 public:
 	CCodeGen();
@@ -39,9 +45,6 @@ public:
 	void stackInitConst();
 	void stackInitType();
 	void stackInitVar(string type, string lexem);
-	void stackPushNum(EType type, string lexem);
-
-	void stackLdc(EType type, string what, string varName);		
 	void stackLdcNum(EType type, string num);		// положить число в стек
 	void stackLdloc(string varName, EType type);		// положить переменную в стек
 	void stackStloc(string varName, EType type);		// записать из стека в переменную
@@ -53,9 +56,12 @@ public:
 	void stackAdditOper(string oper);
 
 	
-	void stackPopMark();			// пишет верхнюю метку в файл и pop
-	void stackBrfalse();
-	void stackBrS();
+
+	void stackIf();					// создать метку else
+	void stackThenEnd();			// создать метку continue
+	void stackElse();				// метка else
+	void stackIfEnd();				// метка continue (конец if)
+
 
 	void stackPrint(string lexem, EType type);
 };
