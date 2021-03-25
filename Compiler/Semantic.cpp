@@ -21,28 +21,24 @@ void CSemantic::createScope() {
 	scopesLst.push_back(CScope(&scopesLst.back(), lexic, eManager));
 }
 EType CScope::unionBoolExprTypes(EType left, EType right) {
-	if (left == eREAL && (right == eREAL || right == eINT))
-		return eREAL;
-	if (right == eREAL && (left == eREAL || left == eINT))
-		return eREAL;
-	if (left == eINT && right == eINT)
-		return eINT;
-	if ((left == eSTRING || left == eCHAR) && (right == eSTRING || right == eCHAR))
-		return eSTRING;
-	if (left == eBOOLEAN && right == eBOOLEAN)
-		return eBOOLEAN;
 	if (left == eNONE || right == eNONE)
 		return eNONE;
+	if (left == eREAL && (right == eREAL || right == eINT))
+		return eBOOLEAN;
+	if (right == eREAL && (left == eREAL || left == eINT))
+		return eBOOLEAN;
+	if (left == eINT && right == eINT)
+		return eBOOLEAN;
+	if ((left == eSTRING || left == eCHAR) && (right == eSTRING || right == eCHAR))
+		return eBOOLEAN;
+	if (left == eBOOLEAN && right == eBOOLEAN)
+		return eBOOLEAN;
 	writeMistake(328);
 	return eNONE;
 }
 EType CScope::unionTypes(EType left, EType right, string oper) {
 	if (left == eNONE || right == eNONE)
 		return eNONE;
-	if (left == eBOOLEAN || right == eBOOLEAN) {
-		writeMistake(1004);
-		return eNONE;
-	}
 	if (oper == "/") {
 		if ((right == eREAL || right == eINT) && (left == eREAL || left == eINT))
 			return eREAL;
@@ -83,7 +79,14 @@ EType CScope::unionTypes(EType left, EType right, string oper) {
 		writeMistake(1004);
 		return eNONE;
 	}
-
+	if (oper == "and" || oper == "or") {
+		if (left == eBOOLEAN && right == eBOOLEAN)
+			return eBOOLEAN;
+		writeMistake(1004);
+		return eNONE;
+	}
+	writeMistake(1004);
+	return eNONE;
 
 }
 list<string> CScope::getNamesBuff() {

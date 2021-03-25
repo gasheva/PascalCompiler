@@ -2,6 +2,6 @@ PROGRAM pre(f1);
 VAR 
 	x, y: boolean;
 BEGIN
-	if 1<8 and 3>3 then
+	if (1<8) and (3>3) then
 		x:=1;
 END.

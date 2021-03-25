@@ -619,7 +619,7 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 	} catch (PascalExcp& e) {
 		skip(skippingSet);
 	}
-	while (isBoolOper()) {
+	if (isBoolOper()) {
 		getNext();		// accept
 		try { 
 			rightType = simpleExpr(); 
@@ -628,7 +628,6 @@ EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) 
 			skip(skippingSet);
 			leftType = eNONE;
 		}
-		leftType = eBOOLEAN;
 	}
 	return leftType;
 }
@@ -690,7 +689,7 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 
 	if (checkOper("(")) {		// (<выражение>)
 		accept("(");
-		auto factorType = simpleExpr();
+		auto factorType = expression(set<string>{"and", "or", "then", "else", ";" });
 		accept(")");
 		return factorType;
 	}
@@ -810,8 +809,8 @@ bool CCompiler::isBoolOper() {
 		((COperToken*)curToken)->getLexem() == string("<=") ||
 		((COperToken*)curToken)->getLexem() == string(">=") ||
 		((COperToken*)curToken)->getLexem() == string(">") ||
-		((COperToken*)curToken)->getLexem() == string("and") ||
-		((COperToken*)curToken)->getLexem() == string("or") ||
+		//((COperToken*)curToken)->getLexem() == string("and") ||
+		//((COperToken*)curToken)->getLexem() == string("or") ||
 		((COperToken*)curToken)->getLexem() == string("in");
 
 }
@@ -821,8 +820,8 @@ bool CCompiler::isAdditiveOper() {
 
 	if (curToken->getType() != OPER) return false;
 	return ((COperToken*)curToken)->getLexem() == string("+") ||
+		((COperToken*)curToken)->getLexem() == string("or") ||
 		((COperToken*)curToken)->getLexem() == string("-");
-		//((COperToken*)curToken)->getLexem() == string("or");
 }
 
 bool CCompiler::isMultOper() {
@@ -832,8 +831,8 @@ bool CCompiler::isMultOper() {
 	return ((COperToken*)curToken)->getLexem() == string("*") ||
 		((COperToken*)curToken)->getLexem() == string("/") ||
 		((COperToken*)curToken)->getLexem() == string("div") ||
+		((COperToken*)curToken)->getLexem() == string("and") ||
 		((COperToken*)curToken)->getLexem() == string("mod");
-		//((COperToken*)curToken)->getLexem() == string("and");
 }
 
 
