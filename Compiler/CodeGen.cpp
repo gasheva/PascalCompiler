@@ -207,12 +207,14 @@ void CCodeGen::stackBrfalse() {
 	genFile << "brfalse ";
 	stackGenMarkElse();
 	genFile << " " + marksElse.top() + "\n";
+	genFile << "nop\n";
 }
 
 void CCodeGen::stackBrS() {
-	genFile << "br.s ";
+	genFile << "br ";
 	stackGenMarkContIf();
 	genFile << " " + markContIf + "\n";
+	genFile << "nop\n";
 }
 
 void CCodeGen::stackIf() {
@@ -228,24 +230,29 @@ void CCodeGen::stackThenEnd() {
 
 void CCodeGen::stackElse() {
 	stackPopMark();
+	genFile << "nop\n";
 }
 
 void CCodeGen::stackIfEnd() {
+	genFile << "nop\n";
 	genFile << markContIf << ":\n";
 }
 
 void CCodeGen::stackWhileExpr() {
 	stackGenMarkWhileExpr();
+	genFile << "nop\n";
 	genFile << marksWhileExpr.top() + ":\n";
 }
 
 void CCodeGen::stackWhileGenCont() {
 	stackGenMarkContWhile();
 	genFile <<"brfalse " + marksWhileCont.top() + "\n";
+	genFile << "nop\n";
 }
 
 void CCodeGen::stackWhileWhileEnd() {
-	genFile << "br.s " + marksWhileExpr.top() + "\n";
+	genFile << "br " + marksWhileExpr.top() + "\n";
+	genFile << "nop\n";
 	marksWhileExpr.pop();
 }
 
