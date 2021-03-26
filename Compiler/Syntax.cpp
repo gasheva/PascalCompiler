@@ -751,19 +751,20 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 		accept(")");
 		return factorType;
 	}
-	string varName = var(set<string>());
-	auto varType = semantic->getLast()->defineType(EVarType(), varName);				// <переменная>
+	else {
+		string varName = var(set<string>());
+		auto varType = semantic->getLast()->defineType(EVarType(), varName);				// <переменная>
 
-	// если это был true\false
-	if (varType == eBOOLEAN)
-		if (varName == "true")
-			codeGen->stackLdcNum(eINT, "1");
-		else 
-			if (varName == "false")
+		// если это был true\false
+		if (varType == eBOOLEAN && (varName == "true"|| varName == "false"))
+			if (varName == "true")
+				codeGen->stackLdcNum(eINT, "1");
+			else
 				codeGen->stackLdcNum(eINT, "0");
-	else codeGen->stackLdloc(varName, varType);
+		else codeGen->stackLdloc(varName, varType);
 
-	return varType;
+		return varType;
+	}
 }
 
 pair<EType, string> CCompiler::unsignedNum() throw(PascalExcp, EOFExcp) {
