@@ -1,22 +1,11 @@
 PROGRAM pre(f1);
-Const c1 = 0;
-	bc = true;
-Type myInt=Integer;
+CONST C_25 = -25;
+	  C_TRUE = true;
+	  C_TRUE2 = C_TRUE;
 VAR 
-	x: boolean;
-	i, res: myInt;
-	j: Integer;
+	b1, b2, b3: boolean;
+	res: integer;
+	y: real;
 BEGIN
-	i:=0;
-	while(i<3) do
-	BEGIN
-		if i mod 2=0 then
-			res:=res+1;
-		i:=i+1;
-		j:=c1;
-		while (j<=i) do
-		BEGIN
-			j:=j+1
-		END
-	END
+	b3:= C_TRUE
 END.

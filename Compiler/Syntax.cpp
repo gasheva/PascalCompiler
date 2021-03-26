@@ -124,9 +124,8 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 		writeMistake(1000);
 		throw PascalExcp();
 	}
-	codeGen->stackPrint("res", eINT);
-	codeGen->stackPrint("i", eINT);
-	codeGen->stackPrint("j", eINT);
+	// === ТЕСТИРОВАНИЕ. ВЫВОД ЗНАЧЕНИЙ В ГЕНЕРАЦИИ  ====
+	codeGen->stackPrint("b3", eBOOLEAN);
 
 	codeGen->stackWriteEnd();
 	codeGen->closeFile();
@@ -250,22 +249,55 @@ void CCompiler::constDef()throw(PascalExcp, EOFExcp) {
 	auto constRight = constanta();
 	semantic->getLast()->defineConst(get<0>(constRight), get<1>(constRight));
 
-
 	// add variables from buffer to gen
 	auto names = semantic->getLast()->getNamesBuff();
 	auto curType = semantic->getLast()->getBuffType();
+	string sign = "";
+	if (constRight.second[0] == '-') {
+		sign = "-";
+		constRight.second.erase(0, 1);
+	}
+		
 	for (auto name : names) {
 		codeGen->stackInitVar(curType, name);
+		if (curType == eNONE || (curType==eBOOLEAN && constRight.second!="true" && constRight.second!="false")) {
+			// если справа другая константа, то в генераторе кладем ее значение в стек и переписываем в новую
+			codeGen->stackLdloc(constRight.second, curType);
+
+		}
+		else {
+			// если справа значение, то кладем значение.
+			// если это был true\false
+			if (curType == eBOOLEAN)
+				if (constRight.second == "true")
+					codeGen->stackLdcNum(eINT, "1");
+				else
+						codeGen->stackLdcNum(eINT, "0");
+			else
+				codeGen->stackLdcNum(curType, constRight.second);		// кладем в стек
+			
+		}
+		codeGen->stackSign(sign);		// кладем знак
+		codeGen->stackStloc(constLeft, curType);						// читаем в константу из стека
 	}
 }
 pair<EType, string> CCompiler::constanta()throw(PascalExcp, EOFExcp) {
 	//<константа>::=<число без знака>|<знак><число без знака>|
 	//<имя константы> | <знак><имя константы> | <строка>
 	//<знак>
-	if (acceptSign()!="") {
+	auto sign = acceptSign() ;
+	if (sign != "") {
 		// <число без знака>
 		if (curToken->getType() == VALUE) {
-			unsignedNum();
+			try {
+				auto res = unsignedNum();
+				if (sign=="-")
+					res.second = sign + res.second;
+				return res;
+			} catch (PascalExcp& e) {
+				writeMistake(50);
+				throw e;
+			}
 		} else {
 			// <имя константы>
 			return std::make_pair(eNONE, name());
@@ -285,7 +317,7 @@ pair<EType, string> CCompiler::constanta()throw(PascalExcp, EOFExcp) {
 		}
 		// <число без знака>
 		try {
-			return unsignedNum();		// кинет ошибку
+			return unsignedNum();
 		} catch (PascalExcp& e) {
 			writeMistake(50);
 			throw e;
@@ -727,7 +759,8 @@ EType CCompiler::factor() throw(PascalExcp, EOFExcp) {
 		if (varName == "true")
 			codeGen->stackLdcNum(eINT, "1");
 		else 
-			codeGen->stackLdcNum(eINT, "0");
+			if (varName == "false")
+				codeGen->stackLdcNum(eINT, "0");
 	else codeGen->stackLdloc(varName, varType);
 
 	return varType;
