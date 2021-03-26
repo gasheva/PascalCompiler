@@ -1,11 +1,8 @@
 PROGRAM pre(f1);
-CONST C_25 = -25;
-	  C_TRUE = true;
-	  C_TRUE2 = C_TRUE;
 VAR 
-	b1, b2, b3: boolean;
-	res: integer;
-	y: real;
+	res, a, b :integer;
 BEGIN
-	b3:= C_TRUE
+	a:=50;
+	b:=130;
+	res:=a+b;
 END.

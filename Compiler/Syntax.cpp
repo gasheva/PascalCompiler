@@ -125,7 +125,7 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 		throw PascalExcp();
 	}
 	// === ÒÅÑÒÈÐÎÂÀÍÈÅ. ÂÛÂÎÄ ÇÍÀ×ÅÍÈÉ Â ÃÅÍÅÐÀÖÈÈ  ====
-	codeGen->stackPrint("b3", eBOOLEAN);
+	codeGen->stackPrint("res", eINT);
 
 	codeGen->stackWriteEnd();
 	codeGen->closeFile();
