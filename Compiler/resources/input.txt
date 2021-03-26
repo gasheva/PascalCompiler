@@ -2,8 +2,8 @@ PROGRAM pre(f1);
 VAR 
 	res, a, b :integer;
 BEGIN
-	a:=50;
-	b:=130;
+	a:=3;
+	b:=5;
 	while (a<>0) and (b<>0) do
 		if a>b then
 			a:=a mod b
