@@ -1,9 +1,22 @@
 PROGRAM pre(f1);
+Const c1 = 0;
+	bc = true;
+Type myInt=Integer;
 VAR 
 	x: boolean;
-	i, res: integer;
+	i, res: myInt;
+	j: Integer;
 BEGIN
 	i:=0;
 	while(i<3) do
+	BEGIN
+		res:=res+1;
 		i:=i+1;
+		j:=c1;
+		while (j<=i) do
+		BEGIN
+			res:=res+1;
+			j:=j+1
+		END
+	END
 END.

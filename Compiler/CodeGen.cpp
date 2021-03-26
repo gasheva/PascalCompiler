@@ -75,7 +75,7 @@ void CCodeGen::stackInitConst() {
 void CCodeGen::stackInitType() {
 
 }
-void CCodeGen::stackInitVar(string type, string lexem) {
+void CCodeGen::stackInitVar(EType type, string lexem) {
 	genFile << ".locals init(" + typeToString(type) + " " + lexem + ")\n";
 }
 

@@ -124,6 +124,10 @@ void CCompiler::program() throw(PascalExcp, EOFExcp) {
 		writeMistake(1000);
 		throw PascalExcp();
 	}
+	codeGen->stackPrint("res", eINT);
+	codeGen->stackPrint("i", eINT);
+	codeGen->stackPrint("j", eINT);
+
 	codeGen->stackWriteEnd();
 	codeGen->closeFile();
 }
@@ -245,6 +249,14 @@ void CCompiler::constDef()throw(PascalExcp, EOFExcp) {
 	accept("=");
 	auto constRight = constanta();
 	semantic->getLast()->defineConst(get<0>(constRight), get<1>(constRight));
+
+
+	// add variables from buffer to gen
+	auto names = semantic->getLast()->getNamesBuff();
+	auto curType = semantic->getLast()->getBuffType();
+	for (auto name : names) {
+		codeGen->stackInitVar(curType, name);
+	}
 }
 pair<EType, string> CCompiler::constanta()throw(PascalExcp, EOFExcp) {
 	//<константа>::=<число без знака>|<знак><число без знака>|
@@ -449,8 +461,9 @@ void CCompiler::descrMonotypeVars() throw(PascalExcp, EOFExcp) {
 
 	// add variables from buffer to gen
 	auto names = semantic->getLast()->getNamesBuff();
+	auto curType = semantic->getLast()->getBuffType();
 	for (auto name: names) {
-		codeGen->stackInitVar(typeName, name);
+		codeGen->stackInitVar(curType, name);
 	}
 }
 
@@ -619,7 +632,7 @@ void CCompiler::assignOper(set<string> skippingSet)throw(PascalExcp, EOFExcp) {
 	auto leftType = semantic->getLast()->checkAssignTypes(varName, rightType);
 	codeGen->stackStloc(varName, leftType);
 	
-	codeGen->stackPrint(varName, leftType);
+	//codeGen->stackPrint(varName, leftType);
 }
 EType CCompiler::expression(set<string> skippingSet) throw(PascalExcp, EOFExcp) {
 	// <выражение>::=<простое выражение>|<простое выражение><операция отношения><простое выражение>

@@ -51,7 +51,7 @@ public:
 
 	void stackInitConst();
 	void stackInitType();
-	void stackInitVar(string type, string lexem);
+	void stackInitVar(EType type, string lexem);
 	void stackLdcNum(EType type, string num);		// положить число в стек
 	void stackLdloc(string varName, EType type);		// положить переменную в стек
 	void stackStloc(string varName, EType type);		// записать из стека в переменную

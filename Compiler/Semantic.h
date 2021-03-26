@@ -68,6 +68,7 @@ public:
 	EType unionTypes(EType left, EType right, string oper);
 
 	list<string> getNamesBuff();
+	EType getBuffType();
 };
 
 class CSemantic {

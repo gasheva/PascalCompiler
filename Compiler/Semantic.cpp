@@ -92,6 +92,11 @@ EType CScope::unionTypes(EType left, EType right, string oper) {
 list<string> CScope::getNamesBuff() {
 	return namesBuff;
 }
+EType CScope::getBuffType() {
+	if (typesBuff.empty())
+		return eNONE;
+	return typesBuff.front()->getType();
+}
 EType CSemantic::unionBoolExprTypes(EType left, EType right) {
 	return scopesLst.back().unionBoolExprTypes(left, right);
 }
